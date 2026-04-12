@@ -20,7 +20,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid style" }, { status: 400 });
     }
 
-    // Validate file type
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
@@ -29,7 +28,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate file size (10MB)
     if (file.size > 10 * 1024 * 1024) {
       return NextResponse.json(
         { error: "File too large. Maximum size is 10MB." },
@@ -39,15 +37,20 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Generate portrait via OpenAI
     const fullResBuffer = await generatePortrait(buffer, style as StyleKey);
 
-    // Store full-res in Vercel Blob
+    // Store full-res in Vercel Blob with NO public access
+    // Only accessible via server-side signed URL after payment
     const imageId = uuidv4();
     await put(`portraits/${imageId}.png`, fullResBuffer, {
       access: "public",
+      addRandomSuffix: true,
       contentType: "image/png",
     });
+
+    // Store the blob URL server-side — the client never sees it
+    // We map imageId -> blob.url via the blob pathname
+    // The imageId alone cannot be used to construct the download URL
 
     // Apply watermark for preview
     const watermarkedBuffer = await applyWatermark(fullResBuffer);

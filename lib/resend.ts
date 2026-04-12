@@ -1,23 +1,26 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let _resend: Resend | null = null;
 
-export async function sendDownloadEmail(
-  to: string,
-  downloadUrl: string,
-  watermarkedBase64: string
-) {
-  await resend.emails.send({
-    from: "Pet Portraits <orders@yourdomain.com>",
+function getResend(): Resend {
+  if (!_resend) {
+    _resend = new Resend(process.env.RESEND_API_KEY);
+  }
+  return _resend;
+}
+
+const fromEmail = () =>
+  process.env.FROM_EMAIL || "Pet Portraits <orders@yourdomain.com>";
+
+export async function sendDownloadEmail(to: string, downloadUrl: string) {
+  await getResend().emails.send({
+    from: fromEmail(),
     to,
     subject: "Your pet portrait is ready 🐾",
     html: `
       <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FAF7F2; padding: 40px 24px;">
         <div style="text-align: center; margin-bottom: 32px;">
           <h1 style="font-size: 28px; color: #2D4A3E; margin: 0;">Your portrait is ready</h1>
-        </div>
-        <div style="text-align: center; margin-bottom: 32px;">
-          <img src="${watermarkedBase64}" alt="Your pet portrait" style="max-width: 400px; width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);" />
         </div>
         <div style="text-align: center; margin-bottom: 24px;">
           <a href="${downloadUrl}" style="display: inline-block; background: #2D4A3E; color: #FAF7F2; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 18px; font-weight: 600;">Download Full Resolution</a>
@@ -31,8 +34,8 @@ export async function sendDownloadEmail(
 }
 
 export async function sendCanvasConfirmationEmail(to: string) {
-  await resend.emails.send({
-    from: "Pet Portraits <orders@yourdomain.com>",
+  await getResend().emails.send({
+    from: fromEmail(),
     to,
     subject: "Your canvas print order is confirmed 🐾",
     html: `

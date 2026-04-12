@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
 import { sendDownloadEmail, sendCanvasConfirmationEmail } from "@/lib/resend";
-import { head } from "@vercel/blob";
+import { list } from "@vercel/blob";
 import Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -36,16 +36,18 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      const blobKey = `portraits/${imageId}.png`;
-      const blobInfo = await head(blobKey);
-      // The blob URL serves as the download link (public access)
-      // For production, use signed URLs with expiry
-      const downloadUrl = blobInfo.url;
+      // Find the blob by searching for the imageId prefix
+      // addRandomSuffix means the full path isn't guessable
+      const { blobs } = await list({ prefix: `portraits/${imageId}` });
+      if (!blobs.length) {
+        console.error("No blob found for imageId:", imageId);
+        return NextResponse.json({ error: "Image not found" }, { status: 404 });
+      }
+
+      const downloadUrl = blobs[0].url;
 
       if (productType === "digital" || productType === "wallpaper") {
-        // Create a watermarked preview for the email (small inline version)
-        const watermarkedPreview = `${process.env.NEXT_PUBLIC_BASE_URL}/api/og?id=${imageId}`;
-        await sendDownloadEmail(email, downloadUrl, watermarkedPreview);
+        await sendDownloadEmail(email, downloadUrl);
         console.log(`Download email sent to ${email} for ${productType}`);
       } else if (productType === "canvas") {
         await sendCanvasConfirmationEmail(email);
