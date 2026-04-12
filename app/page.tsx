@@ -1,101 +1,269 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useCallback } from "react";
+import UploadStep from "@/components/UploadStep";
+import StylePicker from "@/components/StylePicker";
+import GenerateButton from "@/components/GenerateButton";
+import PortraitPreview from "@/components/PortraitPreview";
+import ProductSelector from "@/components/ProductSelector";
+import type { StyleKey } from "@/lib/gemini";
+
+type Step = "upload" | "style" | "generate" | "preview";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [step, setStep] = useState<Step>("upload");
+  const [file, setFile] = useState<File | null>(null);
+  const [style, setStyle] = useState<StyleKey | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [watermarkedImage, setWatermarkedImage] = useState<string | null>(null);
+  const [imageId, setImageId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+  const params =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search)
+      : null;
+  const isSuccess = params?.get("success") === "true";
+  const isCanceled = params?.get("canceled") === "true";
+
+  const handleFileSelected = useCallback((f: File) => {
+    setFile(f);
+    setStep("style");
+    setError(null);
+  }, []);
+
+  const handleStyleSelect = useCallback((s: StyleKey) => {
+    setStyle(s);
+    setStep("generate");
+    setError(null);
+  }, []);
+
+  const handleGenerate = useCallback(async () => {
+    if (!file || !style) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("style", style);
+
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setWatermarkedImage(data.watermarkedImage);
+      setImageId(data.imageId);
+      setStep("preview");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Generation failed — please try again or use a clearer photo."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [file, style]);
+
+  // Success page
+  if (isSuccess) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4 bg-cream">
+        <div className="max-w-md w-full text-center animate-fade-in-up">
+          <div className="w-20 h-20 mx-auto mb-8 rounded-full bg-brand-green flex items-center justify-center">
+            <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="font-display text-4xl text-brand-green mb-4">Thank you!</h1>
+          <p className="text-gray-600 mb-2 text-lg">Your portrait is on its way.</p>
+          <p className="text-gray-500 mb-10 text-sm">Check your email for the full-resolution download link.</p>
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/"
+            className="inline-block bg-brand-green text-white px-10 py-4 rounded-full font-display font-semibold hover:bg-brand-green/90 transition-all hover:shadow-lg"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
+            Create Another Portrait
           </a>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-cream">
+      {/* Top banner */}
+      <div className="bg-brand-green text-white text-center py-2.5 text-sm font-medium tracking-wide">
+        AI-Powered Pet Portraits — Ready in Seconds, Not Days
+      </div>
+
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
+          <h1 className="font-display text-2xl text-brand-green tracking-tight">
+            Pet Portraits
+          </h1>
+        </div>
+      </header>
+
+      {/* Hero section — only show on upload step */}
+      {step === "upload" && (
+        <section className="bg-white border-b border-gray-100">
+          <div className="max-w-6xl mx-auto px-4 py-16 sm:py-20 text-center">
+            <div className="flex items-center justify-center gap-1.5 mb-6">
+              {[...Array(5)].map((_, i) => (
+                <svg key={i} className="w-5 h-5 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+              <span className="text-sm text-gray-500 ml-2">Loved by pet parents</span>
+            </div>
+            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl text-brand-green mb-5 leading-tight">
+              Turn Your Pet Into<br />a Work of Art
+            </h2>
+            <p className="text-gray-500 text-lg sm:text-xl max-w-xl mx-auto mb-8">
+              Upload a photo, choose a style, and get a stunning portrait in under a minute. The perfect gift for any pet lover.
+            </p>
+            <div className="flex items-center justify-center gap-6 text-sm text-gray-400">
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                Ready in seconds
+              </span>
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                Perfect gift
+              </span>
+              <span className="flex items-center gap-1.5">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                Secure checkout
+              </span>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Main content area */}
+      <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
+        {/* Progress steps */}
+        <div className="flex items-center justify-center gap-3 mb-12">
+          {(["upload", "style", "generate", "preview"] as Step[]).map((s, i) => {
+            const stepIndex = ["upload", "style", "generate", "preview"].indexOf(step);
+            const isActive = s === step;
+            const isComplete = i < stepIndex;
+            const labels = ["Upload", "Style", "Generate", "Preview"];
+            return (
+              <div key={s} className="flex items-center gap-3">
+                <div className="flex flex-col items-center gap-1.5">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all ${
+                      isActive
+                        ? "bg-brand-green text-white scale-110"
+                        : isComplete
+                          ? "bg-brand-green text-white"
+                          : "bg-gray-200 text-gray-400"
+                    }`}
+                  >
+                    {isComplete ? (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      i + 1
+                    )}
+                  </div>
+                  <span className={`text-xs font-medium ${isActive ? "text-brand-green" : "text-gray-400"}`}>
+                    {labels[i]}
+                  </span>
+                </div>
+                {i < 3 && (
+                  <div className={`w-12 h-0.5 mb-5 ${isComplete ? "bg-brand-green" : "bg-gray-200"}`} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Step content */}
+        <div className="animate-fade-in-up">
+          {step === "upload" && (
+            <UploadStep onFileSelected={handleFileSelected} />
+          )}
+
+          {step === "style" && (
+            <StylePicker selected={style} onSelect={handleStyleSelect} />
+          )}
+
+          {step === "generate" && (
+            <div className="w-full flex flex-col items-center gap-8">
+              <div className="flex items-center gap-5 p-5 bg-white rounded-2xl border border-gray-200 w-full max-w-sm shadow-sm">
+                {file && (
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt="Selected pet"
+                    className="w-20 h-20 rounded-xl object-cover"
+                  />
+                )}
+                <div>
+                  <p className="font-display text-lg font-semibold text-brand-green">
+                    Ready to create
+                  </p>
+                  <p className="text-sm text-gray-500 capitalize">
+                    {style === "oil"
+                      ? "Oil Painting"
+                      : style === "lineart"
+                        ? "Pencil / Line Art"
+                        : style === "renaissance"
+                          ? "Renaissance"
+                          : "Watercolor"}{" "}
+                    style
+                  </p>
+                </div>
+              </div>
+
+              <GenerateButton
+                disabled={!file || !style}
+                loading={loading}
+                onClick={handleGenerate}
+              />
+            </div>
+          )}
+
+          {step === "preview" && watermarkedImage && imageId && (
+            <div className="w-full">
+              <PortraitPreview watermarkedImage={watermarkedImage} />
+              <ProductSelector imageId={imageId} onError={setError} />
+            </div>
+          )}
+        </div>
+
+        {/* Error display */}
+        {error && (
+          <div className="mt-8 p-4 bg-red-50 border border-red-200 rounded-xl text-center animate-fade-in-up">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
+
+        {isCanceled && (
+          <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center">
+            <p className="text-amber-700 text-sm">
+              Payment was canceled. You can still choose a product above.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 bg-white mt-12">
+        <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+          <p className="text-sm text-gray-400">
+            Each portrait is uniquely generated &middot; Not satisfied? We&apos;ll redo it for free.
+          </p>
+        </div>
       </footer>
-    </div>
+    </main>
   );
 }
