@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import Link from "next/link";
 import UploadStep from "@/components/UploadStep";
 import StylePicker from "@/components/StylePicker";
 import GenerateButton from "@/components/GenerateButton";
@@ -104,9 +105,11 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
-          <h1 className="font-display text-2xl text-brand-green tracking-tight">
-            Pet Portraits
-          </h1>
+          <Link href="/">
+            <h1 className="font-display text-2xl text-brand-green tracking-tight cursor-pointer">
+              Pet Portraits
+            </h1>
+          </Link>
         </div>
       </header>
 
