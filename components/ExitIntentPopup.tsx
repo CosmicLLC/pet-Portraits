@@ -85,16 +85,26 @@ export default function ExitIntentPopup() {
           </div>
         ) : (
           <>
-            <div className="text-center mb-6">
+            <div className="text-center mb-5">
               <p className="text-4xl mb-3">🐾</p>
               <h3 className="font-display text-2xl text-brand-green mb-2">
-                Wait — before you go!
+                Wait! Get 10% Off
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Get <strong>10% off</strong> your first portrait plus exclusive deals
-                for pet lovers — delivered to your inbox.
+                Use this code at checkout for <strong>10% off</strong> your portrait.
               </p>
             </div>
+
+            {/* Discount code display */}
+            <div className="bg-brand-green/5 border-2 border-dashed border-brand-green/40 rounded-xl px-4 py-3 mb-5 text-center">
+              <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium mb-1">Your discount code</p>
+              <p className="font-display text-2xl font-bold text-brand-green tracking-[0.2em]">PAWSOME10</p>
+              <p className="text-[10px] text-gray-400 mt-1">Enter at checkout · 10% off any order</p>
+            </div>
+
+            <p className="text-center text-xs text-gray-500 mb-4">
+              Enter your email and we&apos;ll remind you before the code expires.
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-3">
               <input

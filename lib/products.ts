@@ -1,8 +1,8 @@
 export const PRODUCTS = {
   digital: {
     label: "Digital Download",
-    price: "$25",
-    description: "Full resolution PNG, instant delivery",
+    price: "$19",
+    description: "Full-res PNG, instant email delivery",
   },
   wallpaper: {
     label: "Phone Wallpaper",
@@ -11,8 +11,14 @@ export const PRODUCTS = {
   },
   canvas: {
     label: "Canvas Print 8×10",
-    price: "$77",
-    description: "Printed & shipped to your door",
+    price: "$79",
+    description: "Gallery-quality, shipped to your door",
+  },
+  bundle: {
+    label: "Complete Bundle",
+    price: "$89",
+    originalPrice: "$98",
+    description: "Digital download + canvas print",
   },
 } as const;
 

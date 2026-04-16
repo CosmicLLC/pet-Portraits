@@ -1,38 +1,53 @@
 "use client";
 
 import { useState } from "react";
-import { PRODUCTS, type ProductType } from "@/lib/products";
 
 interface ProductSelectorProps {
   imageId: string;
   onError: (msg: string) => void;
 }
 
-const PRODUCT_ICONS: Record<ProductType, React.ReactNode> = {
-  digital: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  ),
-  wallpaper: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-    </svg>
-  ),
-  canvas: (
-    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-    </svg>
-  ),
+type Tier = {
+  key: string;
+  name: string;
+  price: string;
+  originalPrice?: string;
+  description: string;
+  features: string[];
+  badge?: string;
+  highlighted: boolean;
 };
 
-const BADGES: Record<ProductType, string | null> = {
-  digital: "Most Popular",
-  wallpaper: null,
-  canvas: "Premium",
-};
+const TIERS: Tier[] = [
+  {
+    key: "digital",
+    name: "Digital Download",
+    price: "$19",
+    description: "Instant email delivery",
+    features: ["Full-resolution PNG", "Print-ready file", "Lifetime access"],
+    highlighted: false,
+  },
+  {
+    key: "canvas",
+    name: "Canvas Print 8×10",
+    price: "$79",
+    description: "Ships in 3–5 business days",
+    features: ["Gallery-quality print", "Ready to hang", "Premium frame"],
+    highlighted: false,
+  },
+  {
+    key: "bundle",
+    name: "Complete Bundle",
+    price: "$89",
+    originalPrice: "$98",
+    description: "Digital + Canvas together",
+    features: ["Everything in Digital", "Everything in Canvas", "Save $9"],
+    badge: "Best Value",
+    highlighted: true,
+  },
+];
 
-// Session-consistent portrait count (30–80) for social proof
+// Session-consistent portrait count for social proof
 function getSessionPortraitCount(): number {
   try {
     const stored = sessionStorage.getItem("petPortraitCount");
@@ -45,25 +60,20 @@ function getSessionPortraitCount(): number {
   }
 }
 
-export default function ProductSelector({
-  imageId,
-  onError,
-}: ProductSelectorProps) {
-  const [loading, setLoading] = useState<ProductType | null>(null);
+export default function ProductSelector({ imageId, onError }: ProductSelectorProps) {
+  const [loading, setLoading] = useState<string | null>(null);
   const [portraitCount] = useState<number>(() => getSessionPortraitCount());
 
-  const handleSelect = async (productType: ProductType) => {
-    setLoading(productType);
+  const handleSelect = async (key: string) => {
+    setLoading(key);
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productType, imageId }),
+        body: JSON.stringify({ productType: key, imageId }),
       });
-
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-
       window.location.href = data.url;
     } catch {
       onError("Payment error — please try again.");
@@ -74,133 +84,102 @@ export default function ProductSelector({
   return (
     <div className="w-full mt-10">
       {/* Social proof */}
-      <div className="flex items-center justify-center gap-2 mb-3 text-sm text-gray-500">
+      <div className="flex items-center justify-center gap-2 mb-6 text-sm text-gray-500">
         <span>🔥</span>
         <span>
-          <strong className="text-brand-green">{portraitCount}</strong> portraits created today
+          <strong className="text-brand-green">{portraitCount}</strong> portraits purchased today
         </span>
       </div>
 
-      {/* Limited-time offer banner */}
-      <div className="bg-brand-green/5 border border-brand-green/20 rounded-xl px-4 py-2.5 mb-4 text-center">
-        <p className="text-xs text-brand-green font-medium">
-          🎁 Limited time: Free digital download with every canvas order
-        </p>
-      </div>
-
-      {/* Urgency text */}
-      <div className="flex items-center justify-center gap-1.5 mb-4 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5 w-fit mx-auto">
-        <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Preview expires in 24 hours — purchase to save the full resolution
-      </div>
-
-      {/* Canvas upsell banner */}
-      <button
-        onClick={() => handleSelect("canvas")}
-        disabled={loading !== null}
-        className="w-full mb-4 p-4 rounded-2xl bg-brand-green text-white text-left relative overflow-hidden hover:bg-brand-green/90 transition-all hover:shadow-lg disabled:opacity-60 group"
-      >
-        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10 text-8xl leading-none select-none">
-          🖼
-        </div>
-        <div className="relative">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-0.5">
-            Recommended upgrade
-          </p>
-          <p className="font-display font-bold text-base leading-snug">
-            Make it real — Canvas Print 8×10
-          </p>
-          <p className="text-white/70 text-xs mt-0.5">
-            Gallery-quality print shipped to your door. The perfect keepsake or gift.
-          </p>
-        </div>
-        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-          {loading === "canvas" ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          ) : (
-            <svg className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          )}
-        </div>
-      </button>
-
-      <div className="flex items-center gap-3 mb-3">
-        <div className="flex-1 h-px bg-gray-200" />
-        <p className="text-xs text-gray-400">or choose below</p>
-        <div className="flex-1 h-px bg-gray-200" />
-      </div>
-
-      <div className="flex flex-col gap-3">
-        {(Object.entries(PRODUCTS) as [ProductType, (typeof PRODUCTS)[ProductType]][]).map(
-          ([key, product]) => (
-            <button
-              key={key}
-              onClick={() => handleSelect(key)}
-              disabled={loading !== null}
-              className={`relative flex items-center gap-4 w-full p-5 rounded-2xl border-2 transition-all text-left bg-white ${
-                loading === key
-                  ? "border-brand-green bg-brand-green/5"
-                  : key === "digital"
-                    ? "border-brand-green/30 hover:border-brand-green hover:shadow-lg hover:-translate-y-0.5"
-                    : "border-gray-200 hover:border-brand-green/30 hover:shadow-lg hover:-translate-y-0.5"
-              } ${loading !== null && loading !== key ? "opacity-50" : ""}`}
-            >
-              {/* Badge */}
-              {BADGES[key] && (
-                <span className="absolute -top-2.5 right-4 bg-brand-gold text-white text-[10px] font-bold uppercase tracking-wider px-3 py-0.5 rounded-full">
-                  {BADGES[key]}
-                </span>
-              )}
-
-              <div className="w-12 h-12 rounded-xl bg-brand-green/10 flex items-center justify-center flex-shrink-0 text-brand-green">
-                {PRODUCT_ICONS[key]}
+      {/* 3-tier grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {TIERS.map((tier) => (
+          <div
+            key={tier.key}
+            className={`relative flex flex-col rounded-2xl border-2 overflow-hidden transition-all ${
+              tier.highlighted
+                ? "border-brand-green shadow-xl ring-4 ring-brand-green/10 scale-[1.02]"
+                : "border-gray-200"
+            }`}
+          >
+            {/* Best Value badge */}
+            {tier.badge && (
+              <div className="bg-brand-green text-white text-center py-1.5 text-xs font-bold uppercase tracking-widest">
+                {tier.badge}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-display font-semibold text-brand-green text-base">
-                  {product.label}
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {product.description}
-                </p>
+            )}
+
+            <div className={`flex flex-col flex-1 p-5 ${tier.highlighted ? "bg-white" : "bg-white"}`}>
+              <p className="font-display text-base font-semibold text-brand-green mb-1">
+                {tier.name}
+              </p>
+              <p className="text-xs text-gray-400 mb-4">{tier.description}</p>
+
+              <div className="mb-5">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-display text-3xl font-bold text-brand-green">{tier.price}</span>
+                  {tier.originalPrice && (
+                    <span className="text-sm text-gray-400 line-through">{tier.originalPrice}</span>
+                  )}
+                </div>
               </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <p className="font-display text-2xl font-bold text-brand-green">
-                  {product.price}
-                </p>
-                {loading === key ? (
-                  <div className="w-5 h-5 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
+
+              <ul className="space-y-1.5 mb-6 flex-1">
+                {tier.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
+                    <svg className="w-3.5 h-3.5 text-brand-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => handleSelect(tier.key)}
+                disabled={loading !== null}
+                className={`w-full py-3 rounded-xl font-display font-semibold text-sm transition-all ${
+                  tier.highlighted
+                    ? "bg-brand-green text-white hover:bg-brand-green/90 hover:shadow-lg disabled:opacity-60"
+                    : "bg-gray-100 text-brand-green hover:bg-brand-green hover:text-white disabled:opacity-60"
+                }`}
+              >
+                {loading === tier.key ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Processing…
+                  </span>
                 ) : (
-                  <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
+                  "Get This"
                 )}
-              </div>
-            </button>
-          )
-        )}
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="flex items-center justify-center gap-4 mt-6 text-xs text-gray-400">
-        <span className="flex items-center gap-1">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      {/* Trust badges */}
+      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mt-6 pt-5 border-t border-gray-100">
+        <span className="flex items-center gap-1.5 text-xs text-gray-500">
+          <svg className="w-4 h-4 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
-          Secure payment
+          Secure Checkout
         </span>
-        <span className="flex items-center gap-1">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <span className="flex items-center gap-1.5 text-xs text-gray-500">
+          <svg className="w-4 h-4 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
           </svg>
-          Delivered by email
+          Money-Back Guarantee
         </span>
-        <span className="flex items-center gap-1">
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        <span className="flex items-center gap-1.5 text-xs text-gray-500">
+          <svg className="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
-          Instant delivery
+          5-Star Rated
         </span>
       </div>
     </div>

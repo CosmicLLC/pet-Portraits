@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import UploadStep from "@/components/UploadStep";
 import StylePicker from "@/components/StylePicker";
 import GenerateButton from "@/components/GenerateButton";
@@ -9,6 +9,7 @@ import ProductSelector from "@/components/ProductSelector";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import FooterNewsletter from "@/components/FooterNewsletter";
 import BrowseAbandonmentCapture from "@/components/BrowseAbandonmentCapture";
+import SocialProofToast from "@/components/SocialProofToast";
 import Link from "next/link";
 import type { StyleKey } from "@/lib/gemini";
 
@@ -16,6 +17,12 @@ type Step = "upload" | "style" | "generate" | "preview";
 
 const STEPS: Step[] = ["upload", "style", "generate", "preview"];
 const STEP_LABELS = ["Upload", "Style", "Generate", "Preview"];
+
+function formatCountdown(secs: number): string {
+  const m = Math.floor(secs / 60).toString().padStart(2, "0");
+  const s = (secs % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
 
 export default function Home() {
   const [step, setStep] = useState<Step>("upload");
@@ -29,14 +36,37 @@ export default function Home() {
   const [portraitEmailCaptured, setPortraitEmailCaptured] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Countdown timer for preview step
+  const [countdown, setCountdown] = useState(30 * 60);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Success page upsell state
+  const [upsellLoading, setUpsellLoading] = useState(false);
+  const [upsellDone, setUpsellDone] = useState(false);
+  const [copied, setCopied] = useState(false);
+
   const params =
     typeof window !== "undefined"
       ? new URLSearchParams(window.location.search)
       : null;
   const isSuccess = params?.get("success") === "true";
   const isCanceled = params?.get("canceled") === "true";
+  const successImageId = params?.get("imageId") || null;
 
-  // Show browse-abandonment capture 30s after portrait is ready
+  // Countdown: start/reset when entering preview step
+  useEffect(() => {
+    if (step !== "preview") {
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      return;
+    }
+    setCountdown(30 * 60);
+    countdownRef.current = setInterval(() => {
+      setCountdown((c) => (c <= 1 ? (clearInterval(countdownRef.current!), 0) : c - 1));
+    }, 1000);
+    return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
+  }, [step]);
+
+  // Browse-abandonment capture 30s after portrait is ready
   useEffect(() => {
     if (step !== "preview" || portraitEmailCaptured) return;
     const timer = setTimeout(() => setShowAbandonmentCapture(true), 30000);
@@ -66,8 +96,7 @@ export default function Home() {
   const scrollToSection = useCallback((id: string) => {
     setMobileMenuOpen(false);
     const doScroll = () => {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     };
     if (step !== "upload") {
       setStep("upload");
@@ -110,33 +139,47 @@ export default function Home() {
     if (!file || !style) return;
     setLoading(true);
     setError(null);
-
     try {
       const formData = new FormData();
       formData.append("image", file);
       formData.append("style", style);
-
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await fetch("/api/generate", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-
       setWatermarkedImage(data.watermarkedImage);
       setImageId(data.imageId);
       setStep("preview");
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Generation failed — please try again or use a clearer photo."
-      );
+      setError(err instanceof Error ? err.message : "Generation failed — please try again or use a clearer photo.");
     } finally {
       setLoading(false);
     }
   }, [file, style]);
+
+  const handleUpsell = useCallback(async () => {
+    if (!successImageId) return;
+    setUpsellLoading(true);
+    try {
+      const res = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productType: "canvas_upsell", imageId: successImageId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      window.location.href = data.url;
+    } catch {
+      setUpsellLoading(false);
+    }
+  }, [successImageId]);
+
+  const handleCopyLink = useCallback(() => {
+    const url = window.location.origin;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  }, []);
 
   const navLinks = [
     { label: "How It Works", id: "how-it-works" },
@@ -144,34 +187,152 @@ export default function Home() {
     { label: "Reviews", id: "reviews" },
   ];
 
-  // Success page
+  const shareUrl = typeof window !== "undefined" ? window.location.origin : "https://pet-portraits-five.vercel.app";
+  const shareText = "I just got a stunning AI portrait of my pet! Check it out:";
+
+  // ─── Success page ────────────────────────────────────────────────────
   if (isSuccess) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4 bg-cream">
-        <div className="max-w-md w-full text-center animate-fade-in-up">
-          <div className="w-20 h-20 mx-auto mb-8 rounded-full bg-brand-green flex items-center justify-center">
-            <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+      <main className="min-h-screen px-4 py-16 bg-cream">
+        <div className="max-w-lg mx-auto">
+          {/* Thank you */}
+          <div className="text-center animate-fade-in-up">
+            <div className="w-20 h-20 mx-auto mb-8 rounded-full bg-brand-green flex items-center justify-center">
+              <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h1 className="font-display text-4xl text-brand-green mb-4">Thank you!</h1>
+            <p className="text-gray-600 mb-2 text-lg">Your portrait is on its way.</p>
+            <p className="text-gray-500 mb-10 text-sm">Check your email for the full-resolution download link.</p>
           </div>
-          <h1 className="font-display text-4xl text-brand-green mb-4">Thank you!</h1>
-          <p className="text-gray-600 mb-2 text-lg">Your portrait is on its way.</p>
-          <p className="text-gray-500 mb-10 text-sm">Check your email for the full-resolution download link.</p>
-          <a
-            href="/"
-            className="inline-block bg-brand-green text-white px-10 py-4 rounded-full font-display font-semibold hover:bg-brand-green/90 transition-all hover:shadow-lg"
-          >
-            Create Another Portrait
-          </a>
+
+          {/* Post-purchase upsell — Canvas Print at 25% off */}
+          {successImageId && !upsellDone && (
+            <div className="bg-white rounded-3xl border-2 border-brand-green/20 shadow-lg p-6 mb-8 animate-fade-in-up">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-brand-green/10 flex items-center justify-center flex-shrink-0 text-2xl">
+                  🖼️
+                </div>
+                <div className="flex-1">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-brand-green/60 mb-0.5">
+                    One-time offer
+                  </p>
+                  <h2 className="font-display text-lg text-brand-green font-semibold leading-snug mb-1">
+                    Add a Canvas Print — 25% Off
+                  </h2>
+                  <p className="text-sm text-gray-500 mb-3">
+                    Gallery-quality 8×10 canvas print shipped to your door. Normally $79 — yours right now for just{" "}
+                    <strong className="text-brand-green">$59</strong>.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <span className="font-display text-2xl font-bold text-brand-green">$59</span>
+                    <span className="text-sm text-gray-400 line-through">$79</span>
+                    <span className="bg-brand-gold/10 text-brand-gold text-xs font-bold px-2 py-0.5 rounded-full">
+                      Save 25%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={handleUpsell}
+                disabled={upsellLoading}
+                className="mt-5 w-full bg-brand-green text-white py-3.5 rounded-xl font-display font-semibold hover:bg-brand-green/90 transition-all hover:shadow-lg disabled:opacity-60"
+              >
+                {upsellLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Processing…
+                  </span>
+                ) : (
+                  "Add to Order — $59"
+                )}
+              </button>
+              <button
+                onClick={() => setUpsellDone(true)}
+                className="w-full text-center text-xs text-gray-400 mt-2 hover:text-gray-500 transition-colors"
+              >
+                No thanks, I&apos;ll skip this offer
+              </button>
+            </div>
+          )}
+
+          {/* Referral / Share section */}
+          <div className="bg-white rounded-3xl border border-gray-200 p-6 mb-8 animate-fade-in-up">
+            <h2 className="font-display text-xl text-brand-green mb-1 text-center">Share with Friends</h2>
+            <p className="text-sm text-gray-500 text-center mb-5">
+              Know a pet parent who&apos;d love this? Share the love.
+            </p>
+            {/* Copy link */}
+            <button
+              onClick={handleCopyLink}
+              className="w-full flex items-center justify-between gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3 hover:border-brand-green/40 transition-colors group"
+            >
+              <span className="text-sm text-gray-600 truncate">{shareUrl}</span>
+              <span className={`text-xs font-semibold flex-shrink-0 ${copied ? "text-brand-green" : "text-gray-400 group-hover:text-brand-green"} transition-colors`}>
+                {copied ? "Copied!" : "Copy"}
+              </span>
+            </button>
+            {/* Social share row */}
+            <div className="grid grid-cols-3 gap-3">
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                X / Twitter
+              </a>
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-[#1877F2] hover:text-[#1877F2] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+                Facebook
+              </a>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-[#25D366] hover:text-[#25D366] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.852L.057 23.9l6.234-1.637A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm.029 21.818a9.9 9.9 0 01-5.052-1.38l-.362-.215-3.753.984 1.003-3.664-.235-.374A9.86 9.86 0 012.182 12c0-5.424 4.424-9.836 9.847-9.836 5.424 0 9.836 4.412 9.836 9.836 0 5.423-4.412 9.818-9.836 9.818z" />
+                </svg>
+                WhatsApp
+              </a>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <a
+              href="/"
+              className="inline-block bg-brand-green text-white px-10 py-4 rounded-full font-display font-semibold hover:bg-brand-green/90 transition-all hover:shadow-lg"
+            >
+              Create Another Portrait
+            </a>
+          </div>
         </div>
       </main>
     );
   }
 
+  // ─── Main app ────────────────────────────────────────────────────────
   return (
     <main className="min-h-screen bg-cream">
-      {/* Exit-intent popup — only on the landing/upload step */}
       {step === "upload" && <ExitIntentPopup />}
+      {step === "upload" && <SocialProofToast />}
 
       {/* Top banner */}
       <div className="bg-brand-green text-white text-center py-2.5 text-sm font-medium tracking-wide">
@@ -181,7 +342,6 @@ export default function Home() {
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          {/* Logo — resets wizard to upload */}
           <button
             onClick={resetState}
             className="font-display text-2xl text-brand-green tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
@@ -228,7 +388,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Mobile menu dropdown */}
+        {/* Mobile menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 flex flex-col gap-1">
             {navLinks.map((link) => (
@@ -250,7 +410,7 @@ export default function Home() {
         )}
       </header>
 
-      {/* Hero section — only show on upload step */}
+      {/* Hero — upload step only */}
       {step === "upload" && (
         <section id="create" className="bg-white border-b border-gray-100">
           <div className="max-w-6xl mx-auto px-4 py-16 sm:py-20 text-center">
@@ -286,9 +446,9 @@ export default function Home() {
         </section>
       )}
 
-      {/* Main content area */}
+      {/* Main wizard */}
       <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
-        {/* Progress steps — clickable for completed steps */}
+        {/* Progress steps */}
         <div className="flex items-center justify-center gap-3 mb-12">
           {STEPS.map((s, i) => {
             const stepIndex = STEPS.indexOf(step);
@@ -328,6 +488,19 @@ export default function Home() {
             );
           })}
         </div>
+
+        {/* Countdown timer — preview step only */}
+        {step === "preview" && (
+          <div className="flex items-center justify-center gap-2 mb-6 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5 w-fit mx-auto">
+            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>
+              Your preview expires in{" "}
+              <strong className="font-mono">{formatCountdown(countdown)}</strong>
+            </span>
+          </div>
+        )}
 
         {/* Step content */}
         <div className="animate-fade-in-up">
@@ -370,27 +543,13 @@ export default function Home() {
                   />
                 )}
                 <div>
-                  <p className="font-display text-lg font-semibold text-brand-green">
-                    Ready to create
-                  </p>
+                  <p className="font-display text-lg font-semibold text-brand-green">Ready to create</p>
                   <p className="text-sm text-gray-500 capitalize">
-                    {style === "oil"
-                      ? "Oil Painting"
-                      : style === "lineart"
-                        ? "Pencil / Line Art"
-                        : style === "renaissance"
-                          ? "Renaissance"
-                          : "Watercolor"}{" "}
-                    style
+                    {style === "oil" ? "Oil Painting" : style === "lineart" ? "Pencil / Line Art" : style === "renaissance" ? "Renaissance" : "Watercolor"}{" "}style
                   </p>
                 </div>
               </div>
-
-              <GenerateButton
-                disabled={!file || !style}
-                loading={loading}
-                onClick={handleGenerate}
-              />
+              <GenerateButton disabled={!file || !style} loading={loading} onClick={handleGenerate} />
             </div>
           )}
 
@@ -417,7 +576,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* Error display */}
+        {/* Error */}
         {error && (
           <div className="mt-8 p-4 bg-red-50 border border-red-200 rounded-xl text-center animate-fade-in-up">
             <p className="text-red-600 text-sm">{error}</p>
@@ -432,20 +591,15 @@ export default function Home() {
               </svg>
             </div>
             <p className="font-display text-lg text-amber-800 mb-1">Your payment was canceled</p>
-            <p className="text-amber-700 text-sm mb-4">
-              Your portrait is still saved. Ready to try again?
-            </p>
-            <a
-              href="/"
-              className="inline-block bg-brand-green text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-brand-green/90 transition-all"
-            >
+            <p className="text-amber-700 text-sm mb-4">Your portrait is still saved. Ready to try again?</p>
+            <a href="/" className="inline-block bg-brand-green text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-brand-green/90 transition-all">
               Try Again
             </a>
           </div>
         )}
       </div>
 
-      {/* How It Works — only visible on landing */}
+      {/* How It Works — upload step only */}
       {step === "upload" && (
         <section id="how-it-works" className="bg-white border-y border-gray-100 py-16 sm:py-20">
           <div className="max-w-4xl mx-auto px-4 text-center">
@@ -453,41 +607,12 @@ export default function Home() {
             <p className="text-gray-500 mb-12 max-w-md mx-auto">Three simple steps to a portrait you&apos;ll treasure forever.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
               {[
-                {
-                  step: "1",
-                  title: "Upload a Photo",
-                  desc: "Pick any clear photo of your pet. We handle the rest.",
-                  icon: (
-                    <svg className="w-7 h-7 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                    </svg>
-                  ),
-                },
-                {
-                  step: "2",
-                  title: "Choose a Style",
-                  desc: "Watercolor, Oil, Renaissance, or Line Art — pick your favorite.",
-                  icon: (
-                    <svg className="w-7 h-7 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" />
-                    </svg>
-                  ),
-                },
-                {
-                  step: "3",
-                  title: "Download & Print",
-                  desc: "Get your full-res portrait instantly. Print or frame it.",
-                  icon: (
-                    <svg className="w-7 h-7 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                    </svg>
-                  ),
-                },
+                { title: "Upload a Photo", desc: "Pick any clear photo of your pet. We handle the rest.", icon: <svg className="w-7 h-7 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg> },
+                { title: "Choose a Style", desc: "Watercolor, Oil, Renaissance, or Line Art — pick your favorite.", icon: <svg className="w-7 h-7 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.994 15.994 0 011.622-3.395m3.42 3.42a15.995 15.995 0 004.764-4.648l3.876-5.814a1.151 1.151 0 00-1.597-1.597L14.146 6.32a15.996 15.996 0 00-4.649 4.763m3.42 3.42a6.776 6.776 0 00-3.42-3.42" /></svg> },
+                { title: "Download & Print", desc: "Get your full-res portrait instantly. Print or frame it.", icon: <svg className="w-7 h-7 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg> },
               ].map((item) => (
-                <div key={item.step} className="flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-brand-green/10 flex items-center justify-center">
-                    {item.icon}
-                  </div>
+                <div key={item.title} className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-brand-green/10 flex items-center justify-center">{item.icon}</div>
                   <div>
                     <h3 className="font-display text-lg text-brand-green mb-1">{item.title}</h3>
                     <p className="text-gray-500 text-sm">{item.desc}</p>
@@ -499,7 +624,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* Styles showcase — only visible on landing */}
+      {/* Styles — upload step only */}
       {step === "upload" && (
         <section id="styles" className="py-16 sm:py-20">
           <div className="max-w-4xl mx-auto px-4 text-center">
@@ -529,7 +654,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* Reviews — only visible on landing */}
+      {/* Reviews — upload step only */}
       {step === "upload" && (
         <section id="reviews" className="bg-white border-t border-gray-100 py-16 sm:py-20">
           <div className="max-w-4xl mx-auto px-4 text-center">
@@ -537,24 +662,9 @@ export default function Home() {
             <p className="text-gray-500 mb-12 max-w-md mx-auto">Thousands of happy customers and counting.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {[
-                {
-                  name: "Sarah M.",
-                  review: "I cried when I saw my dog Charlie as an oil painting. It&apos;s now framed above my fireplace. Absolutely stunning.",
-                  stars: 5,
-                  pet: "Golden Retriever mom",
-                },
-                {
-                  name: "James T.",
-                  review: "Ordered the watercolor style for my cat&apos;s birthday (yes, I&apos;m that person). It was ready in 30 seconds and looks incredible.",
-                  stars: 5,
-                  pet: "Cat dad",
-                },
-                {
-                  name: "Priya K.",
-                  review: "Used this as a holiday gift for my sister. She called me crying. Best gift idea ever. The line art was chef&apos;s kiss.",
-                  stars: 5,
-                  pet: "Gift giver",
-                },
+                { name: "Sarah M.", review: "I cried when I saw my dog Charlie as an oil painting. It\u2019s now framed above my fireplace. Absolutely stunning.", stars: 5, pet: "Golden Retriever mom" },
+                { name: "James T.", review: "Ordered the watercolor style for my cat\u2019s birthday (yes, I\u2019m that person). It was ready in 30 seconds and looks incredible.", stars: 5, pet: "Cat dad" },
+                { name: "Priya K.", review: "Used this as a holiday gift for my sister. She called me crying. Best gift idea ever. The line art was chef\u2019s kiss.", stars: 5, pet: "Gift giver" },
               ].map((r) => (
                 <div key={r.name} className="bg-gray-50 rounded-2xl p-6 text-left">
                   <div className="flex gap-0.5 mb-3">
@@ -565,10 +675,8 @@ export default function Home() {
                     ))}
                   </div>
                   <p className="text-gray-600 text-sm mb-4 leading-relaxed">&ldquo;{r.review}&rdquo;</p>
-                  <div>
-                    <p className="font-semibold text-sm text-gray-800">{r.name}</p>
-                    <p className="text-xs text-gray-400">{r.pet}</p>
-                  </div>
+                  <p className="font-semibold text-sm text-gray-800">{r.name}</p>
+                  <p className="text-xs text-gray-400">{r.pet}</p>
                 </div>
               ))}
             </div>
@@ -588,9 +696,7 @@ export default function Home() {
             {" "}&middot;{" "}
             <Link href="/terms" className="hover:text-brand-green transition-colors">Terms of Service</Link>
             {" "}&middot;{" "}
-            <a href="mailto:cosmic.company.llc@gmail.com" className="hover:text-brand-green transition-colors">
-              cosmic.company.llc@gmail.com
-            </a>
+            <a href="mailto:cosmic.company.llc@gmail.com" className="hover:text-brand-green transition-colors">cosmic.company.llc@gmail.com</a>
           </p>
         </div>
       </footer>
