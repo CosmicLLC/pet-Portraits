@@ -53,8 +53,8 @@ export default function Home() {
   const [annIdx, setAnnIdx] = useState(0);
   const [annVisible, setAnnVisible] = useState(true);
 
-  // Real-time visitor count (12–34, fluctuates every 30s)
-  const [visitorCount, setVisitorCount] = useState(() => Math.floor(Math.random() * 23) + 12);
+  // Real-time visitor count (12–34, fluctuates every 30s) — set after mount to avoid hydration mismatch
+  const [visitorCount, setVisitorCount] = useState(0);
 
   // Success page upsell state
   const [upsellLoading, setUpsellLoading] = useState(false);
@@ -108,8 +108,9 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
-  // Visitor count fluctuation
+  // Visitor count — init after mount, fluctuate every 30s
   useEffect(() => {
+    setVisitorCount(Math.floor(Math.random() * 23) + 12);
     const id = setInterval(() => {
       setVisitorCount((n) => Math.min(34, Math.max(12, n + Math.floor(Math.random() * 5) - 2)));
     }, 30000);
@@ -485,12 +486,14 @@ export default function Home() {
             </div>
 
             {/* Real-time visitor count */}
-            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
-              <span>
-                <strong className="text-gray-700">{visitorCount}</strong> people viewing portraits right now
-              </span>
-            </div>
+            {visitorCount > 0 && (
+              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                <span>
+                  <strong className="text-gray-700">{visitorCount}</strong> people viewing portraits right now
+                </span>
+              </div>
+            )}
           </div>
         </section>
       )}
