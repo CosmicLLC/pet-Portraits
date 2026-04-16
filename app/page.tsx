@@ -45,13 +45,13 @@ export default function Home() {
   const [upsellDone, setUpsellDone] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const params =
-    typeof window !== "undefined"
-      ? new URLSearchParams(window.location.search)
-      : null;
-  const isSuccess = params?.get("success") === "true";
-  const isCanceled = params?.get("canceled") === "true";
-  const successImageId = params?.get("imageId") || null;
+  // Read URL params only after mount to avoid hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const urlParams = mounted ? new URLSearchParams(window.location.search) : null;
+  const isSuccess = urlParams?.get("success") === "true";
+  const isCanceled = urlParams?.get("canceled") === "true";
+  const successImageId = urlParams?.get("imageId") ?? null;
 
   // Countdown: start/reset when entering preview step
   useEffect(() => {
@@ -703,3 +703,4 @@ export default function Home() {
     </main>
   );
 }
+
