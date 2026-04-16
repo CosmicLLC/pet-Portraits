@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import UploadStep from "@/components/UploadStep";
 import StylePicker from "@/components/StylePicker";
 import GenerateButton from "@/components/GenerateButton";
@@ -44,6 +45,9 @@ export default function Home() {
   const [showAbandonmentCapture, setShowAbandonmentCapture] = useState(false);
   const [portraitEmailCaptured, setPortraitEmailCaptured] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authDropdownOpen, setAuthDropdownOpen] = useState(false);
+
+  const { data: session } = useSession();
 
   // Countdown timer for preview step
   const [countdown, setCountdown] = useState(30 * 60);
@@ -409,6 +413,72 @@ export default function Home() {
             >
               Create Portrait
             </button>
+
+            {/* Auth — signed in: avatar + dropdown; signed out: Sign In button */}
+            {session ? (
+              <div className="relative">
+                <button
+                  onClick={() => setAuthDropdownOpen((o) => !o)}
+                  className="w-8 h-8 rounded-full bg-brand-green text-white flex items-center justify-center text-sm font-semibold hover:bg-brand-green/90 transition-colors overflow-hidden"
+                  aria-label="Account menu"
+                  aria-expanded={authDropdownOpen}
+                >
+                  {session.user?.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={session.user.image} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    (session.user?.name?.[0] || session.user?.email?.[0] || "U").toUpperCase()
+                  )}
+                </button>
+                {authDropdownOpen && (
+                  <>
+                    {/* Backdrop */}
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setAuthDropdownOpen(false)}
+                    />
+                    {/* Dropdown */}
+                    <div className="absolute right-0 top-10 z-50 w-48 bg-white rounded-2xl shadow-lg border border-gray-100 py-1 overflow-hidden">
+                      <div className="px-3 py-2.5 border-b border-gray-100">
+                        <p className="text-xs font-medium text-gray-800 truncate">{session.user?.name || "Account"}</p>
+                        <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
+                      </div>
+                      {session.user?.role === "admin" && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setAuthDropdownOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-xs text-brand-green hover:bg-brand-green/5 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Admin Dashboard
+                        </Link>
+                      )}
+                      <button
+                        onClick={() => { setAuthDropdownOpen(false); signOut({ callbackUrl: "/" }) }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-600 hover:bg-gray-50 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Sign Out
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => signIn()}
+                className="text-sm text-gray-600 hover:text-brand-green transition-colors font-medium flex items-center gap-1.5"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Sign In
+              </button>
+            )}
           </nav>
 
           {/* Mobile hamburger */}
@@ -448,6 +518,36 @@ export default function Home() {
             >
               Create Portrait
             </button>
+            {/* Mobile auth */}
+            {session ? (
+              <>
+                <div className="mt-2 pt-2 border-t border-gray-100">
+                  <p className="px-3 py-1 text-xs text-gray-400 truncate">{session.user?.email}</p>
+                  {session.user?.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full text-left py-2.5 px-3 rounded-lg text-sm text-brand-green hover:bg-brand-green/5 transition-colors font-medium block"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); signOut({ callbackUrl: "/" }) }}
+                    className="w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </>
+            ) : (
+              <button
+                onClick={() => { setMobileMenuOpen(false); signIn() }}
+                className="mt-1 w-full border border-brand-green text-brand-green py-2.5 px-3 rounded-lg text-sm font-semibold hover:bg-brand-green/5 transition-all text-center"
+              >
+                Sign In
+              </button>
+            )}
           </div>
         )}
       </header>
