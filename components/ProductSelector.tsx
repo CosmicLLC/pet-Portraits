@@ -33,6 +33,7 @@ const TIERS: Tier[] = [
     price: "$79",
     description: "Ships in 3–5 business days",
     features: ["Gallery-quality print", "Ready to hang", "Premium frame"],
+    badge: "Most Popular",
     highlighted: false,
   },
   {
@@ -102,9 +103,13 @@ export default function ProductSelector({ imageId, onError }: ProductSelectorPro
                 : "border-gray-200"
             }`}
           >
-            {/* Best Value badge */}
+            {/* Tier badge */}
             {tier.badge && (
-              <div className="bg-brand-green text-white text-center py-1.5 text-xs font-bold uppercase tracking-widest">
+              <div className={`text-center py-1.5 text-xs font-bold uppercase tracking-widest ${
+                tier.highlighted
+                  ? "bg-brand-green text-white"
+                  : "bg-brand-green/10 text-brand-green"
+              }`}>
                 {tier.badge}
               </div>
             )}

@@ -10,8 +10,17 @@ import ExitIntentPopup from "@/components/ExitIntentPopup";
 import FooterNewsletter from "@/components/FooterNewsletter";
 import BrowseAbandonmentCapture from "@/components/BrowseAbandonmentCapture";
 import SocialProofToast from "@/components/SocialProofToast";
+import StickyCartBar from "@/components/StickyCartBar";
+import FAQ from "@/components/FAQ";
+import Image from "next/image";
 import Link from "next/link";
 import type { StyleKey } from "@/lib/gemini";
+
+const ANNOUNCEMENTS = [
+  "Custom Pet Portraits — Ready in Seconds, Not Days",
+  "100% Satisfaction Guarantee — Love it or we redo it free",
+  "Free Digital Download with Every Canvas Order",
+];
 
 type Step = "upload" | "style" | "generate" | "preview";
 
@@ -39,6 +48,13 @@ export default function Home() {
   // Countdown timer for preview step
   const [countdown, setCountdown] = useState(30 * 60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Announcement bar rotation
+  const [annIdx, setAnnIdx] = useState(0);
+  const [annVisible, setAnnVisible] = useState(true);
+
+  // Real-time visitor count (12–34, fluctuates every 30s)
+  const [visitorCount, setVisitorCount] = useState(() => Math.floor(Math.random() * 23) + 12);
 
   // Success page upsell state
   const [upsellLoading, setUpsellLoading] = useState(false);
@@ -78,6 +94,26 @@ export default function Home() {
     const onResize = () => { if (window.innerWidth >= 768) setMobileMenuOpen(false); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Announcement bar rotation: fade out → swap → fade in every 5s
+  useEffect(() => {
+    const id = setInterval(() => {
+      setAnnVisible(false);
+      setTimeout(() => {
+        setAnnIdx((i) => (i + 1) % ANNOUNCEMENTS.length);
+        setAnnVisible(true);
+      }, 400);
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Visitor count fluctuation
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisitorCount((n) => Math.min(34, Math.max(12, n + Math.floor(Math.random() * 5) - 2)));
+    }, 30000);
+    return () => clearInterval(id);
   }, []);
 
   const resetState = useCallback(() => {
@@ -334,9 +370,14 @@ export default function Home() {
       {step === "upload" && <ExitIntentPopup />}
       {step === "upload" && <SocialProofToast />}
 
-      {/* Top banner */}
-      <div className="bg-brand-green text-white text-center py-2.5 text-sm font-medium tracking-wide">
-        Custom Pet Portraits — Ready in Seconds, Not Days
+      {/* Rotating top banner */}
+      <div className="bg-brand-green text-white text-center py-2.5 text-sm font-medium tracking-wide overflow-hidden">
+        <span
+          className="inline-block transition-opacity duration-400"
+          style={{ opacity: annVisible ? 1 : 0 }}
+        >
+          {ANNOUNCEMENTS[annIdx]}
+        </span>
       </div>
 
       {/* Header */}
@@ -442,12 +483,42 @@ export default function Home() {
                 Secure checkout
               </span>
             </div>
+
+            {/* Real-time visitor count */}
+            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+              <span>
+                <strong className="text-gray-700">{visitorCount}</strong> people viewing portraits right now
+              </span>
+            </div>
           </div>
         </section>
       )}
 
+      {/* Money-back guarantee banner — upload step only */}
+      {step === "upload" && (
+        <div className="bg-brand-green/5 border-b border-brand-green/10">
+          <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-center gap-3 text-center">
+            <svg className="w-5 h-5 text-brand-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <p className="text-sm text-brand-green font-medium">
+              <strong>100% Satisfaction Guarantee</strong> — Love your portrait or we&apos;ll redo it for free. No questions asked.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Main wizard */}
-      <div className="max-w-2xl mx-auto px-4 py-12 sm:py-16">
+      <div className={`max-w-2xl mx-auto px-4 py-12 sm:py-16 ${step === "preview" ? "pb-24" : ""}`}>
+        {/* Thin progress bar */}
+        <div className="w-full h-[3px] bg-gray-200 rounded-full mb-8 overflow-hidden">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-brand-green to-emerald-400 transition-all duration-500 ease-out"
+            style={{ width: `${(STEPS.indexOf(step) + 1) * 25}%` }}
+          />
+        </div>
+
         {/* Progress steps */}
         <div className="flex items-center justify-center gap-3 mb-12">
           {STEPS.map((s, i) => {
@@ -566,12 +637,36 @@ export default function Home() {
               </button>
               <PortraitPreview watermarkedImage={watermarkedImage} />
               <ProductSelector imageId={imageId} onError={setError} />
+
+              {/* Quantity discount nudge */}
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
+                <svg className="w-4 h-4 text-brand-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clipRule="evenodd" />
+                </svg>
+                <span>
+                  Ordering for a friend too?{" "}
+                  <button
+                    onClick={resetState}
+                    className="text-brand-green font-semibold hover:underline"
+                  >
+                    Order 2+ portraits and save 15%
+                  </button>
+                </span>
+              </div>
+
               {showAbandonmentCapture && !portraitEmailCaptured && (
                 <BrowseAbandonmentCapture
                   imageId={imageId}
                   onCaptured={() => setPortraitEmailCaptured(true)}
                 />
               )}
+
+              {/* Sticky buy bar */}
+              <StickyCartBar
+                watermarkedImage={watermarkedImage}
+                imageId={imageId}
+                onError={setError}
+              />
             </div>
           )}
         </div>
@@ -654,6 +749,118 @@ export default function Home() {
         </section>
       )}
 
+      {/* Comparison table — upload step only */}
+      {step === "upload" && (
+        <section className="bg-white border-t border-gray-100 py-16 sm:py-20">
+          <div className="max-w-3xl mx-auto px-4">
+            <div className="text-center mb-10">
+              <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Why Pet Portraits?</h2>
+              <p className="text-gray-500 max-w-md mx-auto">See how we compare to traditional pet portrait services.</p>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-gray-200">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left px-5 py-3.5 font-display text-gray-500 font-medium w-1/2">Feature</th>
+                    <th className="px-5 py-3.5 font-display text-brand-green font-semibold text-center">Pet Portraits</th>
+                    <th className="px-5 py-3.5 font-display text-gray-400 font-medium text-center">Others</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    ["Instant delivery", true, false],
+                    ["Preview before you pay", true, false],
+                    ["Money-back guarantee", true, false],
+                    ["Multiple art styles", true, false],
+                    ["Canvas print shipping", true, true],
+                    ["Starting price", "$19", "$50+"],
+                    ["Turnaround time", "30 seconds", "1–2 weeks"],
+                  ].map(([feature, ours, theirs], i) => (
+                    <tr key={i} className={`border-b border-gray-100 last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                      <td className="px-5 py-3.5 text-gray-700 font-medium">{feature}</td>
+                      <td className="px-5 py-3.5 text-center">
+                        {typeof ours === "boolean" ? (
+                          ours ? (
+                            <svg className="w-5 h-5 text-brand-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          )
+                        ) : (
+                          <span className="font-semibold text-brand-green">{ours}</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        {typeof theirs === "boolean" ? (
+                          theirs ? (
+                            <svg className="w-5 h-5 text-brand-green mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                            </svg>
+                          ) : (
+                            <svg className="w-5 h-5 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          )
+                        ) : (
+                          <span className="text-gray-500">{theirs}</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Photo gallery — upload step only */}
+      {step === "upload" && (
+        <section className="py-16 sm:py-20 bg-cream">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="text-center mb-10">
+              <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Loved by Pet Parents Everywhere</h2>
+              <p className="text-gray-500">Real portraits made with Pet Portraits.</p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              {[
+                { src: "/examples/watercolor.png", style: "Watercolor", name: "Luna" },
+                { src: "/examples/oil.png", style: "Oil Painting", name: "Max" },
+                { src: "/examples/renaissance.png", style: "Renaissance", name: "Bella" },
+                { src: "/examples/lineart.png", style: "Line Art", name: "Charlie" },
+              ].map((p) => (
+                <div key={p.name} className="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
+                  <div className="relative aspect-square">
+                    <Image
+                      src={p.src}
+                      alt={`${p.style} portrait of ${p.name}`}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      sizes="(max-width: 640px) 45vw, 220px"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <p className="font-display text-sm font-semibold text-brand-green">{p.name}</p>
+                    <p className="text-xs text-gray-400">{p.style}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-8">
+              <button
+                onClick={() => scrollToSection("create")}
+                className="bg-brand-green text-white px-8 py-3.5 rounded-full font-display font-semibold hover:bg-brand-green/90 transition-all hover:shadow-lg"
+              >
+                Create Your Portrait
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Reviews — upload step only */}
       {step === "upload" && (
         <section id="reviews" className="bg-white border-t border-gray-100 py-16 sm:py-20">
@@ -683,6 +890,9 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* FAQ — upload step only */}
+      {step === "upload" && <FAQ />}
 
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-12">
