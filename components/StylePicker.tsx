@@ -1,34 +1,46 @@
 "use client";
 
+import Image from "next/image";
 import type { StyleKey } from "@/lib/gemini";
 
-const STYLES: { key: StyleKey; name: string; tagline: string; gradient: string; emoji: string }[] = [
+const STYLES: {
+  key: StyleKey;
+  name: string;
+  tagline: string;
+  image: string;
+  fallbackGradient: string;
+  emoji: string;
+}[] = [
   {
     key: "watercolor",
     name: "Watercolor",
     tagline: "Soft, dreamy, gift-perfect",
-    gradient: "from-sky-200 via-pink-100 to-violet-200",
+    image: "/examples/watercolor.png",
+    fallbackGradient: "from-sky-200 via-pink-100 to-violet-200",
     emoji: "🎨",
   },
   {
     key: "oil",
     name: "Oil Painting",
     tagline: "Rich, classic, museum-worthy",
-    gradient: "from-amber-800 via-orange-700 to-yellow-800",
+    image: "/examples/oil.png",
+    fallbackGradient: "from-amber-800 via-orange-700 to-yellow-800",
     emoji: "🖼️",
   },
   {
     key: "renaissance",
     name: "Renaissance",
     tagline: "Royal, regal, shareable",
-    gradient: "from-red-900 via-amber-800 to-yellow-700",
+    image: "/examples/renaissance.png",
+    fallbackGradient: "from-red-900 via-amber-800 to-yellow-700",
     emoji: "👑",
   },
   {
     key: "lineart",
     name: "Pencil / Line Art",
     tagline: "Clean, modern, minimal",
-    gradient: "from-gray-300 via-gray-200 to-gray-300",
+    image: "/examples/lineart.png",
+    fallbackGradient: "from-gray-300 via-gray-200 to-gray-300",
     emoji: "✏️",
   },
 ];
@@ -61,19 +73,27 @@ export default function StylePicker({ selected, onSelect }: StylePickerProps) {
                 : "border-gray-200 hover:border-brand-green/30"
             }`}
           >
-            {/* Style preview gradient */}
-            <div className={`h-36 bg-gradient-to-br ${style.gradient} relative flex items-center justify-center`}>
-              <span className="text-4xl opacity-80 group-hover:scale-110 transition-transform">
-                {style.emoji}
-              </span>
+            {/* Style preview — real portrait example */}
+            <div className="relative h-36 overflow-hidden">
+              <Image
+                src={style.image}
+                alt={`${style.name} portrait example`}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 640px) 45vw, 220px"
+              />
+              {/* Subtle overlay with style name hint */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+
               {selected === style.key && (
-                <div className="absolute top-3 right-3 w-7 h-7 bg-brand-green rounded-full flex items-center justify-center shadow-lg">
+                <div className="absolute top-3 right-3 w-7 h-7 bg-brand-green rounded-full flex items-center justify-center shadow-lg z-10">
                   <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
               )}
             </div>
+
             <div className="p-4 text-left">
               <p className="font-display text-base font-semibold text-brand-green">
                 {style.name}

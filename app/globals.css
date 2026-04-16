@@ -10,7 +10,7 @@ body {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -28,8 +28,18 @@ body {
   50% { opacity: 0.7; }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(var(--rotate, 0deg)); }
+  50% { transform: translateY(-8px) rotate(var(--rotate, 0deg)); }
+}
+
+@keyframes sidebarSlide {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 .animate-fade-in-up {
-  animation: fadeInUp 0.4s ease-out forwards;
+  animation: fadeInUp 0.5s ease-out forwards;
 }
 
 .animate-shimmer {
@@ -42,6 +52,14 @@ body {
   animation: pulse-soft 2s ease-in-out infinite;
 }
 
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-sidebar {
+  animation: sidebarSlide 0.6s ease-out 1s both;
+}
+
 .frame-shadow {
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.08),
@@ -49,16 +67,41 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* Smooth scroll for anchor links */
+.portrait-frame {
+  box-shadow:
+    0 0 0 8px #f5f0e8,
+    0 0 0 10px #d4c5a0,
+    0 20px 60px rgba(0,0,0,0.25);
+}
+
+/* Smooth scroll */
 html {
   scroll-behavior: smooth;
 }
 
-/* Hide scrollbar on mobile for horizontal scroll */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+/* Scroll-reveal utility */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* Hide scrollbar on mobile */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Vertical text for sidebar tab */
+.vertical-text {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
 }

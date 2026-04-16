@@ -15,9 +15,30 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Pet Portraits — AI-Powered Fine Art of Your Pet",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_BASE_URL || "https://pet-portraits.vercel.app"
+  ),
+  title: "Pet Portraits — Fine Art Portraits of Your Pet",
   description:
     "Transform your pet's photo into a stunning fine art portrait. Watercolor, oil painting, Renaissance, and line art styles. Delivered instantly.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+  },
+  openGraph: {
+    title: "Pet Portraits — Fine Art Portraits of Your Pet",
+    description:
+      "Transform your pet's photo into a stunning fine art portrait. Ready in seconds.",
+    siteName: "Pet Portraits",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pet Portraits — Fine Art Portraits of Your Pet",
+    description:
+      "Transform your pet's photo into a stunning fine art portrait. Ready in seconds.",
+  },
 };
 
 export default function RootLayout({

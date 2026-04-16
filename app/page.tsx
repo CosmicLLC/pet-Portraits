@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import UploadStep from "@/components/UploadStep";
 import StylePicker from "@/components/StylePicker";
 import GenerateButton from "@/components/GenerateButton";
 import PortraitPreview from "@/components/PortraitPreview";
 import ProductSelector from "@/components/ProductSelector";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
+import FooterNewsletter from "@/components/FooterNewsletter";
+import BrowseAbandonmentCapture from "@/components/BrowseAbandonmentCapture";
 import type { StyleKey } from "@/lib/gemini";
 
 type Step = "upload" | "style" | "generate" | "preview";
@@ -19,6 +22,8 @@ export default function Home() {
   const [watermarkedImage, setWatermarkedImage] = useState<string | null>(null);
   const [imageId, setImageId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showAbandonmentCapture, setShowAbandonmentCapture] = useState(false);
+  const [portraitEmailCaptured, setPortraitEmailCaptured] = useState(false);
 
   const params =
     typeof window !== "undefined"
@@ -26,6 +31,13 @@ export default function Home() {
       : null;
   const isSuccess = params?.get("success") === "true";
   const isCanceled = params?.get("canceled") === "true";
+
+  // Show browse-abandonment capture 30s after portrait is ready
+  useEffect(() => {
+    if (step !== "preview" || portraitEmailCaptured) return;
+    const timer = setTimeout(() => setShowAbandonmentCapture(true), 30000);
+    return () => clearTimeout(timer);
+  }, [step, portraitEmailCaptured]);
 
   const handleFileSelected = useCallback((f: File) => {
     setFile(f);
@@ -97,9 +109,12 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-cream">
+      {/* Exit-intent popup — only on the landing/upload step */}
+      {step === "upload" && <ExitIntentPopup />}
+
       {/* Top banner */}
       <div className="bg-brand-green text-white text-center py-2.5 text-sm font-medium tracking-wide">
-        AI-Powered Pet Portraits — Ready in Seconds, Not Days
+        Custom Pet Portraits — Ready in Seconds, Not Days
       </div>
 
       {/* Header */}
@@ -239,6 +254,12 @@ export default function Home() {
             <div className="w-full">
               <PortraitPreview watermarkedImage={watermarkedImage} />
               <ProductSelector imageId={imageId} onError={setError} />
+              {showAbandonmentCapture && !portraitEmailCaptured && (
+                <BrowseAbandonmentCapture
+                  imageId={imageId}
+                  onCaptured={() => setPortraitEmailCaptured(true)}
+                />
+              )}
             </div>
           )}
         </div>
@@ -251,19 +272,41 @@ export default function Home() {
         )}
 
         {isCanceled && (
-          <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-xl text-center">
-            <p className="text-amber-700 text-sm">
-              Payment was canceled. You can still choose a product above.
+          <div className="mt-8 p-5 bg-amber-50 border border-amber-200 rounded-2xl text-center animate-fade-in-up">
+            <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-amber-100 flex items-center justify-center">
+              <svg className="w-5 h-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="font-display text-lg text-amber-800 mb-1">Your payment was canceled</p>
+            <p className="text-amber-700 text-sm mb-4">
+              Your portrait is still saved. Ready to try again?
             </p>
+            <a
+              href="/"
+              className="inline-block bg-brand-green text-white px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-brand-green/90 transition-all"
+            >
+              Try Again
+            </a>
           </div>
         )}
       </div>
 
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-12">
-        <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+        <FooterNewsletter />
+        <div className="max-w-6xl mx-auto px-4 py-6 text-center space-y-2">
           <p className="text-sm text-gray-400">
             Each portrait is uniquely generated &middot; Not satisfied? We&apos;ll redo it for free.
+          </p>
+          <p className="text-sm text-gray-400">
+            <Link href="/privacy" className="hover:text-brand-green transition-colors">Privacy Policy</Link>
+            {" "}&middot;{" "}
+            <Link href="/terms" className="hover:text-brand-green transition-colors">Terms of Service</Link>
+            {" "}&middot;{" "}
+            <a href="mailto:cosmic.company.llc@gmail.com" className="hover:text-brand-green transition-colors">
+              cosmic.company.llc@gmail.com
+            </a>
           </p>
         </div>
       </footer>

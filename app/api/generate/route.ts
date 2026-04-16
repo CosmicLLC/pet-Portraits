@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     // Only accessible via server-side signed URL after payment
     const imageId = uuidv4();
     await put(`portraits/${imageId}.png`, fullResBuffer, {
-      access: "public",
+      access: "private",
       addRandomSuffix: true,
       contentType: "image/png",
     });

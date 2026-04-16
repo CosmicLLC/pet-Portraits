@@ -12,43 +12,135 @@ function getResend(): Resend {
 const fromEmail = () =>
   process.env.FROM_EMAIL || "Pet Portraits <orders@yourdomain.com>";
 
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://petportraits.ai";
+
+function baseTemplate(content: string) {
+  return `
+    <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF7F2;">
+      <!-- Header -->
+      <div style="background:#2D4A3E;padding:28px 32px;text-align:center;border-radius:12px 12px 0 0;">
+        <p style="margin:0;font-size:22px;font-weight:700;color:#FAF7F2;letter-spacing:-0.3px;">🐾 Pet Portraits</p>
+      </div>
+      <!-- Body -->
+      <div style="padding:40px 32px;">
+        ${content}
+      </div>
+      <!-- Footer -->
+      <div style="border-top:1px solid #E5E0D8;padding:24px 32px;text-align:center;">
+        <p style="margin:0 0 6px;color:#AAA;font-size:12px;">
+          Questions? Just reply to this email — we&rsquo;re here to help.
+        </p>
+        <p style="margin:0;color:#CCC;font-size:11px;">
+          Pet Portraits &nbsp;&middot;&nbsp; AI-powered portraits for every pet lover
+        </p>
+      </div>
+    </div>
+  `;
+}
+
 export async function sendDownloadEmail(to: string, downloadUrl: string) {
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your portrait is ready! 🎉</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
+      Your full-resolution pet portrait is waiting for you. Click below to download it before the link expires.
+    </p>
+
+    <!-- Download CTA -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <a href="${downloadUrl}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:18px 48px;border-radius:50px;font-size:17px;font-weight:700;letter-spacing:-0.2px;">
+        Download My Portrait
+      </a>
+      <p style="margin:12px 0 0;color:#AAA;font-size:12px;">Link expires in 24 hours</p>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #E5E0D8;margin:32px 0;" />
+
+    <!-- Canvas upsell -->
+    <div style="background:#fff;border:2px solid #2D4A3E;border-radius:12px;padding:24px;text-align:center;margin-bottom:8px;">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#C4A35A;">
+        Upgrade your order
+      </p>
+      <h2 style="font-size:20px;color:#2D4A3E;margin:0 0 10px;font-weight:700;">
+        Turn it into a canvas print
+      </h2>
+      <p style="color:#666;font-size:14px;line-height:1.6;margin:0 0 20px;">
+        Display your portrait on a stunning 8&times;10 gallery-quality canvas.
+        Arrives in 5&ndash;7 days &mdash; the perfect gift for a pet lover.
+      </p>
+      <a href="${siteUrl()}"
+         style="display:inline-block;background:#C4A35A;color:#fff;text-decoration:none;padding:12px 32px;border-radius:50px;font-size:14px;font-weight:700;">
+        Order Canvas Print &mdash; $77
+      </a>
+    </div>
+
+    <p style="text-align:center;color:#AAA;font-size:12px;margin:16px 0 0;">
+      Not happy with your portrait? Reply and we&rsquo;ll redo it for free.
+    </p>
+  `;
+
   await getResend().emails.send({
     from: fromEmail(),
     to,
-    subject: "Your pet portrait is ready 🐾",
-    html: `
-      <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FAF7F2; padding: 40px 24px;">
-        <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="font-size: 28px; color: #2D4A3E; margin: 0;">Your portrait is ready</h1>
-        </div>
-        <div style="text-align: center; margin-bottom: 24px;">
-          <a href="${downloadUrl}" style="display: inline-block; background: #2D4A3E; color: #FAF7F2; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 18px; font-weight: 600;">Download Full Resolution</a>
-        </div>
-        <p style="text-align: center; color: #888; font-size: 14px;">This link expires in 24 hours.</p>
-        <hr style="border: none; border-top: 1px solid #E5E0D8; margin: 32px 0;" />
-        <p style="text-align: center; color: #AAA; font-size: 12px;">Pet Portraits &mdash; Questions? Reply to this email.</p>
-      </div>
-    `,
+    subject: "Your pet portrait is ready to download 🐾",
+    html: baseTemplate(content),
   });
 }
 
 export async function sendCanvasConfirmationEmail(to: string) {
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your canvas is on its way! 🖼️</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
+      We&rsquo;ve received your order for an 8&times;10 canvas print. Here&rsquo;s what happens next:
+    </p>
+
+    <!-- Timeline -->
+    <div style="margin-bottom:32px;">
+      <div style="display:flex;align-items:flex-start;margin-bottom:16px;">
+        <div style="width:32px;height:32px;background:#2D4A3E;border-radius:50%;color:#FAF7F2;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:14px;text-align:center;line-height:32px;">1</div>
+        <div>
+          <p style="margin:0 0 2px;font-weight:700;color:#2D4A3E;font-size:15px;">We print your portrait</p>
+          <p style="margin:0;color:#888;font-size:13px;">Gallery-quality canvas, printed within 1&ndash;2 business days</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;margin-bottom:16px;">
+        <div style="width:32px;height:32px;background:#2D4A3E;border-radius:50%;color:#FAF7F2;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:14px;text-align:center;line-height:32px;">2</div>
+        <div>
+          <p style="margin:0 0 2px;font-weight:700;color:#2D4A3E;font-size:15px;">It ships to your door</p>
+          <p style="margin:0;color:#888;font-size:13px;">Tracking number sent when it leaves our facility (3&ndash;5 business days)</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-start;">
+        <div style="width:32px;height:32px;background:#C4A35A;border-radius:50%;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:14px;text-align:center;line-height:32px;">✓</div>
+        <div>
+          <p style="margin:0 0 2px;font-weight:700;color:#2D4A3E;font-size:15px;">You hang it with pride</p>
+          <p style="margin:0;color:#888;font-size:13px;">The perfect keepsake for any pet lover</p>
+        </div>
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid #E5E0D8;margin:32px 0;" />
+
+    <!-- Digital upsell while waiting -->
+    <div style="background:#fff;border:1px solid #E5E0D8;border-radius:12px;padding:20px;text-align:center;">
+      <p style="margin:0 0 6px;font-size:13px;color:#888;">While you wait…</p>
+      <p style="margin:0 0 10px;font-size:17px;font-weight:700;color:#2D4A3E;">
+        Create a portrait for a friend&rsquo;s pet
+      </p>
+      <p style="margin:0 0 16px;color:#666;font-size:13px;line-height:1.5;">
+        Digital downloads are just $25 and make a thoughtful, unique gift.
+      </p>
+      <a href="${siteUrl()}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:12px 32px;border-radius:50px;font-size:14px;font-weight:700;">
+        Make Another Portrait
+      </a>
+    </div>
+  `;
+
   await getResend().emails.send({
     from: fromEmail(),
     to,
-    subject: "Your canvas print order is confirmed 🐾",
-    html: `
-      <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #FAF7F2; padding: 40px 24px;">
-        <div style="text-align: center; margin-bottom: 32px;">
-          <h1 style="font-size: 28px; color: #2D4A3E; margin: 0;">Your canvas is on its way</h1>
-        </div>
-        <p style="text-align: center; color: #555; font-size: 16px; line-height: 1.6;">
-          We've received your order for an 8&times;10 canvas print. We'll send you a tracking number once it ships (typically 5&ndash;7 business days).
-        </p>
-        <hr style="border: none; border-top: 1px solid #E5E0D8; margin: 32px 0;" />
-        <p style="text-align: center; color: #AAA; font-size: 12px;">Pet Portraits &mdash; Questions? Reply to this email.</p>
-      </div>
-    `,
+    subject: "Your canvas print is confirmed — here's what's next 🐾",
+    html: baseTemplate(content),
   });
 }

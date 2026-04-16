@@ -56,6 +56,12 @@ export async function POST(req: NextRequest) {
           productType,
         });
       }
+
+      // TODO: Review request email (7 days post-purchase)
+      // Once you have a database, store the order here. The /api/cron/review-reminder
+      // endpoint (triggered by Vercel Cron daily) will query orders placed 7 days ago
+      // and send review request emails automatically.
+      // Example: await db.orders.create({ email, imageId, productType, createdAt: new Date() });
     } catch (err) {
       console.error("Webhook fulfillment error:", err);
       return NextResponse.json(

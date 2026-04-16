@@ -2,7 +2,18 @@ import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
 import path from "path";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
+let _ai: GoogleGenAI | null = null;
+
+function getAI(): GoogleGenAI {
+  if (!_ai) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is not set");
+    }
+    _ai = new GoogleGenAI({ apiKey, httpOptions: { timeout: 180000 } });
+  }
+  return _ai;
+}
 
 export const STYLE_PROMPTS: Record<string, string> = {
   watercolor: `The first image is a pet photo. The second image is a watercolor style reference. Transform the pet from the first image into a fine art watercolor portrait matching the aesthetic, color palette, and brushwork style of the second image. Preserve the pet's exact likeness, facial features, fur color, and markings. Style: loose expressive brushstrokes, soft wet-on-wet blending, delicate ink outlines, pastel and muted tones, white watercolor paper texture background. Composition: centered subject, generous white space around the pet, head and shoulders framing. Print quality: high detail in face and eyes, gallery-worthy illustration, no text, no watermarks, square format.`,
@@ -49,8 +60,8 @@ export async function generatePortrait(
     });
   }
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash-exp",
+  const response = await getAI().models.generateContent({
+    model: "gemini-2.5-flash-image",
     contents: [{ role: "user", parts }],
     config: {
       responseModalities: ["IMAGE", "TEXT"],

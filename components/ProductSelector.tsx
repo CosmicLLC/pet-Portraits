@@ -32,11 +32,25 @@ const BADGES: Record<ProductType, string | null> = {
   canvas: "Premium",
 };
 
+// Session-consistent portrait count (30–80) for social proof
+function getSessionPortraitCount(): number {
+  try {
+    const stored = sessionStorage.getItem("petPortraitCount");
+    if (stored) return parseInt(stored, 10);
+    const count = Math.floor(Math.random() * 51) + 30;
+    sessionStorage.setItem("petPortraitCount", count.toString());
+    return count;
+  } catch {
+    return 47;
+  }
+}
+
 export default function ProductSelector({
   imageId,
   onError,
 }: ProductSelectorProps) {
   const [loading, setLoading] = useState<ProductType | null>(null);
+  const [portraitCount] = useState<number>(() => getSessionPortraitCount());
 
   const handleSelect = async (productType: ProductType) => {
     setLoading(productType);
@@ -59,6 +73,66 @@ export default function ProductSelector({
 
   return (
     <div className="w-full mt-10">
+      {/* Social proof */}
+      <div className="flex items-center justify-center gap-2 mb-3 text-sm text-gray-500">
+        <span>🔥</span>
+        <span>
+          <strong className="text-brand-green">{portraitCount}</strong> portraits created today
+        </span>
+      </div>
+
+      {/* Limited-time offer banner */}
+      <div className="bg-brand-green/5 border border-brand-green/20 rounded-xl px-4 py-2.5 mb-4 text-center">
+        <p className="text-xs text-brand-green font-medium">
+          🎁 Limited time: Free digital download with every canvas order
+        </p>
+      </div>
+
+      {/* Urgency text */}
+      <div className="flex items-center justify-center gap-1.5 mb-4 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-4 py-1.5 w-fit mx-auto">
+        <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        Preview expires in 24 hours — purchase to save the full resolution
+      </div>
+
+      {/* Canvas upsell banner */}
+      <button
+        onClick={() => handleSelect("canvas")}
+        disabled={loading !== null}
+        className="w-full mb-4 p-4 rounded-2xl bg-brand-green text-white text-left relative overflow-hidden hover:bg-brand-green/90 transition-all hover:shadow-lg disabled:opacity-60 group"
+      >
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10 text-8xl leading-none select-none">
+          🖼
+        </div>
+        <div className="relative">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-0.5">
+            Recommended upgrade
+          </p>
+          <p className="font-display font-bold text-base leading-snug">
+            Make it real — Canvas Print 8×10
+          </p>
+          <p className="text-white/70 text-xs mt-0.5">
+            Gallery-quality print shipped to your door. The perfect keepsake or gift.
+          </p>
+        </div>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          {loading === "canvas" ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <svg className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          )}
+        </div>
+      </button>
+
+      <div className="flex items-center gap-3 mb-3">
+        <div className="flex-1 h-px bg-gray-200" />
+        <p className="text-xs text-gray-400">or choose below</p>
+        <div className="flex-1 h-px bg-gray-200" />
+      </div>
+
       <div className="flex flex-col gap-3">
         {(Object.entries(PRODUCTS) as [ProductType, (typeof PRODUCTS)[ProductType]][]).map(
           ([key, product]) => (
