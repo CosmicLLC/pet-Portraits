@@ -14,6 +14,7 @@ import StickyCartBar from "@/components/StickyCartBar";
 import FAQ from "@/components/FAQ";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 import type { StyleKey } from "@/lib/gemini";
 
 const ANNOUNCEMENTS = [
@@ -44,6 +45,8 @@ export default function Home() {
   const [showAbandonmentCapture, setShowAbandonmentCapture] = useState(false);
   const [portraitEmailCaptured, setPortraitEmailCaptured] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const { data: session } = useSession();
 
   // Countdown timer for preview step
   const [countdown, setCountdown] = useState(30 * 60);
@@ -96,6 +99,17 @@ export default function Home() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Close avatar dropdown on outside click
+  useEffect(() => {
+    if (!avatarOpen) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-avatar-menu]")) setAvatarOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [avatarOpen]);
+
   // Announcement bar rotation: fade out → swap → fade in every 5s
   useEffect(() => {
     const id = setInterval(() => {
@@ -127,6 +141,7 @@ export default function Home() {
     setShowAbandonmentCapture(false);
     setPortraitEmailCaptured(false);
     setMobileMenuOpen(false);
+    setAvatarOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -409,6 +424,70 @@ export default function Home() {
             >
               Create Portrait
             </button>
+
+            {/* Auth — desktop */}
+            {session ? (
+              <div className="relative" data-avatar-menu>
+                <button
+                  onClick={() => setAvatarOpen((o) => !o)}
+                  className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-gray-200 hover:border-brand-green/40 transition-all"
+                  aria-label="Account menu"
+                >
+                  {session.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name ?? "Avatar"}
+                      width={30}
+                      height={30}
+                      className="rounded-full"
+                    />
+                  ) : (
+                    <span className="w-[30px] h-[30px] rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green text-xs font-bold">
+                      {(session.user?.name ?? session.user?.email ?? "U")[0].toUpperCase()}
+                    </span>
+                  )}
+                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {avatarOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-lg border border-gray-100 py-1.5 z-50">
+                    <div className="px-4 py-2.5 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-800 truncate">{session.user?.name ?? "My Account"}</p>
+                      <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
+                    </div>
+                    {(session.user as { role?: string })?.role === "admin" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setAvatarOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-brand-green hover:bg-brand-green/5 transition-colors font-medium"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => { setAvatarOpen(false); signOut({ callbackUrl: "/" }); }}
+                      className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/auth/signin"
+                className="text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
+              >
+                Sign In
+              </Link>
+            )}
           </nav>
 
           {/* Mobile hamburger */}
@@ -448,6 +527,38 @@ export default function Home() {
             >
               Create Portrait
             </button>
+
+            {/* Auth — mobile */}
+            <div className="mt-1 border-t border-gray-100 pt-2">
+              {session ? (
+                <>
+                  <div className="px-3 py-2 text-xs text-gray-400 truncate">{session.user?.email}</div>
+                  {(session.user as { role?: string })?.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full text-left py-2.5 px-3 rounded-lg text-sm text-brand-green hover:bg-brand-green/5 transition-colors font-medium"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); signOut({ callbackUrl: "/" }); }}
+                    className="w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/auth/signin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-700 hover:text-brand-green hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Sign In
+                </Link>
+              )}
+            </div>
           </div>
         )}
       </header>
