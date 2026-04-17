@@ -17,7 +17,7 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_BASE_URL || "https://pet-portraits.vercel.app"
+    process.env.NEXT_PUBLIC_BASE_URL || "https://pawmasterpiece.com"
   ),
   title: "Paw Masterpiece — Fine Art Portraits of Your Pet",
   description:

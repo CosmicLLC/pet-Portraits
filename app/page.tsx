@@ -242,7 +242,7 @@ export default function Home() {
     { label: "Reviews", id: "reviews" },
   ];
 
-  const shareUrl = typeof window !== "undefined" ? window.location.origin : "https://pet-portraits-five.vercel.app";
+  const shareUrl = typeof window !== "undefined" ? window.location.origin : "https://pawmasterpiece.com";
   const shareText = "I just got a stunning AI portrait of my pet! Check it out:";
 
   // ─── Success page ────────────────────────────────────────────────────
