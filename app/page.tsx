@@ -51,7 +51,7 @@ export default function Home() {
   const { data: session } = useSession();
 
   // Countdown timer for preview step
-  const [countdown, setCountdown] = useState(30 * 60);
+  const [countdown, setCountdown] = useState(10 * 60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Announcement bar rotation
@@ -80,7 +80,7 @@ export default function Home() {
       if (countdownRef.current) clearInterval(countdownRef.current);
       return;
     }
-    setCountdown(30 * 60);
+    setCountdown(10 * 60);
     countdownRef.current = setInterval(() => {
       setCountdown((c) => (c <= 1 ? (clearInterval(countdownRef.current!), 0) : c - 1));
     }, 1000);
@@ -145,7 +145,9 @@ export default function Home() {
     setMobileMenuOpen(false);
     setAvatarOpen(false);
     setWallpaperSelected(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    requestAnimationFrame(() => {
+      document.getElementById("create")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }, []);
 
   const scrollToSection = useCallback((id: string) => {
@@ -569,7 +571,7 @@ export default function Home() {
 
       {/* Hero — upload step only */}
       {step === "upload" && (
-        <section id="create" className="bg-white border-b border-gray-100">
+        <section className="bg-white border-b border-gray-100">
           <div className="max-w-6xl mx-auto px-4 py-16 sm:py-20 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-6">
               {[...Array(5)].map((_, i) => (
@@ -628,7 +630,7 @@ export default function Home() {
       )}
 
       {/* Main wizard */}
-      <div className={`max-w-2xl mx-auto px-4 py-12 sm:py-16 ${step === "preview" ? "pb-24" : ""}`}>
+      <div id="create" className={`max-w-2xl mx-auto px-4 py-12 sm:py-16 ${step === "preview" ? "pb-24" : ""}`}>
         {/* Thin progress bar */}
         <div className="w-full h-[3px] bg-gray-200 rounded-full mb-8 overflow-hidden">
           <div
