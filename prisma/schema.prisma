@@ -1,5 +1,5 @@
-// NextAuth.js + Prisma schema for Pet Portraits
-// Docs: https://authjs.dev/reference/adapter/prisma
+// NextAuth.js (Auth.js v5) schema for Prisma + SQLite
+// Docs: https://authjs.dev/getting-started/adapters/prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -13,15 +13,15 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String    @unique
   emailVerified DateTime?
   image         String?
-  password      String?
+  // "user" (default) or "admin"
   role          String    @default("user")
-  accounts      Account[]
-  sessions      Session[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
 }
 
 model Account {
@@ -37,7 +37,8 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
