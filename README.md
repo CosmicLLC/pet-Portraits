@@ -1,4 +1,4 @@
-# Pet Portraits — AI-Powered Fine Art Portraits
+# Paw Masterpiece — AI-Powered Fine Art Portraits
 
 A single-page Next.js app where customers upload a pet photo, choose an art style, see an AI-generated watermarked preview, pay via Stripe, and receive the full-res file by email.
 

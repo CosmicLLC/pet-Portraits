@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Pet Portraits",
-  description: "Privacy policy for Pet Portraits. Learn how we collect, use, and protect your data.",
+  title: "Privacy Policy — Paw Masterpiece",
+  description: "Privacy policy for Paw Masterpiece. Learn how we collect, use, and protect your data.",
 };
 
 export default function PrivacyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
           <Link href="/">
             <h1 className="font-display text-2xl text-brand-green tracking-tight cursor-pointer">
-              Pet Portraits
+              Paw Masterpiece
             </h1>
           </Link>
         </div>
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-display text-2xl text-brand-green mb-3">1. Who We Are</h2>
             <p>
-              Pet Portraits is operated by Cosmic Company LLC. We create AI-powered fine art portraits
+              Paw Masterpiece is operated by Cosmic Company LLC. We create AI-powered fine art portraits
               from photos of your pet. If you have any questions about this policy, contact us at{" "}
               <a href="mailto:cosmic.company.llc@gmail.com" className="text-brand-green hover:underline">
                 cosmic.company.llc@gmail.com

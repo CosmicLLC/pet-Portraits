@@ -19,7 +19,7 @@ import PhoneWallpaperPreview from "@/components/PhoneWallpaperPreview";
 import type { StyleKey } from "@/lib/gemini";
 
 const ANNOUNCEMENTS = [
-  "Custom Pet Portraits — Ready in Seconds, Not Days",
+  "Custom Paw Masterpiece — Ready in Seconds, Not Days",
   "100% Satisfaction Guarantee — Love it or we redo it free",
   "Free Digital Download with Every Canvas Order",
 ];
@@ -405,9 +405,9 @@ export default function Home() {
           <button
             onClick={resetState}
             className="font-display text-2xl text-brand-green tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
-            aria-label="Pet Portraits — go to home"
+            aria-label="Paw Masterpiece — go to home"
           >
-            Pet Portraits
+            Paw Masterpiece
           </button>
 
           {/* Desktop nav */}
@@ -922,7 +922,7 @@ export default function Home() {
         <section className="bg-white border-t border-gray-100 py-16 sm:py-20">
           <div className="max-w-3xl mx-auto px-4">
             <div className="text-center mb-10">
-              <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Why Pet Portraits?</h2>
+              <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Why Paw Masterpiece?</h2>
               <p className="text-gray-500 max-w-md mx-auto">See how we compare to traditional pet portrait services.</p>
             </div>
             <div className="overflow-hidden rounded-2xl border border-gray-200">
@@ -930,7 +930,7 @@ export default function Home() {
                 <thead>
                   <tr className="border-b border-gray-200">
                     <th className="text-left px-5 py-3.5 font-display text-gray-500 font-medium w-1/2">Feature</th>
-                    <th className="px-5 py-3.5 font-display text-brand-green font-semibold text-center">Pet Portraits</th>
+                    <th className="px-5 py-3.5 font-display text-brand-green font-semibold text-center">Paw Masterpiece</th>
                     <th className="px-5 py-3.5 font-display text-gray-400 font-medium text-center">Others</th>
                   </tr>
                 </thead>
@@ -991,7 +991,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto px-4">
             <div className="text-center mb-10">
               <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Loved by Pet Parents Everywhere</h2>
-              <p className="text-gray-500">Real portraits made with Pet Portraits.</p>
+              <p className="text-gray-500">Real portraits made with Paw Masterpiece.</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
               {[

@@ -5,7 +5,7 @@ import Link from "next/link"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard — Pet Portraits",
+  title: "Admin Dashboard — Paw Masterpiece",
 }
 
 // Read subscriber count from local JSON store

@@ -79,7 +79,7 @@ function SignInForm() {
       {/* Logo */}
       <div className="text-center mb-8">
         <Link href="/" className="font-display text-3xl text-brand-green tracking-tight">
-          Pet Portraits
+          Paw Masterpiece
         </Link>
         <h1 className="font-display text-2xl text-gray-800 mt-4 mb-1">Sign In</h1>
         <p className="text-gray-500 text-sm">Create an account or sign in to access your portraits</p>
@@ -182,7 +182,7 @@ export default function SignInPage() {
         </div>
         <div className="text-center mt-6">
           <Link href="/" className="text-xs text-gray-400 hover:text-brand-green transition-colors">
-            ← Back to Pet Portraits
+            ← Back to Paw Masterpiece
           </Link>
         </div>
       </div>

@@ -8,7 +8,7 @@ export default function NotFound() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
           <Link href="/">
             <span className="font-display text-2xl text-brand-green tracking-tight cursor-pointer">
-              Pet Portraits
+              Paw Masterpiece
             </span>
           </Link>
         </div>
