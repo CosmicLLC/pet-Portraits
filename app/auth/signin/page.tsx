@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react"
 import { useState, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { Suspense } from "react"
 
 function SignInForm() {
@@ -78,8 +79,9 @@ function SignInForm() {
     <>
       {/* Logo */}
       <div className="text-center mb-8">
-        <Link href="/" className="font-display text-3xl text-brand-green tracking-tight">
-          Paw Masterpiece
+        <Link href="/" className="inline-flex flex-col items-center gap-2">
+          <Image src="/logo.png" alt="Paw Masterpiece" width={56} height={56} />
+          <span className="font-display text-3xl text-brand-green tracking-tight">Paw Masterpiece</span>
         </Link>
         <h1 className="font-display text-2xl text-gray-800 mt-4 mb-1">Sign In</h1>
         <p className="text-gray-500 text-sm">Create an account or sign in to access your portraits</p>

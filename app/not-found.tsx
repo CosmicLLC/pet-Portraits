@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function NotFound() {
   return (
@@ -6,10 +7,9 @@ export default function NotFound() {
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
-          <Link href="/">
-            <span className="font-display text-2xl text-brand-green tracking-tight cursor-pointer">
-              Paw Masterpiece
-            </span>
+          <Link href="/" className="flex items-center gap-2">
+            <Image src="/logo.png" alt="" width={32} height={32} />
+            <span className="font-display text-2xl text-brand-green tracking-tight">Paw Masterpiece</span>
           </Link>
         </div>
       </header>
@@ -17,26 +17,9 @@ export default function NotFound() {
       {/* 404 Content */}
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="text-center animate-fade-in-up">
-          {/* Paw print icon */}
+          {/* Logo */}
           <div className="flex justify-center mb-8">
-            <svg
-              className="w-24 h-24 text-brand-green opacity-80"
-              viewBox="0 0 100 100"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              {/* Toes */}
-              <ellipse cx="28" cy="20" rx="9" ry="11" />
-              <ellipse cx="48" cy="14" rx="9" ry="11" />
-              <ellipse cx="68" cy="14" rx="9" ry="11" />
-              <ellipse cx="84" cy="22" rx="8" ry="10" />
-              {/* Main pad */}
-              <ellipse cx="56" cy="58" rx="24" ry="28" />
-              {/* Inner small pads */}
-              <ellipse cx="38" cy="45" rx="8" ry="9" fill="#FAF7F2" />
-              <ellipse cx="56" cy="39" rx="8" ry="9" fill="#FAF7F2" />
-              <ellipse cx="74" cy="45" rx="8" ry="9" fill="#FAF7F2" />
-            </svg>
+            <Image src="/logo.png" alt="Paw Masterpiece" width={96} height={96} className="opacity-80" />
           </div>
 
           <p className="text-brand-green/50 font-display text-8xl font-bold mb-4 leading-none">

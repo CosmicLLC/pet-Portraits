@@ -404,10 +404,11 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <button
             onClick={resetState}
-            className="font-display text-2xl text-brand-green tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
             aria-label="Paw Masterpiece — go to home"
           >
-            Paw Masterpiece
+            <Image src="/logo.png" alt="" width={36} height={36} className="flex-shrink-0" />
+            <span className="font-display text-2xl text-brand-green tracking-tight">Paw Masterpiece</span>
           </button>
 
           {/* Desktop nav */}
@@ -1066,6 +1067,10 @@ export default function Home() {
       <footer className="border-t border-gray-200 bg-white mt-12">
         <FooterNewsletter />
         <div className="max-w-6xl mx-auto px-4 py-6 text-center space-y-2">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <Image src="/logo.png" alt="Paw Masterpiece" width={24} height={24} className="opacity-60" />
+            <span className="font-display text-sm text-gray-400">Paw Masterpiece</span>
+          </div>
           <p className="text-sm text-gray-400">
             Each portrait is uniquely generated &middot; Not satisfied? We&apos;ll redo it for free.
           </p>
