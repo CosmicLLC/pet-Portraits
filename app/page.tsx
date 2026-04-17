@@ -407,7 +407,7 @@ export default function Home() {
             className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
             aria-label="Paw Masterpiece — go to home"
           >
-            <Image src="/logo.png" alt="" width={36} height={36} className="flex-shrink-0" />
+            <Image src="/logo.jpg" alt="" width={36} height={36} className="flex-shrink-0" />
             <span className="font-display text-2xl text-brand-green tracking-tight">Paw Masterpiece</span>
           </button>
 
@@ -1068,7 +1068,7 @@ export default function Home() {
         <FooterNewsletter />
         <div className="max-w-6xl mx-auto px-4 py-6 text-center space-y-2">
           <div className="flex items-center justify-center gap-2 mb-1">
-            <Image src="/logo.png" alt="Paw Masterpiece" width={24} height={24} className="opacity-60" />
+            <Image src="/logo.jpg" alt="Paw Masterpiece" width={24} height={24} className="opacity-60" />
             <span className="font-display text-sm text-gray-400">Paw Masterpiece</span>
           </div>
           <p className="text-sm text-gray-400">

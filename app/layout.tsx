@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
     ],
-    apple: "/logo.png",
+    apple: "/logo.jpg",
   },
   openGraph: {
     title: "Paw Masterpiece — Fine Art Portraits of Your Pet",

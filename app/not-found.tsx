@@ -8,7 +8,7 @@ export default function NotFound() {
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/logo.png" alt="" width={32} height={32} />
+            <Image src="/logo.jpg" alt="" width={32} height={32} />
             <span className="font-display text-2xl text-brand-green tracking-tight">Paw Masterpiece</span>
           </Link>
         </div>
@@ -19,7 +19,7 @@ export default function NotFound() {
         <div className="text-center animate-fade-in-up">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <Image src="/logo.png" alt="Paw Masterpiece" width={96} height={96} className="opacity-80" />
+            <Image src="/logo.jpg" alt="Paw Masterpiece" width={96} height={96} className="opacity-80" />
           </div>
 
           <p className="text-brand-green/50 font-display text-8xl font-bold mb-4 leading-none">

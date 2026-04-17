@@ -80,7 +80,7 @@ function SignInForm() {
       {/* Logo */}
       <div className="text-center mb-8">
         <Link href="/" className="inline-flex flex-col items-center gap-2">
-          <Image src="/logo.png" alt="Paw Masterpiece" width={56} height={56} />
+          <Image src="/logo.jpg" alt="Paw Masterpiece" width={56} height={56} />
           <span className="font-display text-3xl text-brand-green tracking-tight">Paw Masterpiece</span>
         </Link>
         <h1 className="font-display text-2xl text-gray-800 mt-4 mb-1">Sign In</h1>
