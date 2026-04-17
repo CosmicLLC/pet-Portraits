@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_BASE_URL || "https://pet-portraits.vercel.app"
   ),
-  title: "Pet Portraits — Fine Art Portraits of Your Pet",
+  title: "Paw Masterpiece — Fine Art Portraits of Your Pet",
   description:
     "Transform your pet's photo into a stunning fine art portrait. Watercolor, oil painting, Renaissance, and line art styles. Delivered instantly.",
   icons: {
@@ -28,15 +28,15 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Pet Portraits — Fine Art Portraits of Your Pet",
+    title: "Paw Masterpiece — Fine Art Portraits of Your Pet",
     description:
       "Transform your pet's photo into a stunning fine art portrait. Ready in seconds.",
-    siteName: "Pet Portraits",
+    siteName: "Paw Masterpiece",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pet Portraits — Fine Art Portraits of Your Pet",
+    title: "Paw Masterpiece — Fine Art Portraits of Your Pet",
     description:
       "Transform your pet's photo into a stunning fine art portrait. Ready in seconds.",
   },

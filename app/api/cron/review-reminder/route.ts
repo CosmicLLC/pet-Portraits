@@ -17,7 +17,7 @@ import { NextRequest, NextResponse } from "next/server";
  *
  * The review email should:
  *   - Show the customer their portrait
- *   - Ask them to share on Instagram with #PetPortraitsAI
+ *   - Ask them to share on Instagram with #PawMasterpieceAI
  *   - Include a "Leave a review" link (Trustpilot, Google, etc.)
  */
 export async function GET(req: NextRequest) {

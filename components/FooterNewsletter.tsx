@@ -40,7 +40,7 @@ export default function FooterNewsletter() {
           </>
         ) : (
           <>
-            <p className="font-display text-xl text-brand-green mb-1">Love pet portraits?</p>
+            <p className="font-display text-xl text-brand-green mb-1">Love Paw Masterpiece?</p>
             <p className="text-sm text-gray-500 mb-5">
               Get style tips, new art styles, and exclusive discounts for pet lovers.
             </p>

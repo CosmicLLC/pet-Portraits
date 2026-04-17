@@ -27,12 +27,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     // Sends a passwordless sign-in link via Resend. No password needed.
     Resend({
       apiKey: process.env.RESEND_API_KEY!,
-      from: `Pet Portraits <${process.env.FROM_EMAIL || "noreply@petportraits.com"}>`,
+      from: `Paw Masterpiece <${process.env.FROM_EMAIL || "noreply@pawmasterpiece.com"}>`,
     }),
 
     // ── Credentials (dev fallback) ─────────────────────────────────────────
     // Only active in development when Google OAuth is not yet configured.
-    // Use email: test@petportraits.test, password: password123
+    // Use email: test@pawmasterpiece.test, password: password123
     Credentials({
       name: "Email & Password (Dev)",
       credentials: {
@@ -44,12 +44,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (process.env.NODE_ENV !== "development") return null
         // Dev-only hardcoded test account
         if (
-          credentials.email === "test@petportraits.test" &&
+          credentials.email === "test@pawmasterpiece.test" &&
           credentials.password === "password123"
         ) {
           return {
             id: "dev-test-user",
-            email: "test@petportraits.test",
+            email: "test@pawmasterpiece.test",
             name: "Test User",
           }
         }

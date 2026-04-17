@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Pet Portraits",
-  description: "Terms of service for Pet Portraits. Read our policies on payments, refunds, and intellectual property.",
+  title: "Terms of Service — Paw Masterpiece",
+  description: "Terms of service for Paw Masterpiece. Read our policies on payments, refunds, and intellectual property.",
 };
 
 export default function TermsPage() {
@@ -14,7 +14,7 @@ export default function TermsPage() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
           <Link href="/">
             <h1 className="font-display text-2xl text-brand-green tracking-tight cursor-pointer">
-              Pet Portraits
+              Paw Masterpiece
             </h1>
           </Link>
         </div>
@@ -37,7 +37,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-2xl text-brand-green mb-3">1. Agreement</h2>
             <p>
-              By using Pet Portraits (operated by Cosmic Company LLC), you agree to these Terms of
+              By using Paw Masterpiece (operated by Cosmic Company LLC), you agree to these Terms of
               Service. If you do not agree, please do not use our service. Questions? Contact us at{" "}
               <a href="mailto:cosmic.company.llc@gmail.com" className="text-brand-green hover:underline">
                 cosmic.company.llc@gmail.com
@@ -48,7 +48,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-2xl text-brand-green mb-3">2. Service Description</h2>
             <p>
-              Pet Portraits is an AI-powered service that transforms your pet&apos;s photo into a
+              Paw Masterpiece is an AI-powered service that transforms your pet&apos;s photo into a
               fine art portrait using various artistic styles (watercolor, oil painting, Renaissance,
               pencil/line art, and others). You may preview a watermarked version of your portrait
               for free. To receive the full-resolution, unwatermarked portrait file, a purchase is
@@ -127,7 +127,7 @@ export default function TermsPage() {
 
             <h3 className="font-semibold text-gray-700 mt-4 mb-2">Our Service</h3>
             <p>
-              All software, design, branding, and non-user content of Pet Portraits remains the
+              All software, design, branding, and non-user content of Paw Masterpiece remains the
               exclusive property of Cosmic Company LLC.
             </p>
           </section>

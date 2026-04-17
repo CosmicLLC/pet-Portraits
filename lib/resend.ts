@@ -10,7 +10,7 @@ function getResend(): Resend {
 }
 
 const fromEmail = () =>
-  process.env.FROM_EMAIL || "Pet Portraits <orders@yourdomain.com>";
+  process.env.FROM_EMAIL || "Paw Masterpiece <orders@yourdomain.com>";
 
 const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://petportraits.ai";
 
@@ -19,7 +19,7 @@ function baseTemplate(content: string) {
     <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF7F2;">
       <!-- Header -->
       <div style="background:#2D4A3E;padding:28px 32px;text-align:center;border-radius:12px 12px 0 0;">
-        <p style="margin:0;font-size:22px;font-weight:700;color:#FAF7F2;letter-spacing:-0.3px;">🐾 Pet Portraits</p>
+        <p style="margin:0;font-size:22px;font-weight:700;color:#FAF7F2;letter-spacing:-0.3px;">🐾 Paw Masterpiece</p>
       </div>
       <!-- Body -->
       <div style="padding:40px 32px;">
@@ -31,7 +31,7 @@ function baseTemplate(content: string) {
           Questions? Just reply to this email — we&rsquo;re here to help.
         </p>
         <p style="margin:0;color:#CCC;font-size:11px;">
-          Pet Portraits &nbsp;&middot;&nbsp; AI-powered portraits for every pet lover
+          Paw Masterpiece &nbsp;&middot;&nbsp; AI-powered portraits for every pet lover
         </p>
       </div>
     </div>
@@ -63,7 +63,7 @@ export async function sendDownloadEmail(to: string, downloadUrl: string, wallpap
   const content = `
     <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your portrait is ready! 🎉</h1>
     <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
-      Your full-resolution pet portrait is waiting for you. Click below to download it before the link expires.
+      Your full-resolution Paw Masterpiece portrait is waiting for you. Click below to download it before the link expires.
     </p>
 
     <!-- Download CTA -->
@@ -104,7 +104,7 @@ export async function sendDownloadEmail(to: string, downloadUrl: string, wallpap
   await getResend().emails.send({
     from: fromEmail(),
     to,
-    subject: "Your pet portrait is ready to download 🐾",
+    subject: "Your Paw Masterpiece is ready to download 🐾",
     html: baseTemplate(content),
   });
 }

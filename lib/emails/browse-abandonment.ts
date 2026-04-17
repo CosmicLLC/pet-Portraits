@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const fromEmail = () =>
-  process.env.FROM_EMAIL || "Pet Portraits <orders@yourdomain.com>";
+  process.env.FROM_EMAIL || "Paw Masterpiece <orders@yourdomain.com>";
 
 const siteUrl = () =>
   process.env.NEXT_PUBLIC_SITE_URL || "https://petportraits.ai";
@@ -12,11 +12,11 @@ export async function sendBrowseAbandonmentEmail(to: string) {
   await resend.emails.send({
     from: fromEmail(),
     to,
-    subject: "Your pet portrait is waiting for you 🐾",
+    subject: "Your Paw Masterpiece is waiting for you 🐾",
     html: `
       <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF7F2;">
         <div style="background:#2D4A3E;padding:28px 32px;text-align:center;border-radius:12px 12px 0 0;">
-          <p style="margin:0;font-size:22px;font-weight:700;color:#FAF7F2;letter-spacing:-0.3px;">🐾 Pet Portraits</p>
+          <p style="margin:0;font-size:22px;font-weight:700;color:#FAF7F2;letter-spacing:-0.3px;">🐾 Paw Masterpiece</p>
         </div>
         <div style="padding:40px 32px;">
           <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your portrait is still waiting!</h1>
@@ -37,7 +37,7 @@ export async function sendBrowseAbandonmentEmail(to: string) {
           </div>
         </div>
         <div style="border-top:1px solid #E5E0D8;padding:24px 32px;text-align:center;">
-          <p style="margin:0;color:#AAA;font-size:12px;">Pet Portraits — Questions? Reply to this email.</p>
+          <p style="margin:0;color:#AAA;font-size:12px;">Paw Masterpiece — Questions? Reply to this email.</p>
         </div>
       </div>
     `,
