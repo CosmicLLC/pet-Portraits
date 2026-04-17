@@ -5,6 +5,7 @@ import { useState } from "react";
 interface ProductSelectorProps {
   imageId: string;
   onError: (msg: string) => void;
+  wallpaperSelected?: boolean;
 }
 
 type Tier = {
@@ -61,7 +62,7 @@ function getSessionPortraitCount(): number {
   }
 }
 
-export default function ProductSelector({ imageId, onError }: ProductSelectorProps) {
+export default function ProductSelector({ imageId, onError, wallpaperSelected }: ProductSelectorProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [portraitCount] = useState<number>(() => getSessionPortraitCount());
 
@@ -71,7 +72,7 @@ export default function ProductSelector({ imageId, onError }: ProductSelectorPro
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productType: key, imageId }),
+        body: JSON.stringify({ productType: key, imageId, addWallpaper: !!wallpaperSelected }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -121,10 +122,15 @@ export default function ProductSelector({ imageId, onError }: ProductSelectorPro
               <p className="text-xs text-gray-400 mb-4">{tier.description}</p>
 
               <div className="mb-5">
-                <div className="flex items-baseline gap-2">
+                <div className="flex items-baseline gap-2 flex-wrap">
                   <span className="font-display text-3xl font-bold text-brand-green">{tier.price}</span>
                   {tier.originalPrice && (
                     <span className="text-sm text-gray-400 line-through">{tier.originalPrice}</span>
+                  )}
+                  {wallpaperSelected && (
+                    <span className="text-xs font-semibold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full">
+                      +$1.99 wallpaper
+                    </span>
                   )}
                 </div>
               </div>

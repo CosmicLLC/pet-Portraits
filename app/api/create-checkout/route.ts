@@ -3,7 +3,7 @@ import { getStripe, PRICE_IDS } from "@/lib/stripe";
 
 export async function POST(req: NextRequest) {
   try {
-    const { productType, imageId, customerEmail } = await req.json();
+    const { productType, imageId, customerEmail, addWallpaper } = await req.json();
 
     if (!productType) {
       return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
     // Bundle uses two line items if no dedicated bundle price is set
-    const lineItems =
+    const lineItems: { price: string; quantity: number }[] =
       isBundle && !PRICE_IDS.bundle
         ? [
             { price: PRICE_IDS.digital, quantity: 1 },
@@ -33,10 +33,19 @@ export async function POST(req: NextRequest) {
           ]
         : [{ price: PRICE_IDS[productType], quantity: 1 }];
 
+    // Add phone wallpaper as an optional add-on line item
+    if (addWallpaper && PRICE_IDS.wallpaper) {
+      lineItems.push({ price: PRICE_IDS.wallpaper, quantity: 1 });
+    }
+
     const session = await getStripe().checkout.sessions.create({
       mode: "payment",
       line_items: lineItems,
-      metadata: { imageId, productType },
+      metadata: {
+        imageId,
+        productType,
+        addWallpaper: addWallpaper ? "true" : "false",
+      },
       ...(customerEmail && { customer_email: customerEmail }),
       success_url: `${baseUrl}?success=true&imageId=${encodeURIComponent(imageId)}`,
       cancel_url: `${baseUrl}?canceled=true`,

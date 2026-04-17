@@ -38,7 +38,28 @@ function baseTemplate(content: string) {
   `;
 }
 
-export async function sendDownloadEmail(to: string, downloadUrl: string) {
+export async function sendDownloadEmail(to: string, downloadUrl: string, wallpaperUrl?: string) {
+  const wallpaperSection = wallpaperUrl
+    ? `
+    <hr style="border:none;border-top:1px solid #E5E0D8;margin:32px 0;" />
+    <!-- Phone wallpaper download -->
+    <div style="background:#fff;border:2px solid #2D4A3E;border-radius:12px;padding:24px;text-align:center;margin-bottom:8px;">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#C4A35A;">
+        📱 Your add-on
+      </p>
+      <h2 style="font-size:20px;color:#2D4A3E;margin:0 0 10px;font-weight:700;">
+        Phone Wallpaper (1290×2796)
+      </h2>
+      <p style="color:#666;font-size:14px;line-height:1.6;margin:0 0 20px;">
+        Optimised for iPhone — set it as your lock screen to show off your pet every time you check your phone.
+      </p>
+      <a href="${wallpaperUrl}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:12px 32px;border-radius:50px;font-size:14px;font-weight:700;">
+        Download Wallpaper
+      </a>
+    </div>`
+    : "";
+
   const content = `
     <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your portrait is ready! 🎉</h1>
     <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
@@ -53,6 +74,7 @@ export async function sendDownloadEmail(to: string, downloadUrl: string) {
       </a>
       <p style="margin:12px 0 0;color:#AAA;font-size:12px;">Link expires in 24 hours</p>
     </div>
+    ${wallpaperSection}
 
     <hr style="border:none;border-top:1px solid #E5E0D8;margin:32px 0;" />
 

@@ -15,6 +15,7 @@ import FAQ from "@/components/FAQ";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import PhoneWallpaperPreview from "@/components/PhoneWallpaperPreview";
 import type { StyleKey } from "@/lib/gemini";
 
 const ANNOUNCEMENTS = [
@@ -46,6 +47,7 @@ export default function Home() {
   const [portraitEmailCaptured, setPortraitEmailCaptured] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
+  const [wallpaperSelected, setWallpaperSelected] = useState(false);
   const { data: session } = useSession();
 
   // Countdown timer for preview step
@@ -142,6 +144,7 @@ export default function Home() {
     setPortraitEmailCaptured(false);
     setMobileMenuOpen(false);
     setAvatarOpen(false);
+    setWallpaperSelected(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -750,7 +753,57 @@ export default function Home() {
                 Back
               </button>
               <PortraitPreview watermarkedImage={watermarkedImage} />
-              <ProductSelector imageId={imageId} onError={setError} />
+
+              {/* ─── Phone Wallpaper Upsell ─────────────────────────── */}
+              <button
+                type="button"
+                onClick={() => setWallpaperSelected((s) => !s)}
+                className={`mt-6 w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
+                  wallpaperSelected
+                    ? "border-brand-green bg-brand-green/5 shadow-sm"
+                    : "border-gray-200 bg-white hover:border-brand-green/40"
+                }`}
+              >
+                {/* Phone mockup */}
+                <div className="flex-shrink-0">
+                  <PhoneWallpaperPreview imageUrl={watermarkedImage} size="sm" />
+                </div>
+
+                {/* Copy */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <p className="font-display text-sm font-semibold text-brand-green leading-tight">
+                      Add Phone Wallpaper
+                    </p>
+                    <span className="text-xs font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                      $1.99
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 leading-snug">
+                    1290×2796 px · iPhone-optimised · instant download
+                  </p>
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    Your portrait, sized for your lock screen.
+                  </p>
+                </div>
+
+                {/* Checkbox indicator */}
+                <div
+                  className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    wallpaperSelected
+                      ? "border-brand-green bg-brand-green"
+                      : "border-gray-300"
+                  }`}
+                >
+                  {wallpaperSelected && (
+                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+              </button>
+
+              <ProductSelector imageId={imageId} onError={setError} wallpaperSelected={wallpaperSelected} />
 
               {/* Quantity discount nudge */}
               <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
@@ -780,6 +833,7 @@ export default function Home() {
                 watermarkedImage={watermarkedImage}
                 imageId={imageId}
                 onError={setError}
+                wallpaperSelected={wallpaperSelected}
               />
             </div>
           )}

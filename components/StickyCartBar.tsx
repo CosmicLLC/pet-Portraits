@@ -6,9 +6,10 @@ interface StickyCartBarProps {
   watermarkedImage: string;
   imageId: string;
   onError: (msg: string) => void;
+  wallpaperSelected?: boolean;
 }
 
-export default function StickyCartBar({ watermarkedImage, imageId, onError }: StickyCartBarProps) {
+export default function StickyCartBar({ watermarkedImage, imageId, onError, wallpaperSelected }: StickyCartBarProps) {
   const [loading, setLoading] = useState(false);
 
   const handleBuy = async () => {
@@ -17,7 +18,7 @@ export default function StickyCartBar({ watermarkedImage, imageId, onError }: St
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productType: "bundle", imageId }),
+        body: JSON.stringify({ productType: "bundle", imageId, addWallpaper: !!wallpaperSelected }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
