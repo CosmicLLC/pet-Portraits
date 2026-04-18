@@ -3,7 +3,9 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import Google from "next-auth/providers/google"
 import Resend from "next-auth/providers/resend"
 import Credentials from "next-auth/providers/credentials"
+import { Resend as ResendClient } from "resend"
 import { prisma } from "@/lib/prisma"
+import { renderMagicLinkEmail } from "@/lib/emails/magic-link"
 
 // The email address that automatically receives admin role
 const ADMIN_EMAIL = "cosmic.company.llc@gmail.com"
@@ -28,6 +30,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Resend({
       apiKey: process.env.RESEND_API_KEY!,
       from: `Paw Masterpiece <${process.env.FROM_EMAIL || "noreply@pawmasterpiece.com"}>`,
+      async sendVerificationRequest({ identifier: email, url, provider }) {
+        const { host } = new URL(url)
+        const client = new ResendClient(provider.apiKey as string)
+        const { html, text } = renderMagicLinkEmail({ url, host })
+        const { error } = await client.emails.send({
+          from: provider.from as string,
+          to: email,
+          subject: "Sign in to Paw Masterpiece",
+          html,
+          text,
+        })
+        if (error) {
+          throw new Error(`Resend error: ${JSON.stringify(error)}`)
+        }
+      },
     }),
 
     // ── Credentials (dev fallback) ─────────────────────────────────────────
