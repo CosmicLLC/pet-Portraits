@@ -81,3 +81,31 @@ model RateLimit {
   count   Int      @default(0)
   resetAt DateTime
 }
+
+model Subscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  // "footer" | "exit_intent" | "abandonment" | "portrait" | "purchase" | "other"
+  source         String
+  subscribedAt   DateTime  @default(now())
+  unsubscribedAt DateTime?
+  lastEmailSent  DateTime?
+
+  @@index([unsubscribedAt])
+  @@index([source])
+}
+
+model Campaign {
+  id          String    @id @default(cuid())
+  subject     String
+  htmlBody    String
+  textBody    String?
+  status      String    @default("draft") // draft | sending | sent | failed
+  sentAt      DateTime?
+  recipients  Int       @default(0)
+  delivered   Int       @default(0)
+  failed      Int       @default(0)
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+}

@@ -8,20 +8,6 @@ export const metadata: Metadata = {
   title: "Admin Dashboard — Paw Masterpiece",
 }
 
-// Read subscriber count from local JSON store
-async function getSubscriberCount(): Promise<number> {
-  try {
-    const fs = await import("fs/promises")
-    const path = await import("path")
-    const filePath = path.join(process.cwd(), "data", "subscribers.json")
-    const raw = await fs.readFile(filePath, "utf-8")
-    const data = JSON.parse(raw)
-    return Array.isArray(data) ? data.length : 0
-  } catch {
-    return 0
-  }
-}
-
 export default async function AdminPage() {
   const session = await auth()
 
@@ -31,7 +17,7 @@ export default async function AdminPage() {
   }
 
   // Fetch stats in parallel
-  const [totalUsers, recentUsers, subscriberCount] = await Promise.all([
+  const [totalUsers, recentUsers, activeSubscribers, unsubscribedCount, totalOrders] = await Promise.all([
     prisma.user.count(),
     prisma.user.findMany({
       orderBy: { createdAt: "desc" },
@@ -46,7 +32,9 @@ export default async function AdminPage() {
         accounts: { select: { provider: true } },
       },
     }),
-    getSubscriberCount(),
+    prisma.subscriber.count({ where: { unsubscribedAt: null } }),
+    prisma.subscriber.count({ where: { unsubscribedAt: { not: null } } }),
+    prisma.order.count(),
   ])
 
   return (
@@ -70,10 +58,27 @@ export default async function AdminPage() {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-          <StatCard label="Total Users" value={totalUsers} icon="👤" />
-          <StatCard label="Subscribers" value={subscriberCount} icon="✉️" subtitle="portraits + newsletter" />
-          <StatCard label="Total Accounts" value={totalUsers} icon="🔐" subtitle="across all providers" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <StatCard label="Users" value={totalUsers} icon="👤" />
+          <StatCard label="Orders" value={totalOrders} icon="🛒" />
+          <StatCard label="Subscribers" value={activeSubscribers} icon="✉️" subtitle={unsubscribedCount > 0 ? `${unsubscribedCount} unsubscribed` : "active"} />
+          <StatCard label="Providers" value={totalUsers} icon="🔐" subtitle="linked accounts" />
+        </div>
+
+        {/* Email marketing quick actions */}
+        <div className="flex flex-wrap gap-3 mb-10">
+          <Link
+            href="/admin/campaigns"
+            className="inline-flex items-center gap-2 bg-brand-green text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-brand-green/90 transition-colors"
+          >
+            <span>✉️</span> New email campaign
+          </Link>
+          <a
+            href="/api/admin/subscribers?format=csv"
+            className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-4 py-2.5 rounded-xl text-sm font-medium hover:border-brand-green/40 transition-colors"
+          >
+            <span>⬇</span> Export subscribers (CSV)
+          </a>
         </div>
 
         {/* Recent signups */}

@@ -128,6 +128,16 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Auto-enroll the customer in the marketing list under CAN-SPAM's
+      // existing-customer allowance. They can unsubscribe via the required
+      // footer link in every campaign. If they'd previously unsubscribed,
+      // don't re-subscribe them — honor that choice.
+      await prisma.subscriber.upsert({
+        where: { email },
+        create: { email, source: "purchase" },
+        update: {},
+      }).catch((err) => console.error("Subscriber auto-enroll failed:", err));
+
       // Gated download links — HMAC-signed, streamed through /api/download/[orderId]
       // so the raw blob URL never leaves our server.
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://pawmasterpiece.com";
