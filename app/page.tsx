@@ -570,8 +570,9 @@ export default function Home() {
         <section className="relative bg-cream border-b border-gray-100 overflow-hidden isolate">
           {/* Background image layer — positioned to the right so the dog and framed
               portrait hug the viewport edge. Feathered masks + color washes dissolve
-              it into the cream canvas on the text side. */}
-          <div className="pointer-events-none absolute inset-0 select-none" aria-hidden="true">
+              it into the cream canvas on the text side. Hidden on mobile where the
+              image competes with the text for space. */}
+          <div className="pointer-events-none absolute inset-0 select-none hidden md:block" aria-hidden="true">
             <div
               className="absolute inset-0"
               style={{
@@ -594,8 +595,8 @@ export default function Home() {
           </div>
 
           {/* Foreground content */}
-          <div className="relative max-w-6xl mx-auto px-4 py-20 sm:py-28 lg:py-32 min-h-[480px] sm:min-h-[560px] flex items-center">
-            <div className="w-full md:max-w-[62%] text-center md:text-left">
+          <div className="relative max-w-6xl mx-auto px-4 py-14 sm:py-24 lg:py-32 min-h-[380px] sm:min-h-[520px] flex items-center">
+            <div className="w-full md:max-w-[62%] text-center md:text-left reveal">
               <div className="flex items-center justify-center md:justify-start gap-1.5 mb-6">
                 {[...Array(5)].map((_, i) => (
                   <svg key={i} className="w-5 h-5 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
@@ -907,7 +908,7 @@ export default function Home() {
       {/* How It Works — upload step only */}
       {step === "upload" && (
         <section id="how-it-works" className="bg-white border-y border-gray-100 py-16 sm:py-20">
-          <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto px-4 text-center reveal">
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">How It Works</h2>
             <p className="text-gray-500 mb-12 max-w-md mx-auto">Three simple steps to a portrait you&apos;ll treasure forever.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
@@ -932,7 +933,7 @@ export default function Home() {
       {/* Styles — upload step only */}
       {step === "upload" && (
         <section id="styles" className="py-16 sm:py-20">
-          <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto px-4 text-center reveal">
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Choose Your Style</h2>
             <p className="text-gray-500 mb-10 max-w-md mx-auto">Four beautiful artistic styles, each one a masterpiece.</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -962,7 +963,7 @@ export default function Home() {
       {/* Comparison table — upload step only */}
       {step === "upload" && (
         <section className="bg-white border-t border-gray-100 py-16 sm:py-20">
-          <div className="max-w-3xl mx-auto px-4">
+          <div className="max-w-3xl mx-auto px-4 reveal">
             <div className="text-center mb-10">
               <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Why Paw Masterpiece?</h2>
               <p className="text-gray-500 max-w-md mx-auto">See how we compare to traditional pet portrait services.</p>
@@ -1030,7 +1031,7 @@ export default function Home() {
       {/* Photo gallery — upload step only */}
       {step === "upload" && (
         <section className="py-16 sm:py-20 bg-cream">
-          <div className="max-w-4xl mx-auto px-4">
+          <div className="max-w-4xl mx-auto px-4 reveal">
             <div className="text-center mb-10">
               <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Loved by Pet Parents Everywhere</h2>
               <p className="text-gray-500">Real portraits made with Paw Masterpiece.</p>
@@ -1074,7 +1075,7 @@ export default function Home() {
       {/* Reviews — upload step only */}
       {step === "upload" && (
         <section id="reviews" className="bg-white border-t border-gray-100 py-16 sm:py-20">
-          <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto px-4 text-center reveal">
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">What Pet Parents Say</h2>
             <p className="text-gray-500 mb-12 max-w-md mx-auto">Thousands of happy customers and counting.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
