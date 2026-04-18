@@ -610,6 +610,17 @@ export default function Home() {
               <p className="text-gray-600 text-lg sm:text-xl max-w-xl md:mx-0 mx-auto mb-8 drop-shadow-[0_1px_0_rgba(250,247,242,0.9)]">
                 Upload a photo, choose a style, and get a stunning portrait in under a minute. The perfect gift for any pet lover.
               </p>
+              <div className="mb-8 flex justify-center md:justify-start">
+                <button
+                  onClick={resetState}
+                  className="group inline-flex items-center gap-3 bg-brand-green text-cream px-8 sm:px-10 py-4 sm:py-5 rounded-full text-base sm:text-lg font-display font-semibold shadow-[0_12px_30px_-10px_rgba(45,74,62,0.45)] hover:bg-brand-green/90 hover:shadow-[0_18px_38px_-12px_rgba(45,74,62,0.55)] hover:-translate-y-0.5 transition-all"
+                >
+                  Create Your Portrait
+                  <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </button>
+              </div>
               <div className="flex items-center justify-center md:justify-start gap-x-6 gap-y-2 text-sm text-gray-500 flex-wrap">
                 <span className="flex items-center gap-1.5">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
