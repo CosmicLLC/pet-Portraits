@@ -16,6 +16,8 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   image         String?
+  // bcrypt hash — null for OAuth-only accounts (Google / magic-link)
+  password      String?
   // "user" (default) or "admin"
   role          String    @default("user")
   createdAt     DateTime  @default(now())

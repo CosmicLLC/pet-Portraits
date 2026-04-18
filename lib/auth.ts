@@ -6,6 +6,7 @@ import Credentials from "next-auth/providers/credentials"
 import { Resend as ResendClient } from "resend"
 import { prisma } from "@/lib/prisma"
 import { renderMagicLinkEmail } from "@/lib/emails/magic-link"
+import { verifyPassword } from "@/lib/password"
 
 // The email address that automatically receives admin role
 const ADMIN_EMAIL = "cosmic.company.llc@gmail.com"
@@ -47,30 +48,38 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
 
-    // ── Credentials (dev fallback) ─────────────────────────────────────────
-    // Only active in development when Google OAuth is not yet configured.
-    // Use email: test@pawmasterpiece.test, password: password123
+    // ── Email + password ───────────────────────────────────────────────────
+    // Users create accounts via /api/auth/register which hashes the password
+    // with bcrypt. Sign-in here verifies the hash. Unverified emails are
+    // rejected — users must click the verify link sent on signup first.
     Credentials({
-      name: "Email & Password (Dev)",
+      name: "Email & Password",
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
-        if (process.env.NODE_ENV !== "development") return null
-        // Dev-only hardcoded test account
-        if (
-          credentials.email === "test@pawmasterpiece.test" &&
-          credentials.password === "password123"
-        ) {
-          return {
-            id: "dev-test-user",
-            email: "test@pawmasterpiece.test",
-            name: "Test User",
-          }
+        const email = typeof credentials?.email === "string" ? credentials.email.trim().toLowerCase() : ""
+        const password = typeof credentials?.password === "string" ? credentials.password : ""
+        if (!email || !password) return null
+
+        const user = await prisma.user.findUnique({ where: { email } })
+        if (!user || !user.password) return null
+
+        const ok = await verifyPassword(password, user.password)
+        if (!ok) return null
+
+        if (!user.emailVerified) {
+          // Signal via a thrown error so the signin page can show the right copy.
+          throw new Error("EMAIL_NOT_VERIFIED")
         }
-        return null
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name ?? undefined,
+          image: user.image ?? undefined,
+        }
       },
     }),
   ],
