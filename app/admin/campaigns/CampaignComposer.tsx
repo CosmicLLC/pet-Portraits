@@ -2,15 +2,31 @@
 
 import { useState, useCallback } from "react"
 
-type Props = { activeSubscribers: number }
+type SegmentCount = { segment: string; count: number }
+type Props = { activeSubscribers: number; segmentCounts?: SegmentCount[] }
 
-export default function CampaignComposer({ activeSubscribers }: Props) {
+const SEGMENT_LABELS: Record<string, string> = {
+  all: "Everyone (active subscribers)",
+  footer: "Footer signups",
+  exit_intent: "Exit-intent leads",
+  abandonment: "Browse-abandonment leads",
+  portrait: "Portrait-page signups",
+  purchase: "Past customers",
+}
+
+export default function CampaignComposer({ activeSubscribers, segmentCounts = [] }: Props) {
   const [subject, setSubject] = useState("")
   const [htmlBody, setHtmlBody] = useState("")
+  const [segment, setSegment] = useState<string>("all")
   const [sending, setSending] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<{ delivered: number; failed: number; recipients: number } | null>(null)
   const [confirming, setConfirming] = useState(false)
+
+  const recipientCount =
+    segment === "all"
+      ? activeSubscribers
+      : segmentCounts.find((s) => s.segment === segment)?.count ?? 0
 
   const handleSend = useCallback(async () => {
     setError(null)
@@ -20,7 +36,7 @@ export default function CampaignComposer({ activeSubscribers }: Props) {
       const res = await fetch("/api/admin/campaigns", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, htmlBody }),
+        body: JSON.stringify({ subject, htmlBody, segment }),
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -38,9 +54,9 @@ export default function CampaignComposer({ activeSubscribers }: Props) {
       setSending(false)
       setConfirming(false)
     }
-  }, [subject, htmlBody])
+  }, [subject, htmlBody, segment])
 
-  const canSend = subject.trim().length > 0 && htmlBody.trim().length > 0 && activeSubscribers > 0
+  const canSend = subject.trim().length > 0 && htmlBody.trim().length > 0 && recipientCount > 0
 
   return (
     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
@@ -62,6 +78,30 @@ export default function CampaignComposer({ activeSubscribers }: Props) {
       )}
 
       <div className="space-y-3">
+        <div>
+          <label htmlFor="segment" className="block text-xs font-medium text-gray-600 mb-1.5">
+            Recipient segment
+          </label>
+          <select
+            id="segment"
+            value={segment}
+            onChange={(e) => setSegment(e.target.value)}
+            disabled={sending}
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green bg-white disabled:opacity-60"
+          >
+            <option value="all">All active subscribers ({activeSubscribers})</option>
+            {Object.entries(SEGMENT_LABELS)
+              .filter(([k]) => k !== "all")
+              .map(([k, label]) => {
+                const count = segmentCounts.find((s) => s.segment === k)?.count ?? 0
+                return (
+                  <option key={k} value={k}>
+                    {label} ({count})
+                  </option>
+                )
+              })}
+          </select>
+        </div>
         <div>
           <label htmlFor="subject" className="block text-xs font-medium text-gray-600 mb-1.5">
             Subject line
@@ -95,7 +135,7 @@ export default function CampaignComposer({ activeSubscribers }: Props) {
         {confirming ? (
           <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
             <p className="text-sm text-amber-900 mb-3">
-              Send to <strong>{activeSubscribers}</strong> subscriber{activeSubscribers === 1 ? "" : "s"}? This is not reversible.
+              Send to <strong>{recipientCount}</strong> subscriber{recipientCount === 1 ? "" : "s"} in <strong>{SEGMENT_LABELS[segment]}</strong>? This is not reversible.
             </p>
             <div className="flex gap-2">
               <button
@@ -103,7 +143,7 @@ export default function CampaignComposer({ activeSubscribers }: Props) {
                 disabled={sending}
                 className="flex-1 bg-brand-green text-white py-3 rounded-xl text-sm font-semibold hover:bg-brand-green/90 transition-all disabled:opacity-60"
               >
-                {sending ? "Sending…" : `Send to ${activeSubscribers}`}
+                {sending ? "Sending…" : `Send to ${recipientCount}`}
               </button>
               <button
                 onClick={() => setConfirming(false)}

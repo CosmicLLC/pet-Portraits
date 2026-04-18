@@ -81,10 +81,13 @@ function wrapMarketingText(innerText: string, email: string): string {
   )
 }
 
+export type CampaignSegment = "all" | "footer" | "exit_intent" | "abandonment" | "portrait" | "purchase"
+
 export type CampaignInput = {
   subject: string
   htmlBody: string // inner HTML — wrapMarketingEmail adds header + legal footer
   textBody?: string
+  segment?: CampaignSegment
 }
 
 export type SendResult = {
@@ -98,18 +101,23 @@ export async function sendCampaign(
   input: CampaignInput,
   createdBy: string | null
 ): Promise<SendResult> {
+  const segment: CampaignSegment = input.segment ?? "all"
   const campaign = await prisma.campaign.create({
     data: {
       subject: input.subject,
       htmlBody: input.htmlBody,
       textBody: input.textBody ?? null,
+      segment,
       status: "sending",
       createdBy,
     },
   })
 
   const subscribers = await prisma.subscriber.findMany({
-    where: { unsubscribedAt: null },
+    where: {
+      unsubscribedAt: null,
+      ...(segment !== "all" ? { source: segment } : {}),
+    },
     select: { email: true },
   })
 

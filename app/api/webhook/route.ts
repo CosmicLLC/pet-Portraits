@@ -6,6 +6,7 @@ import sharp from "sharp";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { signDownloadToken } from "@/lib/download-token";
+import { logEvent } from "@/lib/events";
 
 // 9:19.5 — iPhone 14 Pro resolution
 const WALLPAPER_W = 1290;
@@ -116,12 +117,18 @@ export async function POST(req: NextRequest) {
 
       // Persist the order FIRST — even if email sending fails we have a durable
       // record and idempotency protection on retries.
+      const stripePaymentIntent =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id ?? null;
       const order = await prisma.order.create({
         data: {
           stripeSessionId: session.id,
+          stripePaymentIntent,
           email,
           imageId,
           productType,
+          priceCents: session.amount_total ?? null,
           addWallpaper: addWallpaper === "true",
           portraitBlobUrl,
           wallpaperBlobUrl,
@@ -160,6 +167,13 @@ export async function POST(req: NextRequest) {
       }
     } catch (err) {
       console.error("Webhook fulfillment error:", err);
+      await logEvent("error", "webhook", "Fulfillment failed", {
+        sessionId: session.id,
+        email,
+        imageId,
+        productType,
+        error: err instanceof Error ? err.message : String(err),
+      });
       return NextResponse.json(
         { error: "Fulfillment failed" },
         { status: 500 }

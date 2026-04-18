@@ -14,7 +14,7 @@ export default async function CampaignsPage() {
   const session = await auth()
   if (!session || session.user.role !== "admin") redirect("/")
 
-  const [activeSubscribers, campaigns] = await Promise.all([
+  const [activeSubscribers, campaigns, segmentGroups] = await Promise.all([
     prisma.subscriber.count({ where: { unsubscribedAt: null } }),
     prisma.campaign.findMany({
       orderBy: { createdAt: "desc" },
@@ -30,7 +30,13 @@ export default async function CampaignsPage() {
         createdAt: true,
       },
     }),
+    prisma.subscriber.groupBy({
+      by: ["source"],
+      _count: true,
+      where: { unsubscribedAt: null },
+    }),
   ])
+  const segmentCounts = segmentGroups.map((g) => ({ segment: g.source, count: g._count }))
 
   return (
     <main className="min-h-screen bg-cream px-4 py-12">
@@ -47,7 +53,7 @@ export default async function CampaignsPage() {
           </Link>
         </div>
 
-        <CampaignComposer activeSubscribers={activeSubscribers} />
+        <CampaignComposer activeSubscribers={activeSubscribers} segmentCounts={segmentCounts} />
 
         <div className="mt-10 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-gray-100">

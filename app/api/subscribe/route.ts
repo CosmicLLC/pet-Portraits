@@ -45,6 +45,13 @@ export async function POST(req: NextRequest) {
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 })
   }
+
+  const blocked = await prisma.blockedEmail.findUnique({ where: { email } }).catch(() => null)
+  if (blocked) {
+    // Silently succeed — don't reveal the block list.
+    return NextResponse.json({ ok: true })
+  }
+
   const source = normalizeSource(body.source)
   const name = typeof body.name === "string" && body.name.trim() ? body.name.trim() : null
 

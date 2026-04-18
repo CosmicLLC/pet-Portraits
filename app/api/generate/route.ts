@@ -4,6 +4,7 @@ import { applyWatermark } from "@/lib/watermark";
 import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
+import { logEvent } from "@/lib/events";
 
 export const maxDuration = 60;
 
@@ -115,6 +116,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ watermarkedImage: watermarkedBase64, imageId });
   } catch (error) {
     console.error("Generate error:", error);
+    await logEvent("error", "generate", "Generation failed", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack?.slice(0, 1500) : undefined,
+    });
     return NextResponse.json(
       { error: "Generation failed — please try again or use a clearer photo." },
       { status: 500 }

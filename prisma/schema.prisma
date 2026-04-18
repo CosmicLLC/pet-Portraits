@@ -62,18 +62,21 @@ model VerificationToken {
 }
 
 model Order {
-  id               String   @id @default(cuid())
-  stripeSessionId  String   @unique
-  email            String
-  imageId          String
-  productType      String
-  addWallpaper     Boolean  @default(false)
-  portraitBlobUrl  String
-  wallpaperBlobUrl String?
-  createdAt        DateTime @default(now())
+  id                  String   @id @default(cuid())
+  stripeSessionId     String   @unique
+  stripePaymentIntent String?
+  email               String
+  imageId             String
+  productType         String
+  priceCents          Int?
+  addWallpaper        Boolean  @default(false)
+  portraitBlobUrl     String
+  wallpaperBlobUrl    String?
+  createdAt           DateTime @default(now())
 
   @@index([email])
   @@index([imageId])
+  @@index([createdAt])
 }
 
 model RateLimit {
@@ -101,6 +104,7 @@ model Campaign {
   subject     String
   htmlBody    String
   textBody    String?
+  segment     String    @default("all") // "all" | "footer" | "exit_intent" | "abandonment" | "portrait" | "purchase"
   status      String    @default("draft") // draft | sending | sent | failed
   sentAt      DateTime?
   recipients  Int       @default(0)
@@ -108,4 +112,23 @@ model Campaign {
   failed      Int       @default(0)
   createdBy   String?
   createdAt   DateTime  @default(now())
+}
+
+model EventLog {
+  id        String   @id @default(cuid())
+  type      String   // "error" | "warning" | "info"
+  source    String   // "generate" | "webhook" | "auth" | "email" | "checkout"
+  message   String
+  context   Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type])
+  @@index([source])
+}
+
+model BlockedEmail {
+  email     String   @id
+  reason    String?
+  blockedAt DateTime @default(now())
 }

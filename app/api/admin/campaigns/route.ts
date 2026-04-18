@@ -38,12 +38,17 @@ export async function POST(req: NextRequest) {
   const session = await requireAdmin()
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
-  let body: { subject?: string; htmlBody?: string; textBody?: string }
+  let body: { subject?: string; htmlBody?: string; textBody?: string; segment?: string }
   try { body = await req.json() } catch { body = {} }
 
   const subject = (body.subject || "").trim()
   const htmlBody = (body.htmlBody || "").trim()
   const textBody = body.textBody?.trim() || undefined
+  const allowedSegments = ["all", "footer", "exit_intent", "abandonment", "portrait", "purchase"] as const
+  type Segment = typeof allowedSegments[number]
+  const segment: Segment = (allowedSegments as readonly string[]).includes(body.segment || "")
+    ? (body.segment as Segment)
+    : "all"
 
   if (!subject || !htmlBody) {
     return NextResponse.json({ error: "subject and htmlBody are required" }, { status: 400 })
@@ -54,7 +59,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await sendCampaign(
-      { subject, htmlBody, textBody },
+      { subject, htmlBody, textBody, segment },
       session.user?.id ?? null
     )
     return NextResponse.json(result)
