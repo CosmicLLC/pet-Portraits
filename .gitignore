@@ -27,9 +27,20 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env*.bak
+*.bak
 
 # vercel
 .vercel
+
+# Claude Code worktrees and clone workspaces
+.claude/worktrees/
+.claude/scheduled_tasks.lock
+.clone/
+
+# dev screenshots / scratch images
+/screenshots/
+/screenshot-*.png
 
 # subscriber data (contains emails)
 /data/subscribers.json

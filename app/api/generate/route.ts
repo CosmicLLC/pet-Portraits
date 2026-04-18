@@ -3,11 +3,21 @@ import { generatePortrait, STYLE_KEYS, type StyleKey } from "@/lib/gemini";
 import { applyWatermark } from "@/lib/watermark";
 import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = clientIp(req.headers);
+    const limit = await rateLimit(`generate:${ip}`, 5, 60);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many requests — please wait a moment and try again." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get("image") as File | null;
     const style = formData.get("style") as string | null;

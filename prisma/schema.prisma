@@ -58,3 +58,24 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model Order {
+  id               String   @id @default(cuid())
+  stripeSessionId  String   @unique
+  email            String
+  imageId          String
+  productType      String
+  addWallpaper     Boolean  @default(false)
+  portraitBlobUrl  String
+  wallpaperBlobUrl String?
+  createdAt        DateTime @default(now())
+
+  @@index([email])
+  @@index([imageId])
+}
+
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
+}

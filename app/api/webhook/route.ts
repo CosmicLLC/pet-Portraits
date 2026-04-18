@@ -4,6 +4,8 @@ import { sendDownloadEmail, sendCanvasConfirmationEmail } from "@/lib/resend";
 import { list, put } from "@vercel/blob";
 import sharp from "sharp";
 import Stripe from "stripe";
+import { prisma } from "@/lib/prisma";
+import { signDownloadToken } from "@/lib/download-token";
 
 // 9:19.5 — iPhone 14 Pro resolution
 const WALLPAPER_W = 1290;
@@ -70,53 +72,82 @@ export async function POST(req: NextRequest) {
     const { imageId, productType, addWallpaper } = session.metadata || {};
     const email = session.customer_details?.email;
 
-    if (!imageId || !email) {
-      console.error("Missing imageId or email in webhook", { imageId, email });
+    if (!imageId || !email || !productType) {
+      console.error("Missing required metadata in webhook", { imageId, email, productType });
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
 
+    // Idempotency — if we've already processed this Stripe session, return 200 without
+    // re-sending emails or re-generating the wallpaper. Stripe retries are common.
+    const existing = await prisma.order.findUnique({
+      where: { stripeSessionId: session.id },
+    }).catch(() => null);
+    if (existing) {
+      console.log(`Skipping duplicate webhook for session ${session.id}`);
+      return NextResponse.json({ received: true, deduplicated: true });
+    }
+
     try {
-      // Find the blob by imageId prefix
+      // Find the original portrait blob by imageId prefix
       const { blobs } = await list({ prefix: `portraits/${imageId}` });
       if (!blobs.length) {
         console.error("No blob found for imageId:", imageId);
         return NextResponse.json({ error: "Image not found" }, { status: 404 });
       }
+      const portraitBlobUrl = blobs[0].url;
 
-      const downloadUrl = blobs[0].url;
-
-      // Generate phone wallpaper when add-on was purchased
-      let wallpaperUrl: string | undefined;
+      // Generate phone wallpaper when add-on was purchased.
+      // Failure here is non-fatal — we still fulfill the main portrait.
+      let wallpaperBlobUrl: string | null = null;
       if (addWallpaper === "true") {
         try {
-          const wallpaperBuffer = await buildWallpaper(downloadUrl);
+          const wallpaperBuffer = await buildWallpaper(portraitBlobUrl);
           const blob = await put(
             `wallpapers/${imageId}.jpg`,
             wallpaperBuffer,
-            { access: "public", contentType: "image/jpeg" }
+            { access: "public", addRandomSuffix: true, contentType: "image/jpeg" }
           );
-          wallpaperUrl = blob.url;
-          console.log(`Wallpaper generated for ${imageId}: ${wallpaperUrl}`);
+          wallpaperBlobUrl = blob.url;
+          console.log(`Wallpaper generated for ${imageId}`);
         } catch (wallpaperErr) {
-          // Non-fatal — still deliver the main portrait
           console.error("Wallpaper generation failed:", wallpaperErr);
         }
       }
 
+      // Persist the order FIRST — even if email sending fails we have a durable
+      // record and idempotency protection on retries.
+      const order = await prisma.order.create({
+        data: {
+          stripeSessionId: session.id,
+          email,
+          imageId,
+          productType,
+          addWallpaper: addWallpaper === "true",
+          portraitBlobUrl,
+          wallpaperBlobUrl,
+        },
+      });
+
+      // Gated download links — HMAC-signed, streamed through /api/download/[orderId]
+      // so the raw blob URL never leaves our server.
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://pawmasterpiece.com";
+      const token = signDownloadToken(order.id);
+      const downloadUrl = `${baseUrl}/api/download/${order.id}?token=${token}`;
+      const wallpaperDownloadUrl = wallpaperBlobUrl
+        ? `${baseUrl}/api/download/${order.id}?token=${token}&type=wallpaper`
+        : undefined;
+
       if (productType === "digital" || productType === "wallpaper") {
-        await sendDownloadEmail(email, downloadUrl, wallpaperUrl);
+        await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl);
         console.log(`Download email sent to ${email} for ${productType}`);
       } else if (productType === "canvas") {
         await sendCanvasConfirmationEmail(email);
         console.log(`Canvas order confirmed for ${email}`, { imageId, productType });
       } else if (productType === "bundle") {
-        await sendDownloadEmail(email, downloadUrl, wallpaperUrl);
+        await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl);
         await sendCanvasConfirmationEmail(email);
         console.log(`Bundle fulfillment for ${email}`);
       }
-
-      // TODO: Review request email (7 days post-purchase)
-      // Store the order in a DB here once available.
     } catch (err) {
       console.error("Webhook fulfillment error:", err);
       return NextResponse.json(

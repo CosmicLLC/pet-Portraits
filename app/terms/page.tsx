@@ -29,7 +29,7 @@ export default function TermsPage() {
             Back to Home
           </Link>
           <h1 className="font-display text-4xl text-brand-green mb-3">Terms of Service</h1>
-          <p className="text-sm text-gray-400">Last updated: April 16, 2026</p>
+          <p className="text-sm text-gray-400">Last updated: April 17, 2026</p>
         </div>
 
         <div className="prose prose-slate max-w-none space-y-8 text-gray-600 leading-relaxed">
@@ -74,6 +74,7 @@ export default function TermsPage() {
               <li><strong>Digital Download</strong> — high-resolution portrait file delivered by email</li>
               <li><strong>Phone Wallpaper Pack</strong> — portrait optimized for mobile screens</li>
               <li><strong>Canvas Print (8×10)</strong> — gallery-quality physical print shipped to your address</li>
+              <li><strong>Canvas + Digital Bundle</strong> — canvas print plus the digital download file</li>
             </ul>
             <p className="mt-3">
               Prices are subject to change without notice. The price shown at the time of purchase

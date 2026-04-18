@@ -9,7 +9,6 @@ import ProductSelector from "@/components/ProductSelector";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import FooterNewsletter from "@/components/FooterNewsletter";
 import BrowseAbandonmentCapture from "@/components/BrowseAbandonmentCapture";
-import SocialProofToast from "@/components/SocialProofToast";
 import StickyCartBar from "@/components/StickyCartBar";
 import FAQ from "@/components/FAQ";
 import Image from "next/image";
@@ -20,8 +19,8 @@ import type { StyleKey } from "@/lib/gemini";
 
 const ANNOUNCEMENTS = [
   "Custom Paw Masterpiece — Ready in Seconds, Not Days",
-  "100% Satisfaction Guarantee — Love it or we redo it free",
-  "Free Digital Download with Every Canvas Order",
+  "Love it or we redo it free — within 7 days of purchase",
+  "Canvas + Digital Bundle Available",
 ];
 
 type Step = "upload" | "style" | "generate" | "preview";
@@ -57,9 +56,6 @@ export default function Home() {
   // Announcement bar rotation
   const [annIdx, setAnnIdx] = useState(0);
   const [annVisible, setAnnVisible] = useState(true);
-
-  // Real-time visitor count (12–34, fluctuates every 30s) — set after mount to avoid hydration mismatch
-  const [visitorCount, setVisitorCount] = useState(0);
 
   // Success page upsell state
   const [upsellLoading, setUpsellLoading] = useState(false);
@@ -121,15 +117,6 @@ export default function Home() {
         setAnnVisible(true);
       }, 400);
     }, 5000);
-    return () => clearInterval(id);
-  }, []);
-
-  // Visitor count — init after mount, fluctuate every 30s
-  useEffect(() => {
-    setVisitorCount(Math.floor(Math.random() * 23) + 12);
-    const id = setInterval(() => {
-      setVisitorCount((n) => Math.min(34, Math.max(12, n + Math.floor(Math.random() * 5) - 2)));
-    }, 30000);
     return () => clearInterval(id);
   }, []);
 
@@ -389,7 +376,6 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-cream">
       {step === "upload" && <ExitIntentPopup />}
-      {step === "upload" && <SocialProofToast />}
 
       {/* Rotating top banner */}
       <div className="bg-brand-green text-white text-center py-2.5 text-sm font-medium tracking-wide overflow-hidden">
@@ -602,15 +588,6 @@ export default function Home() {
               </span>
             </div>
 
-            {/* Real-time visitor count */}
-            {visitorCount > 0 && (
-              <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
-                <span>
-                  <strong className="text-gray-700">{visitorCount}</strong> people viewing portraits right now
-                </span>
-              </div>
-            )}
           </div>
         </section>
       )}
@@ -623,7 +600,7 @@ export default function Home() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
             <p className="text-sm text-brand-green font-medium">
-              <strong>100% Satisfaction Guarantee</strong> — Love your portrait or we&apos;ll redo it for free. No questions asked.
+              <strong>Satisfaction Guarantee</strong> — Love your portrait or we&apos;ll redo it free within 7 days of purchase.
             </p>
           </div>
         </div>
