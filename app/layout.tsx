@@ -34,12 +34,21 @@ export const metadata: Metadata = {
       "Transform your pet's photo into a stunning fine art portrait. Ready in seconds.",
     siteName: "Paw Masterpiece",
     type: "website",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Paw Masterpiece",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Paw Masterpiece — Fine Art Portraits of Your Pet",
     description:
       "Transform your pet's photo into a stunning fine art portrait. Ready in seconds.",
+    images: ["/og-image.jpg"],
   },
 };
 
