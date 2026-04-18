@@ -610,7 +610,7 @@ export default function Home() {
               <p className="text-gray-600 text-lg sm:text-xl max-w-xl md:mx-0 mx-auto mb-8 drop-shadow-[0_1px_0_rgba(250,247,242,0.9)]">
                 Upload a photo, choose a style, and get a stunning portrait in under a minute. The perfect gift for any pet lover.
               </p>
-              <div className="mb-8 flex justify-center md:justify-start">
+              <div className="mb-8 flex justify-center md:justify-start md:pl-16 lg:pl-24">
                 <button
                   onClick={resetState}
                   className="group inline-flex items-center gap-3 bg-brand-green text-cream px-8 sm:px-10 py-4 sm:py-5 rounded-full text-base sm:text-lg font-display font-semibold shadow-[0_12px_30px_-10px_rgba(45,74,62,0.45)] hover:bg-brand-green/90 hover:shadow-[0_18px_38px_-12px_rgba(45,74,62,0.55)] hover:-translate-y-0.5 transition-all"
@@ -781,6 +781,20 @@ export default function Home() {
                 Back
               </button>
               <PortraitPreview watermarkedImage={watermarkedImage} />
+
+              {/* ─── Admin-only: download full-res without purchase ──── */}
+              {session?.user?.role === "admin" && imageId && (
+                <a
+                  href={`/api/admin/download-portrait/${imageId}`}
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 bg-brand-gold/10 border border-brand-gold/40 text-brand-green text-sm font-semibold px-4 py-3 rounded-xl hover:bg-brand-gold/20 transition-colors"
+                  title="Admin-only: download the unwatermarked full-resolution portrait"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download full-res (admin)
+                </a>
+              )}
 
               {/* ─── Phone Wallpaper Upsell ─────────────────────────── */}
               <button

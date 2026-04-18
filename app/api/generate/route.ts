@@ -7,14 +7,60 @@ import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export const maxDuration = 60;
 
+// Known bot / scripting client User-Agent signatures. Won't stop a motivated
+// attacker (they can spoof the header) but filters out the 90% of drive-by
+// scrapers and accidental curl/python scripts hammering the endpoint.
+const BOT_UA = /(^\s*$|\bcurl\b|\bwget\b|\bpython-requests\b|\bpython-urllib\b|\bGo-http-client\b|\bJava\/|\bScrapy\b|\bnode-fetch\b|\baxios\b|\bbot\b|\bcrawler\b|\bspider\b)/i;
+
+function sameOrigin(req: NextRequest): boolean {
+  const origin = req.headers.get("origin");
+  if (!origin) return true; // some browsers omit Origin on same-origin POST
+  const host = req.headers.get("host") || "";
+  const allowed = [
+    process.env.NEXT_PUBLIC_BASE_URL,
+    process.env.NEXTAUTH_URL,
+    `https://${host}`,
+    `http://${host}`,
+  ]
+    .filter(Boolean)
+    .map((u) => (u as string).replace(/\/$/, ""));
+  return allowed.some((a) => origin.replace(/\/$/, "") === a);
+}
+
 export async function POST(req: NextRequest) {
   try {
+    // Layer 1 — reject obvious bots by User-Agent
+    const ua = req.headers.get("user-agent") || "";
+    if (BOT_UA.test(ua)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Layer 2 — origin must match our site (prevents cross-site abuse)
+    if (!sameOrigin(req)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const ip = clientIp(req.headers);
+
+    // Layer 3 — per-IP rate limit: 5 calls / minute
     const limit = await rateLimit(`generate:${ip}`, 5, 60);
     if (!limit.ok) {
       return NextResponse.json(
         { error: "Too many requests — please wait a moment and try again." },
         { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      );
+    }
+
+    // Layer 4 — global daily cap across ALL callers. Caps worst-case Gemini
+    // spend from distributed IP rotation attacks. Tighten via DAILY_GENERATE_CAP.
+    const dailyCap = Number(process.env.DAILY_GENERATE_CAP || "300");
+    const today = new Date().toISOString().slice(0, 10);
+    const daily = await rateLimit(`generate:global:${today}`, dailyCap, 24 * 60 * 60);
+    if (!daily.ok) {
+      console.error(`Daily generation cap (${dailyCap}) reached — blocking request from ${ip}`);
+      return NextResponse.json(
+        { error: "Service is busy — please try again tomorrow." },
+        { status: 503, headers: { "Retry-After": String(daily.retryAfterSeconds) } }
       );
     }
 
