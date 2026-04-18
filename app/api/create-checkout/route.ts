@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         addWallpaper: addWallpaper ? "true" : "false",
       },
       ...(customerEmail && { customer_email: customerEmail }),
-      success_url: `${baseUrl}?success=true&imageId=${encodeURIComponent(imageId)}`,
+      success_url: `${baseUrl}?success=true&imageId=${encodeURIComponent(imageId)}&productType=${encodeURIComponent(productType)}`,
       cancel_url: `${baseUrl}?canceled=true`,
     });
 

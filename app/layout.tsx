@@ -22,12 +22,6 @@ export const metadata: Metadata = {
   title: "Paw Masterpiece — Fine Art Portraits of Your Pet",
   description:
     "Transform your pet's photo into a stunning fine art portrait. Watercolor, oil painting, Renaissance, and line art styles. Delivered instantly.",
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
-    apple: "/logo.jpg",
-  },
   openGraph: {
     title: "Paw Masterpiece — Fine Art Portraits of Your Pet",
     description:

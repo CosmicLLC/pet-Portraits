@@ -69,6 +69,14 @@ export default function Home() {
   const isSuccess = urlParams?.get("success") === "true";
   const isCanceled = urlParams?.get("canceled") === "true";
   const successImageId = urlParams?.get("imageId") ?? null;
+  const successProductType = urlParams?.get("productType") ?? null;
+  // Customers who already purchased a canvas (direct canvas or bundle) shouldn't be
+  // re-pitched a canvas on the success page.
+  const showCanvasUpsell =
+    !!successImageId &&
+    successProductType !== "canvas" &&
+    successProductType !== "bundle" &&
+    successProductType !== "canvas_upsell";
 
   // Countdown: start/reset when entering preview step
   useEffect(() => {
@@ -252,7 +260,7 @@ export default function Home() {
           </div>
 
           {/* Post-purchase upsell — Canvas Print at 25% off */}
-          {successImageId && !upsellDone && (
+          {showCanvasUpsell && !upsellDone && (
             <div className="bg-white rounded-3xl border-2 border-brand-green/20 shadow-lg p-6 mb-8 animate-fade-in-up">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-brand-green/10 flex items-center justify-center flex-shrink-0 text-2xl">
