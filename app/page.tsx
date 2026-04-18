@@ -563,31 +563,54 @@ export default function Home() {
         )}
       </header>
 
-      {/* Hero — upload step only */}
+      {/* Hero — upload step only. The product photo is a full-bleed atmospheric
+          background that dissolves into the cream on the text side, rather than
+          sitting next to the copy as an obvious image. */}
       {step === "upload" && (
-        <section className="relative bg-white border-b border-gray-100 overflow-hidden">
-          {/* Decorative "baseboard" line — echoes the wall-molding look of a real gallery shot */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-b from-transparent to-gray-50" aria-hidden="true" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-8 h-px bg-gray-100" aria-hidden="true" />
+        <section className="relative bg-cream border-b border-gray-100 overflow-hidden isolate">
+          {/* Background image layer — positioned to the right so the dog and framed
+              portrait hug the viewport edge. Feathered masks + color washes dissolve
+              it into the cream canvas on the text side. */}
+          <div className="pointer-events-none absolute inset-0 select-none" aria-hidden="true">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: "url(/hero-pet.jpg)",
+                backgroundRepeat: "no-repeat",
+                backgroundSize: "cover",
+                backgroundPosition: "right center",
+                WebkitMaskImage:
+                  "radial-gradient(120% 110% at 85% 50%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.75) 55%, rgba(0,0,0,0) 85%)",
+                maskImage:
+                  "radial-gradient(120% 110% at 85% 50%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.75) 55%, rgba(0,0,0,0) 85%)",
+              }}
+            />
+            {/* Warm cream wash on the left so the text has a clean ground */}
+            <div className="absolute inset-0 bg-gradient-to-r from-cream via-cream/80 to-transparent" />
+            {/* Cream-to-transparent top fade softens the hard edge against the header */}
+            <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-cream/70 to-transparent" />
+            {/* Cream-to-transparent bottom fade so the image settles into the next section */}
+            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-cream to-transparent" />
+          </div>
 
-          <div className="relative max-w-6xl mx-auto px-4 py-16 sm:py-20 grid grid-cols-1 md:grid-cols-5 md:gap-12 items-center">
-            {/* Left: headline + subhead + proof */}
-            <div className="md:col-span-3 text-center md:text-left">
+          {/* Foreground content */}
+          <div className="relative max-w-6xl mx-auto px-4 py-20 sm:py-28 lg:py-32 min-h-[480px] sm:min-h-[560px] flex items-center">
+            <div className="w-full md:max-w-[62%] text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-1.5 mb-6">
                 {[...Array(5)].map((_, i) => (
                   <svg key={i} className="w-5 h-5 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                   </svg>
                 ))}
-                <span className="text-sm text-gray-500 ml-2">Loved by pet parents</span>
+                <span className="text-sm text-gray-600 ml-2 drop-shadow-[0_1px_0_rgba(250,247,242,0.8)]">Loved by pet parents</span>
               </div>
-              <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl text-brand-green mb-5 leading-tight">
+              <h2 className="font-display text-4xl sm:text-5xl lg:text-[4rem] text-brand-green mb-5 leading-[1.05] drop-shadow-[0_1px_0_rgba(250,247,242,0.9)]">
                 Turn Your Pet Into<br />a Work of Art
               </h2>
-              <p className="text-gray-500 text-lg sm:text-xl max-w-xl md:mx-0 mx-auto mb-8">
+              <p className="text-gray-600 text-lg sm:text-xl max-w-xl md:mx-0 mx-auto mb-8 drop-shadow-[0_1px_0_rgba(250,247,242,0.9)]">
                 Upload a photo, choose a style, and get a stunning portrait in under a minute. The perfect gift for any pet lover.
               </p>
-              <div className="flex items-center justify-center md:justify-start gap-6 text-sm text-gray-400 flex-wrap">
+              <div className="flex items-center justify-center md:justify-start gap-x-6 gap-y-2 text-sm text-gray-500 flex-wrap">
                 <span className="flex items-center gap-1.5">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                   Ready in seconds
@@ -600,26 +623,6 @@ export default function Home() {
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                   Secure checkout
                 </span>
-              </div>
-            </div>
-
-            {/* Right: hero product shot — a pet posing beside its own framed portrait.
-                The image itself already contains the "framed on a wall" composition,
-                so we let it speak: rounded corners, soft ground-shadow, no extra frame. */}
-            <div className="md:col-span-2 mt-12 md:mt-0 flex justify-center md:justify-end">
-              <div className="relative w-full max-w-[420px] aspect-[1014/885]">
-                <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-[0_30px_60px_-25px_rgba(45,74,62,0.30)] ring-1 ring-gray-100 bg-white">
-                  <Image
-                    src="/hero-pet.jpg"
-                    alt="A dog sitting beside its custom line-art portrait — ready to hang"
-                    fill
-                    className="object-cover"
-                    priority
-                    sizes="(max-width: 768px) 320px, 420px"
-                  />
-                </div>
-                {/* Soft ground-shadow beneath the image — keeps it from floating */}
-                <div className="absolute -bottom-3 left-[12%] right-[12%] h-4 rounded-full bg-gray-900/10 blur-xl" aria-hidden="true" />
               </div>
             </div>
           </div>
