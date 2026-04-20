@@ -11,12 +11,12 @@ export const PRODUCTS = {
   },
   display: {
     label: "Display Print 11×14",
-    price: "$39",
+    price: "$15.99",
     description: "Fine art print on backing board, bagged ready to frame",
   },
   mounted: {
     label: "Mounted Print 11×14",
-    price: "$69",
+    price: "$33",
     description: "Gallery-matted fine art print — window mount + backing",
   },
   canvas: {

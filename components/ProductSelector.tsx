@@ -31,7 +31,7 @@ const TIERS: Tier[] = [
   {
     key: "display",
     name: "Display Print 11×14",
-    price: "$39",
+    price: "$15.99",
     description: "Bagged ready to frame",
     features: ["Fine art paper", "Rigid backing board", "Protective sleeve"],
     highlighted: false,
@@ -39,7 +39,7 @@ const TIERS: Tier[] = [
   {
     key: "mounted",
     name: "Mounted Print 11×14",
-    price: "$69",
+    price: "$33",
     description: "Gallery-matted & ready to frame",
     features: ["Window mount + backing", "Fine art paper", "Gallery finish"],
     highlighted: false,
