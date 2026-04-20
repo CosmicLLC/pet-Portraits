@@ -7,6 +7,12 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { signDownloadToken } from "@/lib/download-token";
 import { logEvent } from "@/lib/events";
+import {
+  createProdigiOrder,
+  getCanvasSku,
+  isProdigiConfigured,
+  type ProdigiAddress,
+} from "@/lib/prodigi";
 
 // 9:19.5 — iPhone 14 Pro resolution
 const WALLPAPER_W = 1290;
@@ -121,6 +127,34 @@ export async function POST(req: NextRequest) {
         typeof session.payment_intent === "string"
           ? session.payment_intent
           : session.payment_intent?.id ?? null;
+
+      // Capture shipping address for physical products. Newer Stripe API versions
+      // nest this under collected_information; older versions expose it directly
+      // on the session. Support both so we don't care which one's in play.
+      const needsShipping = productType === "canvas" || productType === "bundle";
+      const sessionAny = session as unknown as {
+        shipping_details?: { name?: string | null; address?: Stripe.Address | null } | null;
+        collected_information?: {
+          shipping_details?: { name?: string | null; address?: Stripe.Address | null } | null;
+        } | null;
+      };
+      const shippingDetails =
+        sessionAny.collected_information?.shipping_details ??
+        sessionAny.shipping_details ??
+        null;
+      const shippingName = shippingDetails?.name ?? null;
+      const shippingAddress = shippingDetails?.address ?? null;
+
+      if (needsShipping && (!shippingAddress || !shippingName)) {
+        // This should only happen for orders placed before shipping collection was enabled.
+        console.error("Physical order missing shipping details", { sessionId: session.id });
+        await logEvent("error", "webhook", "Physical order missing shipping details", {
+          sessionId: session.id,
+          email,
+          productType,
+        });
+      }
+
       const order = await prisma.order.create({
         data: {
           stripeSessionId: session.id,
@@ -132,6 +166,10 @@ export async function POST(req: NextRequest) {
           addWallpaper: addWallpaper === "true",
           portraitBlobUrl,
           wallpaperBlobUrl,
+          shippingName,
+          shippingAddress: shippingAddress
+            ? (shippingAddress as unknown as object)
+            : undefined,
         },
       });
 
@@ -164,6 +202,62 @@ export async function POST(req: NextRequest) {
         await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl);
         await sendCanvasConfirmationEmail(email);
         console.log(`Bundle fulfillment for ${email}`);
+      }
+
+      // Physical fulfillment via Prodigi. Isolated from email failures above.
+      // Never throws upward — we always want to 200 the Stripe webhook so it
+      // doesn't retry (the customer already paid, the Order row exists, an
+      // admin can manually retry from the dashboard).
+      if (needsShipping && shippingAddress && shippingName) {
+        if (!isProdigiConfigured()) {
+          console.warn(`Prodigi not configured — skipping fulfillment for order ${order.id}`);
+          await logEvent("warning", "webhook", "Prodigi not configured, order not sent to printer", {
+            orderId: order.id,
+            email,
+          });
+        } else {
+          try {
+            const prodigiAddress: ProdigiAddress = {
+              line1: shippingAddress.line1 ?? "",
+              line2: shippingAddress.line2 ?? undefined,
+              townOrCity: shippingAddress.city ?? "",
+              stateOrCounty: shippingAddress.state ?? undefined,
+              postalOrZipCode: shippingAddress.postal_code ?? "",
+              countryCode: shippingAddress.country ?? "US",
+            };
+            const prodigi = await createProdigiOrder({
+              merchantReference: order.id,
+              sku: getCanvasSku(),
+              imageUrl: portraitBlobUrl,
+              recipient: {
+                name: shippingName,
+                email,
+                phoneNumber: session.customer_details?.phone ?? undefined,
+                address: prodigiAddress,
+              },
+            });
+            await prisma.order.update({
+              where: { id: order.id },
+              data: {
+                prodigiOrderId: prodigi.order.id,
+                prodigiStatus: "InProgress",
+                prodigiStage: prodigi.order.status.stage,
+              },
+            });
+            console.log(`Prodigi order created ${prodigi.order.id} for ${order.id}`);
+          } catch (prodigiErr) {
+            console.error("Prodigi order creation failed:", prodigiErr);
+            await prisma.order.update({
+              where: { id: order.id },
+              data: { prodigiStatus: "Failed" },
+            }).catch(() => {});
+            await logEvent("error", "webhook", "Prodigi order creation failed", {
+              orderId: order.id,
+              email,
+              error: prodigiErr instanceof Error ? prodigiErr.message : String(prodigiErr),
+            });
+          }
+        }
       }
     } catch (err) {
       console.error("Webhook fulfillment error:", err);

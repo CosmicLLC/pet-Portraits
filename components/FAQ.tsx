@@ -17,11 +17,11 @@ const FAQS = [
   },
   {
     q: "What sizes are available?",
-    a: "Digital downloads are full-resolution (300 DPI), suitable for printing at any size. Canvas prints are available in 8×10 inches — the perfect size for home display or gifting.",
+    a: "Digital downloads are full-resolution (300 DPI), suitable for printing at any size. Canvas prints come framed at 8×12 inches — the perfect size for home display or gifting.",
   },
   {
     q: "Do you ship internationally?",
-    a: "Yes! Canvas prints ship worldwide. Digital downloads are delivered instantly by email, anywhere in the world, within seconds of purchase.",
+    a: "Canvas prints currently ship within the United States only. Digital downloads are delivered instantly by email, anywhere in the world, within seconds of purchase.",
   },
   {
     q: "Can I request a custom style?",

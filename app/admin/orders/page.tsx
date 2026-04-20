@@ -27,6 +27,13 @@ export default async function OrdersPage() {
       priceCents: true,
       addWallpaper: true,
       createdAt: true,
+      prodigiOrderId: true,
+      prodigiStatus: true,
+      prodigiStage: true,
+      trackingUrl: true,
+      trackingNumber: true,
+      carrier: true,
+      shippedAt: true,
     },
   })
 
@@ -42,7 +49,13 @@ export default async function OrdersPage() {
             ← Admin
           </Link>
         </div>
-        <OrdersTable initialOrders={orders.map(o => ({ ...o, createdAt: o.createdAt.toISOString() }))} />
+        <OrdersTable
+          initialOrders={orders.map(o => ({
+            ...o,
+            createdAt: o.createdAt.toISOString(),
+            shippedAt: o.shippedAt ? o.shippedAt.toISOString() : null,
+          }))}
+        />
       </div>
     </main>
   )

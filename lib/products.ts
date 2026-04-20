@@ -10,9 +10,9 @@ export const PRODUCTS = {
     description: "Optimized for mobile screens",
   },
   canvas: {
-    label: "Canvas Print 8×10",
+    label: "Framed Canvas Print 8×12",
     price: "$79",
-    description: "Gallery-quality, shipped to your door",
+    description: "Gallery-quality framed canvas, shipped to your door",
   },
   bundle: {
     label: "Complete Bundle",

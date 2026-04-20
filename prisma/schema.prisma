@@ -74,9 +74,21 @@ model Order {
   wallpaperBlobUrl    String?
   createdAt           DateTime @default(now())
 
+  // Physical fulfillment (canvas/bundle via Prodigi)
+  shippingName        String?
+  shippingAddress     Json?
+  prodigiOrderId      String?  @unique
+  prodigiStatus       String?  // InProgress | Complete | Cancelled | Failed
+  prodigiStage        String?  // More granular: AwaitingPayment | InProgress | Shipped | etc
+  trackingNumber      String?
+  trackingUrl         String?
+  carrier             String?
+  shippedAt           DateTime?
+
   @@index([email])
   @@index([imageId])
   @@index([createdAt])
+  @@index([prodigiStatus])
 }
 
 model RateLimit {

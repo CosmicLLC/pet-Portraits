@@ -30,7 +30,7 @@ const TIERS: Tier[] = [
   },
   {
     key: "canvas",
-    name: "Canvas Print 8×10",
+    name: "Framed Canvas Print 8×12",
     price: "$79",
     description: "Ships in 3–5 business days",
     features: ["Gallery-quality print", "Ready to hang", "Premium frame"],

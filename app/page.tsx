@@ -274,7 +274,7 @@ export default function Home() {
                     Add a Canvas Print — 25% Off
                   </h2>
                   <p className="text-sm text-gray-500 mb-3">
-                    Gallery-quality 8×10 canvas print shipped to your door. Normally $79 — yours right now for just{" "}
+                    Gallery-quality 8×12 framed canvas print shipped to your door. Normally $79 — yours right now for just{" "}
                     <strong className="text-brand-green">$59</strong>.
                   </p>
                   <div className="flex items-center gap-3">

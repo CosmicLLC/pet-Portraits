@@ -33,7 +33,7 @@ export async function sendBrowseAbandonmentEmail(to: string) {
           <div style="background:#fff;border:1px solid #E5E0D8;border-radius:12px;padding:20px;text-align:center;">
             <p style="margin:0 0 6px;font-size:13px;color:#C4A35A;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Special offer</p>
             <p style="margin:0 0 10px;font-size:17px;font-weight:700;color:#2D4A3E;">Canvas prints ship in 5–7 days</p>
-            <p style="margin:0;color:#666;font-size:13px;">The perfect gift — gallery-quality 8×10 print delivered to your door.</p>
+            <p style="margin:0;color:#666;font-size:13px;">The perfect gift — gallery-quality 8×12 framed canvas delivered to your door.</p>
           </div>
         </div>
         <div style="border-top:1px solid #E5E0D8;padding:24px 32px;text-align:center;">

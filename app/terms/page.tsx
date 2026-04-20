@@ -73,7 +73,7 @@ export default function TermsPage() {
             <ul className="list-disc pl-5 space-y-1.5 mt-2">
               <li><strong>Digital Download</strong> — high-resolution portrait file delivered by email</li>
               <li><strong>Phone Wallpaper Pack</strong> — portrait optimized for mobile screens</li>
-              <li><strong>Canvas Print (8×10)</strong> — gallery-quality physical print shipped to your address</li>
+              <li><strong>Framed Canvas Print (8×12)</strong> — gallery-quality framed canvas shipped within the United States</li>
               <li><strong>Canvas + Digital Bundle</strong> — canvas print plus the digital download file</li>
             </ul>
             <p className="mt-3">

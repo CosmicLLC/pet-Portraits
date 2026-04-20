@@ -38,6 +38,9 @@ export async function POST(req: NextRequest) {
       lineItems.push({ price: PRICE_IDS.wallpaper, quantity: 1 });
     }
 
+    // Canvas and bundle ship a physical product — collect a US address.
+    const needsShipping = productType === "canvas" || productType === "bundle";
+
     const session = await getStripe().checkout.sessions.create({
       mode: "payment",
       line_items: lineItems,
@@ -47,6 +50,10 @@ export async function POST(req: NextRequest) {
         addWallpaper: addWallpaper ? "true" : "false",
       },
       ...(customerEmail && { customer_email: customerEmail }),
+      ...(needsShipping && {
+        shipping_address_collection: { allowed_countries: ["US"] },
+        phone_number_collection: { enabled: true },
+      }),
       success_url: `${baseUrl}?success=true&imageId=${encodeURIComponent(imageId)}&productType=${encodeURIComponent(productType)}`,
       cancel_url: `${baseUrl}?canceled=true`,
     });

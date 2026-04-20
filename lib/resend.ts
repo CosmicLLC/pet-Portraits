@@ -87,7 +87,7 @@ export async function sendDownloadEmail(to: string, downloadUrl: string, wallpap
         Turn it into a canvas print
       </h2>
       <p style="color:#666;font-size:14px;line-height:1.6;margin:0 0 20px;">
-        Display your portrait on a stunning 8&times;10 gallery-quality canvas.
+        Display your portrait on a stunning 8&times;12 framed gallery-quality canvas.
         Arrives in 5&ndash;7 days &mdash; the perfect gift for a pet lover.
       </p>
       <a href="${siteUrl()}"
@@ -113,7 +113,7 @@ export async function sendCanvasConfirmationEmail(to: string) {
   const content = `
     <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your canvas is on its way! 🖼️</h1>
     <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
-      We&rsquo;ve received your order for an 8&times;10 canvas print. Here&rsquo;s what happens next:
+      We&rsquo;ve received your order for an 8&times;12 framed canvas print. Here&rsquo;s what happens next:
     </p>
 
     <!-- Timeline -->
@@ -163,6 +163,48 @@ export async function sendCanvasConfirmationEmail(to: string) {
     from: fromEmail(),
     to,
     subject: "Your canvas print is confirmed — here's what's next 🐾",
+    html: baseTemplate(content),
+  });
+}
+
+export async function sendCanvasShippedEmail(
+  to: string,
+  tracking: { carrier: string; trackingNumber: string; trackingUrl: string | null }
+) {
+  const ctaBlock = tracking.trackingUrl
+    ? `
+    <div style="text-align:center;margin-bottom:32px;">
+      <a href="${tracking.trackingUrl}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:18px 48px;border-radius:50px;font-size:17px;font-weight:700;letter-spacing:-0.2px;">
+        Track My Package
+      </a>
+    </div>`
+    : "";
+
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your canvas has shipped! 📦</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
+      Great news — your Paw Masterpiece canvas is on its way. Here are your tracking details:
+    </p>
+
+    <div style="background:#fff;border:1px solid #E5E0D8;border-radius:12px;padding:20px;margin-bottom:24px;">
+      <p style="margin:0 0 6px;font-size:13px;color:#888;">Carrier</p>
+      <p style="margin:0 0 16px;font-size:17px;font-weight:700;color:#2D4A3E;">${tracking.carrier}</p>
+      <p style="margin:0 0 6px;font-size:13px;color:#888;">Tracking number</p>
+      <p style="margin:0;font-size:15px;font-weight:700;color:#2D4A3E;font-family:monospace;">${tracking.trackingNumber}</p>
+    </div>
+
+    ${ctaBlock}
+
+    <p style="color:#666;font-size:14px;line-height:1.6;margin:0;">
+      Typical transit is 3&ndash;5 business days. If there&rsquo;s any issue with your delivery, just reply to this email.
+    </p>
+  `;
+
+  await getResend().emails.send({
+    from: fromEmail(),
+    to,
+    subject: "Your canvas print has shipped 📦",
     html: baseTemplate(content),
   });
 }
