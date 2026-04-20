@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { extractTracking, type ProdigiOrderResponse } from "@/lib/prodigi";
-import { sendCanvasShippedEmail } from "@/lib/resend";
+import { sendPrintShippedEmail } from "@/lib/resend";
 import { logEvent } from "@/lib/events";
 
 // Prodigi pub/sub status webhook.
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
 
   if (justShipped && trackingNumber) {
     try {
-      await sendCanvasShippedEmail(order.email, {
+      await sendPrintShippedEmail(order.email, {
         carrier: carrier ?? "your carrier",
         trackingNumber,
         trackingUrl: trackingUrl ?? null,

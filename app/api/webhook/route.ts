@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
-import { sendDownloadEmail, sendCanvasConfirmationEmail } from "@/lib/resend";
+import { sendDownloadEmail, sendPhysicalConfirmationEmail } from "@/lib/resend";
 import { list, put } from "@vercel/blob";
 import sharp from "sharp";
 import Stripe from "stripe";
@@ -9,10 +9,16 @@ import { signDownloadToken } from "@/lib/download-token";
 import { logEvent } from "@/lib/events";
 import {
   createProdigiOrder,
-  getCanvasSku,
+  getProdigiSkuForProduct,
   isProdigiConfigured,
+  isProdigiSkuConfigured,
   type ProdigiAddress,
 } from "@/lib/prodigi";
+import { isPhysicalProduct } from "@/lib/products";
+import { upscaleForPrint, isUpscalerConfigured } from "@/lib/upscale";
+
+// Upscaling + Prodigi can take 15-30s on a physical order.
+export const maxDuration = 60;
 
 // 9:19.5 — iPhone 14 Pro resolution
 const WALLPAPER_W = 1290;
@@ -131,7 +137,7 @@ export async function POST(req: NextRequest) {
       // Capture shipping address for physical products. Newer Stripe API versions
       // nest this under collected_information; older versions expose it directly
       // on the session. Support both so we don't care which one's in play.
-      const needsShipping = productType === "canvas" || productType === "bundle";
+      const needsShipping = isPhysicalProduct(productType);
       const sessionAny = session as unknown as {
         shipping_details?: { name?: string | null; address?: Stripe.Address | null } | null;
         collected_information?: {
@@ -195,12 +201,12 @@ export async function POST(req: NextRequest) {
       if (productType === "digital" || productType === "wallpaper") {
         await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl);
         console.log(`Download email sent to ${email} for ${productType}`);
-      } else if (productType === "canvas") {
-        await sendCanvasConfirmationEmail(email);
-        console.log(`Canvas order confirmed for ${email}`, { imageId, productType });
+      } else if (productType === "display" || productType === "mounted" || productType === "canvas") {
+        await sendPhysicalConfirmationEmail(email, productType);
+        console.log(`Physical order confirmed for ${email}`, { imageId, productType });
       } else if (productType === "bundle") {
         await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl);
-        await sendCanvasConfirmationEmail(email);
+        await sendPhysicalConfirmationEmail(email, productType);
         console.log(`Bundle fulfillment for ${email}`);
       }
 
@@ -209,14 +215,34 @@ export async function POST(req: NextRequest) {
       // doesn't retry (the customer already paid, the Order row exists, an
       // admin can manually retry from the dashboard).
       if (needsShipping && shippingAddress && shippingName) {
-        if (!isProdigiConfigured()) {
-          console.warn(`Prodigi not configured — skipping fulfillment for order ${order.id}`);
+        if (!isProdigiConfigured() || !isProdigiSkuConfigured(productType)) {
+          console.warn(`Prodigi not configured for ${productType} — skipping fulfillment for order ${order.id}`);
           await logEvent("warning", "webhook", "Prodigi not configured, order not sent to printer", {
             orderId: order.id,
             email,
+            productType,
           });
         } else {
           try {
+            // Upscale the Gemini output (1024x1024) to a print-ready resolution
+            // before sending to Prodigi. Pay-per-sale economics — we only burn
+            // upscale credits on paid orders. If the upscaler isn't configured
+            // or fails, we fall back to the original blob URL and Prodigi will
+            // print whatever resolution they receive.
+            let printImageUrl = portraitBlobUrl;
+            if (isUpscalerConfigured()) {
+              try {
+                printImageUrl = await upscaleForPrint(portraitBlobUrl, imageId);
+                console.log(`Upscaled print asset for order ${order.id}`);
+              } catch (upErr) {
+                console.error("Upscale failed, falling back to original:", upErr);
+                await logEvent("warning", "webhook", "Upscale failed, using original resolution", {
+                  orderId: order.id,
+                  error: upErr instanceof Error ? upErr.message : String(upErr),
+                });
+              }
+            }
+
             const prodigiAddress: ProdigiAddress = {
               line1: shippingAddress.line1 ?? "",
               line2: shippingAddress.line2 ?? undefined,
@@ -227,8 +253,8 @@ export async function POST(req: NextRequest) {
             };
             const prodigi = await createProdigiOrder({
               merchantReference: order.id,
-              sku: getCanvasSku(),
-              imageUrl: portraitBlobUrl,
+              sku: getProdigiSkuForProduct(productType),
+              imageUrl: printImageUrl,
               recipient: {
                 name: shippingName,
                 email,
@@ -242,6 +268,7 @@ export async function POST(req: NextRequest) {
                 prodigiOrderId: prodigi.order.id,
                 prodigiStatus: "InProgress",
                 prodigiStage: prodigi.order.status.stage,
+                printReadyBlobUrl: printImageUrl !== portraitBlobUrl ? printImageUrl : undefined,
               },
             });
             console.log(`Prodigi order created ${prodigi.order.id} for ${order.id}`);

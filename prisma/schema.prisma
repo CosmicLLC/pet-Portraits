@@ -74,9 +74,10 @@ model Order {
   wallpaperBlobUrl    String?
   createdAt           DateTime @default(now())
 
-  // Physical fulfillment (canvas/bundle via Prodigi)
+  // Physical fulfillment (display/mounted/canvas/bundle via Prodigi)
   shippingName        String?
   shippingAddress     Json?
+  printReadyBlobUrl   String?  // AI-upscaled print asset, reused on retry
   prodigiOrderId      String?  @unique
   prodigiStatus       String?  // InProgress | Complete | Cancelled | Failed
   prodigiStage        String?  // More granular: AwaitingPayment | InProgress | Shipped | etc

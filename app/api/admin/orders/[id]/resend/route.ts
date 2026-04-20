@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { sendDownloadEmail, sendCanvasConfirmationEmail } from "@/lib/resend"
+import { sendDownloadEmail, sendPhysicalConfirmationEmail } from "@/lib/resend"
+import { isPhysicalProduct } from "@/lib/products"
 import { signDownloadToken } from "@/lib/download-token"
 import { logEvent } from "@/lib/events"
 
@@ -32,11 +33,11 @@ export async function POST(
   try {
     if (order.productType === "digital" || order.productType === "wallpaper") {
       await sendDownloadEmail(order.email, downloadUrl, wallpaperUrl)
-    } else if (order.productType === "canvas") {
-      await sendCanvasConfirmationEmail(order.email)
     } else if (order.productType === "bundle") {
       await sendDownloadEmail(order.email, downloadUrl, wallpaperUrl)
-      await sendCanvasConfirmationEmail(order.email)
+      await sendPhysicalConfirmationEmail(order.email, order.productType)
+    } else if (isPhysicalProduct(order.productType)) {
+      await sendPhysicalConfirmationEmail(order.email, order.productType)
     } else {
       // canvas_upsell or unknown — send the digital link.
       await sendDownloadEmail(order.email, downloadUrl, wallpaperUrl)

@@ -109,11 +109,20 @@ export async function sendDownloadEmail(to: string, downloadUrl: string, wallpap
   });
 }
 
-export async function sendCanvasConfirmationEmail(to: string) {
+// Human-readable description for each product type, used in the confirmation email
+const PRODUCT_EMAIL_LABEL: Record<string, string> = {
+  display: "11×14 display print",
+  mounted: "11×14 mounted print",
+  canvas: "8×12 framed canvas print",
+  bundle: "8×12 framed canvas print",
+};
+
+export async function sendPhysicalConfirmationEmail(to: string, productType: string) {
+  const label = PRODUCT_EMAIL_LABEL[productType] ?? "print";
   const content = `
-    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your canvas is on its way! 🖼️</h1>
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your print is on its way! 🖼️</h1>
     <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
-      We&rsquo;ve received your order for an 8&times;12 framed canvas print. Here&rsquo;s what happens next:
+      We&rsquo;ve received your order for a ${label}. Here&rsquo;s what happens next:
     </p>
 
     <!-- Timeline -->
@@ -122,7 +131,7 @@ export async function sendCanvasConfirmationEmail(to: string) {
         <div style="width:32px;height:32px;background:#2D4A3E;border-radius:50%;color:#FAF7F2;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:14px;text-align:center;line-height:32px;">1</div>
         <div>
           <p style="margin:0 0 2px;font-weight:700;color:#2D4A3E;font-size:15px;">We print your portrait</p>
-          <p style="margin:0;color:#888;font-size:13px;">Gallery-quality canvas, printed within 1&ndash;2 business days</p>
+          <p style="margin:0;color:#888;font-size:13px;">Gallery-quality print produced within 1&ndash;2 business days</p>
         </div>
       </div>
       <div style="display:flex;align-items:flex-start;margin-bottom:16px;">
@@ -162,12 +171,12 @@ export async function sendCanvasConfirmationEmail(to: string) {
   await getResend().emails.send({
     from: fromEmail(),
     to,
-    subject: "Your canvas print is confirmed — here's what's next 🐾",
+    subject: "Your print order is confirmed — here's what's next 🐾",
     html: baseTemplate(content),
   });
 }
 
-export async function sendCanvasShippedEmail(
+export async function sendPrintShippedEmail(
   to: string,
   tracking: { carrier: string; trackingNumber: string; trackingUrl: string | null }
 ) {
@@ -182,9 +191,9 @@ export async function sendCanvasShippedEmail(
     : "";
 
   const content = `
-    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your canvas has shipped! 📦</h1>
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your print has shipped! 📦</h1>
     <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
-      Great news — your Paw Masterpiece canvas is on its way. Here are your tracking details:
+      Great news — your Paw Masterpiece print is on its way. Here are your tracking details:
     </p>
 
     <div style="background:#fff;border:1px solid #E5E0D8;border-radius:12px;padding:20px;margin-bottom:24px;">
@@ -204,7 +213,7 @@ export async function sendCanvasShippedEmail(
   await getResend().emails.send({
     from: fromEmail(),
     to,
-    subject: "Your canvas print has shipped 📦",
+    subject: "Your print has shipped 📦",
     html: baseTemplate(content),
   });
 }

@@ -49,17 +49,34 @@ export type ProdigiOrderResponse = {
 };
 
 export function isProdigiConfigured(): boolean {
-  return Boolean(process.env.PRODIGI_API_KEY && process.env.PRODIGI_CANVAS_SKU);
+  return Boolean(process.env.PRODIGI_API_KEY);
 }
 
 function getBaseUrl(): string {
   return process.env.PRODIGI_ENV === "live" ? LIVE_BASE : SANDBOX_BASE;
 }
 
-export function getCanvasSku(): string {
-  const sku = process.env.PRODIGI_CANVAS_SKU;
-  if (!sku) throw new Error("PRODIGI_CANVAS_SKU not set");
+// Map our internal product type to the Prodigi SKU env var.
+// Bundle ships the framed canvas — its physical component == canvas.
+const PRODUCT_SKU_ENV: Record<string, string> = {
+  display: "PRODIGI_DISPLAY_SKU",
+  mounted: "PRODIGI_MOUNTED_SKU",
+  canvas: "PRODIGI_CANVAS_SKU",
+  bundle: "PRODIGI_CANVAS_SKU",
+};
+
+export function getProdigiSkuForProduct(productType: string): string {
+  const envVar = PRODUCT_SKU_ENV[productType];
+  if (!envVar) throw new Error(`No Prodigi SKU mapping for productType "${productType}"`);
+  const sku = process.env[envVar];
+  if (!sku) throw new Error(`${envVar} not set`);
   return sku;
+}
+
+export function isProdigiSkuConfigured(productType: string): boolean {
+  const envVar = PRODUCT_SKU_ENV[productType];
+  if (!envVar) return false;
+  return Boolean(process.env[envVar]);
 }
 
 export async function createProdigiOrder(

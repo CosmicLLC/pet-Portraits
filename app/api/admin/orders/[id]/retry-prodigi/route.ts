@@ -3,11 +3,16 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   createProdigiOrder,
-  getCanvasSku,
+  getProdigiSkuForProduct,
   isProdigiConfigured,
+  isProdigiSkuConfigured,
   type ProdigiAddress,
 } from "@/lib/prodigi";
+import { isPhysicalProduct } from "@/lib/products";
+import { upscaleForPrint, isUpscalerConfigured } from "@/lib/upscale";
 import { logEvent } from "@/lib/events";
+
+export const maxDuration = 60;
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,7 +31,7 @@ export async function POST(
 
   if (!isProdigiConfigured()) {
     return NextResponse.json(
-      { error: "Prodigi is not configured. Set PRODIGI_API_KEY and PRODIGI_CANVAS_SKU." },
+      { error: "Prodigi is not configured. Set PRODIGI_API_KEY." },
       { status: 400 }
     );
   }
@@ -34,8 +39,15 @@ export async function POST(
   const order = await prisma.order.findUnique({ where: { id: params.id } });
   if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-  if (order.productType !== "canvas" && order.productType !== "bundle") {
+  if (!isPhysicalProduct(order.productType)) {
     return NextResponse.json({ error: "Not a physical order" }, { status: 400 });
+  }
+
+  if (!isProdigiSkuConfigured(order.productType)) {
+    return NextResponse.json(
+      { error: `No Prodigi SKU configured for ${order.productType}` },
+      { status: 400 }
+    );
   }
 
   if (order.prodigiOrderId) {
@@ -63,10 +75,21 @@ export async function POST(
   };
 
   try {
+    // Reuse the print-ready asset if we already upscaled it once. Only burn
+    // a fresh upscale credit if we haven't.
+    let printImageUrl = order.printReadyBlobUrl ?? order.portraitBlobUrl;
+    if (!order.printReadyBlobUrl && isUpscalerConfigured()) {
+      try {
+        printImageUrl = await upscaleForPrint(order.portraitBlobUrl, order.imageId);
+      } catch (upErr) {
+        console.error("Admin retry upscale failed, falling back to original:", upErr);
+      }
+    }
+
     const prodigi = await createProdigiOrder({
       merchantReference: order.id,
-      sku: getCanvasSku(),
-      imageUrl: order.portraitBlobUrl,
+      sku: getProdigiSkuForProduct(order.productType),
+      imageUrl: printImageUrl,
       recipient: {
         name: order.shippingName,
         email: order.email,
@@ -79,6 +102,8 @@ export async function POST(
         prodigiOrderId: prodigi.order.id,
         prodigiStatus: "InProgress",
         prodigiStage: prodigi.order.status.stage,
+        printReadyBlobUrl:
+          printImageUrl !== order.portraitBlobUrl ? printImageUrl : undefined,
       },
     });
     await logEvent("info", "admin", "Prodigi order submitted by admin", {

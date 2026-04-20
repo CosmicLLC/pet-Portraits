@@ -73,8 +73,10 @@ export default function TermsPage() {
             <ul className="list-disc pl-5 space-y-1.5 mt-2">
               <li><strong>Digital Download</strong> — high-resolution portrait file delivered by email</li>
               <li><strong>Phone Wallpaper Pack</strong> — portrait optimized for mobile screens</li>
+              <li><strong>Display Print (11×14)</strong> — fine art print on backing board, bagged ready to frame, shipped within the United States</li>
+              <li><strong>Mounted Print (11×14)</strong> — fine art print with window mount and backing board, shipped within the United States</li>
               <li><strong>Framed Canvas Print (8×12)</strong> — gallery-quality framed canvas shipped within the United States</li>
-              <li><strong>Canvas + Digital Bundle</strong> — canvas print plus the digital download file</li>
+              <li><strong>Canvas + Digital Bundle</strong> — framed canvas plus the digital download file</li>
             </ul>
             <p className="mt-3">
               Prices are subject to change without notice. The price shown at the time of purchase

@@ -49,7 +49,7 @@ export default function StickyCartBar({ watermarkedImage, imageId, onError, wall
             <span className="text-gray-400 text-xs line-through">$98</span>
             <span className="text-[10px] text-brand-gold font-semibold bg-brand-gold/10 px-1.5 py-0.5 rounded-full">Save $9</span>
           </div>
-          <p className="text-xs text-gray-500 truncate">Digital + Canvas Print</p>
+          <p className="text-xs text-gray-500 truncate">Digital + Framed Canvas</p>
         </div>
 
         {/* CTA */}

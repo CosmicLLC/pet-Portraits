@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe, PRICE_IDS } from "@/lib/stripe";
+import { isPhysicalProduct } from "@/lib/products";
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,8 +39,9 @@ export async function POST(req: NextRequest) {
       lineItems.push({ price: PRICE_IDS.wallpaper, quantity: 1 });
     }
 
-    // Canvas and bundle ship a physical product — collect a US address.
-    const needsShipping = productType === "canvas" || productType === "bundle";
+    // Any physical product (display/mounted/canvas/bundle) ships via Prodigi
+    // and needs a US shipping address.
+    const needsShipping = isPhysicalProduct(productType);
 
     const session = await getStripe().checkout.sessions.create({
       mode: "payment",

@@ -17,7 +17,7 @@ const FAQS = [
   },
   {
     q: "What sizes are available?",
-    a: "Digital downloads are full-resolution (300 DPI), suitable for printing at any size. Canvas prints come framed at 8×12 inches — the perfect size for home display or gifting.",
+    a: "Three physical options: an 11×14 display print (fine art paper on a backing board, ready to slide into your own frame), an 11×14 mounted print (gallery-matted with a window mount for a finished look), and an 8×12 framed canvas (ready to hang). Digital downloads are full-resolution and suitable for printing at any size.",
   },
   {
     q: "Do you ship internationally?",

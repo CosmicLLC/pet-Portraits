@@ -29,11 +29,27 @@ const TIERS: Tier[] = [
     highlighted: false,
   },
   {
+    key: "display",
+    name: "Display Print 11×14",
+    price: "$39",
+    description: "Bagged ready to frame",
+    features: ["Fine art paper", "Rigid backing board", "Protective sleeve"],
+    highlighted: false,
+  },
+  {
+    key: "mounted",
+    name: "Mounted Print 11×14",
+    price: "$69",
+    description: "Gallery-matted & ready to frame",
+    features: ["Window mount + backing", "Fine art paper", "Gallery finish"],
+    highlighted: false,
+  },
+  {
     key: "canvas",
-    name: "Framed Canvas Print 8×12",
+    name: "Framed Canvas 8×12",
     price: "$79",
-    description: "Ships in 3–5 business days",
-    features: ["Gallery-quality print", "Ready to hang", "Premium frame"],
+    description: "Ready to hang",
+    features: ["Gallery-quality canvas", "Premium frame", "Ships in 3–5 days"],
     badge: "Most Popular",
     highlighted: false,
   },
@@ -42,8 +58,8 @@ const TIERS: Tier[] = [
     name: "Complete Bundle",
     price: "$89",
     originalPrice: "$98",
-    description: "Digital + Canvas together",
-    features: ["Everything in Digital", "Everything in Canvas", "Save $9"],
+    description: "Digital + Framed Canvas",
+    features: ["Full-res digital", "8×12 framed canvas", "Save $9"],
     badge: "Best Value",
     highlighted: true,
   },
@@ -93,8 +109,8 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected }:
         </span>
       </div>
 
-      {/* 3-tier grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      {/* 5-tier ladder — stacks on mobile, 2-up on tablet, row on desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {TIERS.map((tier) => (
           <div
             key={tier.key}
