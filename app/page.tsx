@@ -570,9 +570,8 @@ export default function Home() {
         <section className="relative bg-cream border-b border-gray-100 overflow-hidden isolate">
           {/* Background image layer — positioned to the right so the dog and framed
               portrait hug the viewport edge. Feathered masks + color washes dissolve
-              it into the cream canvas on the text side. Hidden on mobile where the
-              image competes with the text for space. */}
-          <div className="pointer-events-none absolute inset-0 select-none hidden md:block" aria-hidden="true">
+              it into the cream canvas on the text side. */}
+          <div className="pointer-events-none absolute inset-0 select-none" aria-hidden="true">
             <div
               className="absolute inset-0"
               style={{
