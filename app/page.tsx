@@ -11,6 +11,7 @@ import FooterNewsletter from "@/components/FooterNewsletter";
 import BrowseAbandonmentCapture from "@/components/BrowseAbandonmentCapture";
 import StickyCartBar from "@/components/StickyCartBar";
 import FAQ from "@/components/FAQ";
+import HomeJsonLd from "@/components/HomeJsonLd";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
@@ -386,6 +387,7 @@ export default function Home() {
   const isBrowsing = step === "style" || step === "upload";
   return (
     <main className="min-h-screen bg-cream">
+      {isBrowsing && <HomeJsonLd />}
       {isBrowsing && <ExitIntentPopup />}
 
       {/* Rotating top banner */}
@@ -962,7 +964,7 @@ export default function Home() {
                 >
                   <Image
                     src={s.src}
-                    alt={`${s.name} style example — husky portrait`}
+                    alt={`${s.name} pet portrait from photo — custom AI-generated ${s.name.toLowerCase()} dog painting example`}
                     fill
                     sizes="(max-width: 640px) 45vw, 22vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
