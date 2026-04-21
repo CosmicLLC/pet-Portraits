@@ -116,10 +116,12 @@ export async function POST(req: NextRequest) {
       if (addWallpaper === "true") {
         try {
           const wallpaperBuffer = await buildWallpaper(portraitBlobUrl);
+          // Private — served through /api/download/[orderId]?type=wallpaper,
+          // which validates the signed token before streaming the blob.
           const blob = await put(
             `wallpapers/${imageId}.jpg`,
             wallpaperBuffer,
-            { access: "public", addRandomSuffix: true, contentType: "image/jpeg" }
+            { access: "private", addRandomSuffix: true, contentType: "image/jpeg" }
           );
           wallpaperBlobUrl = blob.url;
           console.log(`Wallpaper generated for ${imageId}`);
@@ -190,13 +192,14 @@ export async function POST(req: NextRequest) {
         update: {},
       }).catch((err) => console.error("Subscriber auto-enroll failed:", err));
 
-      // Gated download links — HMAC-signed, streamed through /api/download/[orderId]
-      // so the raw blob URL never leaves our server.
+      // Gated download links — HMAC-signed with a 7-day expiry, streamed
+      // through /api/download/[orderId] so the raw blob URL never leaves
+      // our server.
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://pawmasterpiece.com";
-      const token = signDownloadToken(order.id);
-      const downloadUrl = `${baseUrl}/api/download/${order.id}?token=${token}`;
+      const { token, exp } = signDownloadToken(order.id);
+      const downloadUrl = `${baseUrl}/api/download/${order.id}?token=${token}&exp=${exp}`;
       const wallpaperDownloadUrl = wallpaperBlobUrl
-        ? `${baseUrl}/api/download/${order.id}?token=${token}&type=wallpaper`
+        ? `${baseUrl}/api/download/${order.id}?token=${token}&exp=${exp}&type=wallpaper`
         : undefined;
 
       if (productType === "digital" || productType === "wallpaper") {

@@ -24,10 +24,10 @@ export async function POST(
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || "https://pawmasterpiece.com"
-  const token = signDownloadToken(order.id)
-  const downloadUrl = `${baseUrl}/api/download/${order.id}?token=${token}`
+  const { token, exp } = signDownloadToken(order.id)
+  const downloadUrl = `${baseUrl}/api/download/${order.id}?token=${token}&exp=${exp}`
   const wallpaperUrl = order.wallpaperBlobUrl
-    ? `${baseUrl}/api/download/${order.id}?token=${token}&type=wallpaper`
+    ? `${baseUrl}/api/download/${order.id}?token=${token}&exp=${exp}&type=wallpaper`
     : undefined
 
   try {

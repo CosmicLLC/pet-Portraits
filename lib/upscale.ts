@@ -86,6 +86,10 @@ export async function upscaleForPrint(sourceUrl: string, imageId: string): Promi
   if (!imgRes.ok) throw new Error(`Failed to fetch upscaled image (${imgRes.status})`);
   const buf = Buffer.from(await imgRes.arrayBuffer());
 
+  // Public because Prodigi's print lab fetches this URL directly to produce
+  // the customer's print — no way to pass a bearer token to them. Protected
+  // by an unguessable random suffix on the blob pathname, which is only
+  // logged server-side and sent to Prodigi over HTTPS.
   const blob = await put(`print-ready/${imageId}.png`, buf, {
     access: "public",
     addRandomSuffix: true,

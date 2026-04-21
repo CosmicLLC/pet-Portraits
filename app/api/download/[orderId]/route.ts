@@ -10,10 +10,15 @@ export async function GET(
   { params }: { params: { orderId: string } }
 ) {
   const token = req.nextUrl.searchParams.get("token")
+  const expRaw = req.nextUrl.searchParams.get("exp")
+  const exp = expRaw ? parseInt(expRaw, 10) : NaN
   const type = req.nextUrl.searchParams.get("type") === "wallpaper" ? "wallpaper" : "portrait"
 
-  if (!token || !verifyDownloadToken(params.orderId, token)) {
-    return NextResponse.json({ error: "Invalid or missing token" }, { status: 403 })
+  if (!token || !Number.isFinite(exp) || !verifyDownloadToken(params.orderId, token, exp)) {
+    return NextResponse.json(
+      { error: "Invalid or expired download link. Ask support to resend." },
+      { status: 403 }
+    )
   }
 
   const order = await prisma.order.findUnique({ where: { id: params.orderId } })
