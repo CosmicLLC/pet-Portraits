@@ -459,6 +459,16 @@ export default function Home() {
                       <p className="text-sm font-medium text-gray-800 truncate">{session.user?.name ?? "My Account"}</p>
                       <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
                     </div>
+                    <Link
+                      href="/account/orders"
+                      onClick={() => setAvatarOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium"
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                      </svg>
+                      My Account
+                    </Link>
                     {(session.user as { role?: string })?.role === "admin" && (
                       <Link
                         href="/admin"
