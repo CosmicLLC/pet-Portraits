@@ -937,15 +937,28 @@ export default function Home() {
             <p className="text-gray-500 mb-10 max-w-md mx-auto">Four beautiful artistic styles, each one a masterpiece.</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { name: "Watercolor", tagline: "Soft & dreamy", gradient: "from-sky-200 via-pink-100 to-violet-200", emoji: "🎨" },
-                { name: "Oil Painting", tagline: "Rich & classic", gradient: "from-amber-800 via-orange-700 to-yellow-800", emoji: "🖼️" },
-                { name: "Renaissance", tagline: "Royal & regal", gradient: "from-red-900 via-amber-800 to-yellow-700", emoji: "👑" },
-                { name: "Line Art", tagline: "Clean & modern", gradient: "from-gray-300 via-gray-200 to-gray-300", emoji: "✏️" },
+                { name: "Watercolor", tagline: "Soft & dreamy", src: "/examples/watercolor.png" },
+                { name: "Oil Painting", tagline: "Rich & classic", src: "/examples/oil.png" },
+                { name: "Renaissance", tagline: "Royal & regal", src: "/examples/renaissance.png" },
+                { name: "Line Art", tagline: "Clean & modern", src: "/examples/lineart.png" },
               ].map((s) => (
-                <div key={s.name} className={`rounded-2xl bg-gradient-to-br ${s.gradient} p-6 flex flex-col items-center gap-2 text-white`}>
-                  <span className="text-3xl">{s.emoji}</span>
-                  <p className="font-display font-semibold text-sm drop-shadow">{s.name}</p>
-                  <p className="text-xs opacity-80">{s.tagline}</p>
+                <div
+                  key={s.name}
+                  className="relative rounded-2xl overflow-hidden aspect-[3/4] shadow-sm ring-1 ring-gray-100 group"
+                >
+                  <Image
+                    src={s.src}
+                    alt={`${s.name} style example — husky portrait`}
+                    fill
+                    sizes="(max-width: 640px) 45vw, 22vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
+                  {/* Bottom gradient for text legibility */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/30 to-transparent" aria-hidden="true" />
+                  <div className="absolute inset-x-0 bottom-0 p-3 text-left text-white">
+                    <p className="font-display font-semibold text-sm drop-shadow">{s.name}</p>
+                    <p className="text-xs opacity-90">{s.tagline}</p>
+                  </div>
                 </div>
               ))}
             </div>
