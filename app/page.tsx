@@ -25,8 +25,8 @@ const ANNOUNCEMENTS = [
 
 type Step = "upload" | "style" | "generate" | "preview";
 
-const STEPS: Step[] = ["upload", "style", "generate", "preview"];
-const STEP_LABELS = ["Upload", "Style", "Generate", "Preview"];
+const STEPS: Step[] = ["style", "upload", "generate", "preview"];
+const STEP_LABELS = ["Style", "Upload", "Generate", "Preview"];
 
 function formatCountdown(secs: number): string {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
@@ -35,7 +35,7 @@ function formatCountdown(secs: number): string {
 }
 
 export default function Home() {
-  const [step, setStep] = useState<Step>("upload");
+  const [step, setStep] = useState<Step>("style");
   const [file, setFile] = useState<File | null>(null);
   const [style, setStyle] = useState<StyleKey | null>(null);
   const [loading, setLoading] = useState(false);
@@ -129,7 +129,7 @@ export default function Home() {
   }, []);
 
   const resetState = useCallback(() => {
-    setStep("upload");
+    setStep("style");
     setFile(null);
     setStyle(null);
     setWatermarkedImage(null);
@@ -150,8 +150,8 @@ export default function Home() {
     const doScroll = () => {
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     };
-    if (step !== "upload") {
-      setStep("upload");
+    if (step !== "style") {
+      setStep("style");
       setError(null);
       setTimeout(doScroll, 100);
     } else {
@@ -161,8 +161,8 @@ export default function Home() {
 
   const handleBack = useCallback(() => {
     setError(null);
-    if (step === "style") setStep("upload");
-    else if (step === "generate") setStep("style");
+    if (step === "upload") setStep("style");
+    else if (step === "generate") setStep("upload");
     else if (step === "preview") setStep("generate");
   }, [step]);
 
@@ -177,13 +177,13 @@ export default function Home() {
 
   const handleFileSelected = useCallback((f: File) => {
     setFile(f);
-    setStep("style");
+    setStep("generate");
     setError(null);
   }, []);
 
   const handleStyleSelect = useCallback((s: StyleKey) => {
     setStyle(s);
-    setStep("generate");
+    setStep("upload");
     setError(null);
   }, []);
 
@@ -381,9 +381,12 @@ export default function Home() {
   }
 
   // ─── Main app ────────────────────────────────────────────────────────
+  // Landing-page marketing sections show during the first two steps (style + upload)
+  // so users browsing see all the copy, then disappear once generation starts.
+  const isBrowsing = step === "style" || step === "upload";
   return (
     <main className="min-h-screen bg-cream">
-      {step === "upload" && <ExitIntentPopup />}
+      {isBrowsing && <ExitIntentPopup />}
 
       {/* Rotating top banner */}
       <div className="bg-brand-green text-white text-center py-2.5 text-sm font-medium tracking-wide overflow-hidden">
@@ -563,10 +566,10 @@ export default function Home() {
         )}
       </header>
 
-      {/* Hero — upload step only. The product photo is a full-bleed atmospheric
+      {/* Hero — pre-generation only. The product photo is a full-bleed atmospheric
           background that dissolves into the cream on the text side, rather than
           sitting next to the copy as an obvious image. */}
-      {step === "upload" && (
+      {isBrowsing && (
         <section className="relative bg-cream border-b border-gray-100 overflow-hidden isolate">
           {/* Background image layer — positioned to the right so the dog and framed
               portrait hug the viewport edge. Feathered masks + color washes dissolve
@@ -641,8 +644,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* Money-back guarantee banner — upload step only */}
-      {step === "upload" && (
+      {/* Money-back guarantee banner — pre-generation only */}
+      {isBrowsing && (
         <div className="bg-brand-green/5 border-b border-brand-green/10">
           <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-center gap-3 text-center">
             <svg className="w-5 h-5 text-brand-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -721,11 +724,11 @@ export default function Home() {
 
         {/* Step content */}
         <div className="animate-fade-in-up">
-          {step === "upload" && (
-            <UploadStep onFileSelected={handleFileSelected} />
+          {step === "style" && (
+            <StylePicker selected={style} onSelect={handleStyleSelect} />
           )}
 
-          {step === "style" && (
+          {step === "upload" && (
             <div>
               <button
                 onClick={handleBack}
@@ -736,7 +739,7 @@ export default function Home() {
                 </svg>
                 Back
               </button>
-              <StylePicker selected={style} onSelect={handleStyleSelect} />
+              <UploadStep onFileSelected={handleFileSelected} />
             </div>
           )}
 
@@ -905,8 +908,8 @@ export default function Home() {
         )}
       </div>
 
-      {/* How It Works — upload step only */}
-      {step === "upload" && (
+      {/* How It Works — pre-generation only */}
+      {isBrowsing && (
         <section id="how-it-works" className="bg-white border-y border-gray-100 py-16 sm:py-20">
           <div className="max-w-4xl mx-auto px-4 text-center reveal">
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">How It Works</h2>
@@ -930,8 +933,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* Styles — upload step only */}
-      {step === "upload" && (
+      {/* Styles — pre-generation only */}
+      {isBrowsing && (
         <section id="styles" className="py-16 sm:py-20">
           <div className="max-w-4xl mx-auto px-4 text-center reveal">
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Choose Your Style</h2>
@@ -973,8 +976,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* Comparison table — upload step only */}
-      {step === "upload" && (
+      {/* Comparison table — pre-generation only */}
+      {isBrowsing && (
         <section className="bg-white border-t border-gray-100 py-16 sm:py-20">
           <div className="max-w-3xl mx-auto px-4 reveal">
             <div className="text-center mb-10">
@@ -1041,8 +1044,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* Photo gallery — upload step only */}
-      {step === "upload" && (
+      {/* Photo gallery — pre-generation only */}
+      {isBrowsing && (
         <section className="py-16 sm:py-20 bg-cream">
           <div className="max-w-4xl mx-auto px-4 reveal">
             <div className="text-center mb-10">
@@ -1085,8 +1088,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* Reviews — upload step only */}
-      {step === "upload" && (
+      {/* Reviews — pre-generation only */}
+      {isBrowsing && (
         <section id="reviews" className="bg-white border-t border-gray-100 py-16 sm:py-20">
           <div className="max-w-4xl mx-auto px-4 text-center reveal">
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">What Pet Parents Say</h2>
@@ -1115,8 +1118,8 @@ export default function Home() {
         </section>
       )}
 
-      {/* FAQ — upload step only */}
-      {step === "upload" && <FAQ />}
+      {/* FAQ — pre-generation only */}
+      {isBrowsing && <FAQ />}
 
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-12">
