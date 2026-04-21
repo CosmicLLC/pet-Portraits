@@ -953,11 +953,11 @@ export default function Home() {
                     sizes="(max-width: 640px) 45vw, 22vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                   />
-                  {/* Bottom gradient for text legibility */}
-                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/30 to-transparent" aria-hidden="true" />
-                  <div className="absolute inset-x-0 bottom-0 p-3 text-left text-white">
-                    <p className="font-display font-semibold text-sm drop-shadow">{s.name}</p>
-                    <p className="text-xs opacity-90">{s.tagline}</p>
+                  {/* Bottom gradient for text legibility — heavier so labels pop */}
+                  <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/55 to-transparent" aria-hidden="true" />
+                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 text-left text-white">
+                    <p className="font-display font-bold text-xl sm:text-2xl leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.85)]">{s.name}</p>
+                    <p className="text-sm mt-0.5 opacity-95 drop-shadow-[0_1px_4px_rgba(0,0,0,0.8)]">{s.tagline}</p>
                   </div>
                 </div>
               ))}
