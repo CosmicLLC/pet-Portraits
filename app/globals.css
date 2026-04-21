@@ -88,6 +88,7 @@ html {
   opacity: 0;
   transform: translateY(24px);
   transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  will-change: opacity, transform;
 }
 
 .reveal.visible {
@@ -98,6 +99,51 @@ html {
 .reveal-delay-1 { transition-delay: 0.1s; }
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
+
+/* Auto-staggered child reveals — drop .reveal-stagger on a parent to have
+   its direct children fade-up sequentially when the parent enters view. */
+.reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+  will-change: opacity, transform;
+}
+.reveal-stagger.visible > *:nth-child(1) { transition-delay: 0.00s; }
+.reveal-stagger.visible > *:nth-child(2) { transition-delay: 0.08s; }
+.reveal-stagger.visible > *:nth-child(3) { transition-delay: 0.16s; }
+.reveal-stagger.visible > *:nth-child(4) { transition-delay: 0.24s; }
+.reveal-stagger.visible > *:nth-child(5) { transition-delay: 0.32s; }
+.reveal-stagger.visible > *:nth-child(6) { transition-delay: 0.40s; }
+.reveal-stagger.visible > *:nth-child(7) { transition-delay: 0.48s; }
+.reveal-stagger.visible > *:nth-child(8) { transition-delay: 0.56s; }
+.reveal-stagger.visible > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Subtle parallax — element moves at a slower rate than scroll.
+   Tied to the --parallax-y custom property set by a tiny JS hook. */
+[data-parallax] {
+  transform: translate3d(0, var(--parallax-y, 0), 0);
+  will-change: transform;
+}
+
+/* Respect users who've asked for reduced motion — kill all reveal motion
+   and parallax, keep final states visible. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  [data-parallax] {
+    transform: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
 
 /* Hide scrollbar on mobile */
 .no-scrollbar::-webkit-scrollbar { display: none; }

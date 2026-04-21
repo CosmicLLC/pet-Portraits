@@ -570,9 +570,10 @@ export default function Home() {
         <section className="relative bg-cream border-b border-gray-100 overflow-hidden isolate">
           {/* Background image layer — positioned to the right so the dog and framed
               portrait hug the viewport edge. Feathered masks + color washes dissolve
-              it into the cream canvas on the text side. */}
+              it into the cream canvas on the text side. Subtle parallax on scroll. */}
           <div className="pointer-events-none absolute inset-0 select-none" aria-hidden="true">
             <div
+              data-parallax="0.12"
               className="absolute inset-0"
               style={{
                 backgroundImage: "url(/hero-pet.jpg)",
@@ -935,7 +936,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto px-4 text-center reveal">
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">Choose Your Style</h2>
             <p className="text-gray-500 mb-10 max-w-md mx-auto">Four beautiful artistic styles, each one a masterpiece.</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="reveal-stagger grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 { name: "Watercolor", tagline: "Soft & dreamy", src: "/examples/watercolor.png" },
                 { name: "Oil Painting", tagline: "Rich & classic", src: "/examples/oil.png" },
