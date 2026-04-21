@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   createProdigiOrder,
+  getProdigiAttributesForProduct,
   getProdigiSkuForProduct,
   isProdigiConfigured,
   isProdigiSkuConfigured,
@@ -90,6 +91,7 @@ export async function POST(
       merchantReference: order.id,
       sku: getProdigiSkuForProduct(order.productType),
       imageUrl: printImageUrl,
+      attributes: getProdigiAttributesForProduct(order.productType),
       recipient: {
         name: order.shippingName,
         email: order.email,

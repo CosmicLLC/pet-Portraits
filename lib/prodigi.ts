@@ -27,6 +27,9 @@ export type CreateProdigiOrderInput = {
   copies?: number;
   recipient: ProdigiRecipient;
   shippingMethod?: "Budget" | "Standard" | "Express" | "Overnight";
+  // SKU-specific attributes (frame color, wrap, etc). Required for some
+  // product families like ECO-FRA-CAN (framed canvas).
+  attributes?: Record<string, string>;
 };
 
 export type ProdigiOrderResponse = {
@@ -79,6 +82,20 @@ export function isProdigiSkuConfigured(productType: string): boolean {
   return Boolean(process.env[envVar]);
 }
 
+// Required SKU attributes for each product type. Display + mounted prints
+// don't need attributes. Framed canvas (ECO-FRA-CAN) requires color + wrap —
+// Prodigi rejects the order without them.
+const PRODUCT_ATTRIBUTES: Record<string, Record<string, string>> = {
+  display: {},
+  mounted: {},
+  canvas: { color: "black", wrap: "ImageWrap" },
+  bundle: { color: "black", wrap: "ImageWrap" },
+};
+
+export function getProdigiAttributesForProduct(productType: string): Record<string, string> {
+  return PRODUCT_ATTRIBUTES[productType] ?? {};
+}
+
 export async function createProdigiOrder(
   input: CreateProdigiOrderInput
 ): Promise<ProdigiOrderResponse> {
@@ -95,6 +112,7 @@ export async function createProdigiOrder(
         sku: input.sku,
         copies: input.copies ?? 1,
         sizing: "fillPrintArea",
+        attributes: input.attributes ?? {},
         assets: [{ printArea: "default", url: input.imageUrl }],
       },
     ],

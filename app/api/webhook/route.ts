@@ -9,6 +9,7 @@ import { signDownloadToken } from "@/lib/download-token";
 import { logEvent } from "@/lib/events";
 import {
   createProdigiOrder,
+  getProdigiAttributesForProduct,
   getProdigiSkuForProduct,
   isProdigiConfigured,
   isProdigiSkuConfigured,
@@ -255,6 +256,7 @@ export async function POST(req: NextRequest) {
               merchantReference: order.id,
               sku: getProdigiSkuForProduct(productType),
               imageUrl: printImageUrl,
+              attributes: getProdigiAttributesForProduct(productType),
               recipient: {
                 name: shippingName,
                 email,
