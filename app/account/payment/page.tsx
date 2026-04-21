@@ -135,7 +135,10 @@ export default async function AccountPaymentPage() {
           </ul>
         )}
 
-        <PaymentPortalButton hasCustomer={Boolean(customerId)} />
+        <PaymentPortalButton
+          hasCustomer={Boolean(customerId)}
+          loginUrl={process.env.STRIPE_BILLING_PORTAL_URL ?? null}
+        />
         <p className="text-xs text-gray-400 mt-3">
           Manage your cards securely on Stripe's hosted billing portal. We never see or store your card details.
         </p>
