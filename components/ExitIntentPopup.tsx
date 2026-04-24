@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { track } from "@/lib/analytics";
 
 export default function ExitIntentPopup() {
   const [visible, setVisible] = useState(false);
@@ -16,6 +17,7 @@ export default function ExitIntentPopup() {
     const handler = (e: MouseEvent) => {
       if (e.clientY <= 5) {
         setVisible(true);
+        track({ name: "exit_intent_shown" });
         document.removeEventListener("mouseleave", handler);
       }
     };
@@ -48,6 +50,7 @@ export default function ExitIntentPopup() {
       });
       if (!res.ok) throw new Error("Failed");
       setSubmitted(true);
+      track({ name: "sign_up", source: "exit-intent" });
       sessionStorage.setItem("exit-popup-dismissed", "1");
       setTimeout(dismiss, 2500);
     } catch {

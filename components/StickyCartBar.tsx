@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track, productValue } from "@/lib/analytics";
 
 interface StickyCartBarProps {
   watermarkedImage: string;
@@ -14,6 +15,8 @@ export default function StickyCartBar({ watermarkedImage, imageId, onError, wall
 
   const handleBuy = async () => {
     setLoading(true);
+    const value = productValue("bundle") + (wallpaperSelected ? 1.99 : 0);
+    track({ name: "begin_checkout", productType: "bundle", value, imageId });
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",

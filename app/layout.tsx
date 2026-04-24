@@ -3,6 +3,7 @@ import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import ScrollRevealInit from "@/components/ScrollRevealInit";
+import Analytics, { AnalyticsNoScript } from "@/components/Analytics";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -126,8 +127,10 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-cream font-body text-gray-800 antialiased">
+        <AnalyticsNoScript />
         <AuthProvider>{children}</AuthProvider>
         <ScrollRevealInit />
+        <Analytics />
       </body>
     </html>
   );

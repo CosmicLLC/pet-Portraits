@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@/lib/analytics";
 
 export default function FooterNewsletter() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,7 @@ export default function FooterNewsletter() {
       });
       if (!res.ok) throw new Error("Failed");
       setSubmitted(true);
+      track({ name: "sign_up", source: "footer" });
     } catch {
       setError("Something went wrong — please try again.");
     } finally {

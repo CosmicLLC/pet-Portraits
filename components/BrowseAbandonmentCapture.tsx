@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@/lib/analytics";
 
 interface Props {
   imageId: string;
@@ -25,6 +26,7 @@ export default function BrowseAbandonmentCapture({ imageId, onCaptured }: Props)
       });
       if (!res.ok) throw new Error("Failed");
       setSubmitted(true);
+      track({ name: "sign_up", source: "browse-abandonment" });
       onCaptured();
     } catch {
       setError("Something went wrong — please try again.");

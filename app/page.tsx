@@ -17,6 +17,9 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import PhoneWallpaperPreview from "@/components/PhoneWallpaperPreview";
 import type { StyleKey } from "@/lib/gemini";
+import { track, productValue } from "@/lib/analytics";
+import type { ProductType } from "@/lib/products";
+import { HOME_REVIEWS } from "@/lib/reviews";
 
 const ANNOUNCEMENTS = [
   "Custom Paw Masterpiece — Ready in Seconds, Not Days",
@@ -66,6 +69,28 @@ export default function Home() {
   // Read URL params only after mount to avoid hydration mismatch
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Fire purchase event once per unique Stripe redirect. Guarded by sessionStorage
+  // on imageId so back-button or hard-reload doesn't double-count. Value is
+  // derived from productType; transaction_id left undefined because Stripe
+  // session_id isn't on the success URL — CAPI server-side will supply it later.
+  useEffect(() => {
+    if (!mounted) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") !== "true") return;
+    const imageId = params.get("imageId");
+    const productType = params.get("productType") as ProductType | null;
+    if (!imageId) return;
+    const key = `purchase-tracked:${imageId}:${productType ?? ""}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    const value = productType ? productValue(productType) : undefined;
+    track({
+      name: "purchase",
+      value,
+      productType: productType ?? undefined,
+    });
+  }, [mounted]);
   const urlParams = mounted ? new URLSearchParams(window.location.search) : null;
   const isSuccess = urlParams?.get("success") === "true";
   const isCanceled = urlParams?.get("canceled") === "true";
@@ -192,6 +217,7 @@ export default function Home() {
     if (!file || !style) return;
     setLoading(true);
     setError(null);
+    track({ name: "portrait_generation_start", style });
     try {
       const formData = new FormData();
       formData.append("image", file);
@@ -202,6 +228,7 @@ export default function Home() {
       setWatermarkedImage(data.watermarkedImage);
       setImageId(data.imageId);
       setStep("preview");
+      track({ name: "portrait_generated", style, imageId: data.imageId });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Generation failed — please try again or use a clearer photo.");
     } finally {
@@ -212,6 +239,7 @@ export default function Home() {
   const handleUpsell = useCallback(async () => {
     if (!successImageId) return;
     setUpsellLoading(true);
+    track({ name: "begin_checkout", productType: "canvas" as ProductType, value: 59, imageId: successImageId });
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
@@ -1107,11 +1135,7 @@ export default function Home() {
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">What Pet Parents Say</h2>
             <p className="text-gray-500 mb-12 max-w-md mx-auto">Thousands of happy customers and counting.</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              {[
-                { name: "Sarah M.", review: "I cried when I saw my dog Charlie as an oil painting. It\u2019s now framed above my fireplace. Absolutely stunning.", stars: 5, pet: "Golden Retriever mom" },
-                { name: "James T.", review: "Ordered the watercolor style for my cat\u2019s birthday (yes, I\u2019m that person). It was ready in 30 seconds and looks incredible.", stars: 5, pet: "Cat dad" },
-                { name: "Priya K.", review: "Used this as a holiday gift for my sister. She called me crying. Best gift idea ever. The line art was chef\u2019s kiss.", stars: 5, pet: "Gift giver" },
-              ].map((r) => (
+              {HOME_REVIEWS.map((r) => (
                 <div key={r.name} className="bg-gray-50 rounded-2xl p-6 text-left">
                   <div className="flex gap-0.5 mb-3">
                     {[...Array(r.stars)].map((_, i) => (
