@@ -13,15 +13,19 @@ export interface FormatSpec {
   // Meta's recommended upload dimensions for this placement
   W: number;
   H: number;
-  // Cream band at top (headline + subhead)
+  // Cream band at top (brand lockup + headline + subhead)
   topBandH: number;
   // Photograph band height — the hero visual
   photoH: number;
   // Cream band at bottom (CTA + URL)
   bottomBandH: number;
+  // Brand lockup (logo + wordmark) sizing at the top of the top band
+  brandPadTop: number;
+  brandLogoSize: number;
+  brandWordmarkSize: number;
+  brandGap: number; // Gap between brand lockup and headline
   // Type-system layout numbers — each tuned per aspect ratio to keep
   // headlines legible at every placement without word-wrap surprises.
-  headlinePadTop: number;
   headlineSize: number;
   subheadSize: number;
   subheadGap: number;
@@ -42,19 +46,22 @@ export const FORMATS: FormatSpec[] = [
     label: "Meta feed (1:1)",
     W: 1080,
     H: 1080,
-    topBandH: 280,
+    topBandH: 300,
     photoH: 540,
-    bottomBandH: 260,
-    headlinePadTop: 36,
-    headlineSize: 58,
+    bottomBandH: 240,
+    brandPadTop: 26,
+    brandLogoSize: 32,
+    brandWordmarkSize: 22,
+    brandGap: 22,
+    headlineSize: 54,
     subheadSize: 22,
     subheadGap: 14,
     ctaBtnW: 520,
     ctaBtnH: 72,
-    ctaPadTop: 50,
+    ctaPadTop: 40,
     ctaSize: 22,
     urlSize: 16,
-    urlGap: 22,
+    urlGap: 20,
     badgeH: 36,
     badgeFontSize: 15,
     badgePadX: 16,
@@ -64,19 +71,22 @@ export const FORMATS: FormatSpec[] = [
     label: "Meta feed vertical (4:5)",
     W: 1080,
     H: 1350,
-    topBandH: 320,
+    topBandH: 360,
     photoH: 700,
-    bottomBandH: 330,
-    headlinePadTop: 50,
-    headlineSize: 62,
+    bottomBandH: 290,
+    brandPadTop: 34,
+    brandLogoSize: 36,
+    brandWordmarkSize: 24,
+    brandGap: 26,
+    headlineSize: 58,
     subheadSize: 24,
     subheadGap: 18,
     ctaBtnW: 580,
     ctaBtnH: 80,
-    ctaPadTop: 70,
+    ctaPadTop: 54,
     ctaSize: 24,
     urlSize: 18,
-    urlGap: 28,
+    urlGap: 26,
     badgeH: 40,
     badgeFontSize: 17,
     badgePadX: 18,
@@ -86,19 +96,22 @@ export const FORMATS: FormatSpec[] = [
     label: "Reels / Stories / TikTok (9:16)",
     W: 1080,
     H: 1920,
-    topBandH: 460,
+    topBandH: 520,
     photoH: 980,
-    bottomBandH: 480,
-    headlinePadTop: 110,
-    headlineSize: 72,
+    bottomBandH: 420,
+    brandPadTop: 70,
+    brandLogoSize: 48,
+    brandWordmarkSize: 30,
+    brandGap: 40,
+    headlineSize: 68,
     subheadSize: 28,
     subheadGap: 28,
     ctaBtnW: 680,
     ctaBtnH: 92,
-    ctaPadTop: 120,
+    ctaPadTop: 90,
     ctaSize: 28,
     urlSize: 20,
-    urlGap: 32,
+    urlGap: 30,
     badgeH: 46,
     badgeFontSize: 19,
     badgePadX: 22,
@@ -108,19 +121,22 @@ export const FORMATS: FormatSpec[] = [
     label: "Landscape / desktop feed (16:9)",
     W: 1200,
     H: 628,
-    topBandH: 150,
+    topBandH: 170,
     photoH: 340,
-    bottomBandH: 138,
-    headlinePadTop: 24,
-    headlineSize: 42,
-    subheadSize: 18,
+    bottomBandH: 118,
+    brandPadTop: 14,
+    brandLogoSize: 22,
+    brandWordmarkSize: 16,
+    brandGap: 12,
+    headlineSize: 38,
+    subheadSize: 17,
     subheadGap: 8,
     ctaBtnW: 380,
-    ctaBtnH: 54,
-    ctaPadTop: 30,
+    ctaBtnH: 52,
+    ctaPadTop: 22,
     ctaSize: 18,
     urlSize: 13,
-    urlGap: 14,
+    urlGap: 12,
     badgeH: 30,
     badgeFontSize: 13,
     badgePadX: 14,
@@ -130,19 +146,22 @@ export const FORMATS: FormatSpec[] = [
     label: "Pinterest pin (2:3)",
     W: 1000,
     H: 1500,
-    topBandH: 340,
+    topBandH: 380,
     photoH: 800,
-    bottomBandH: 360,
-    headlinePadTop: 60,
-    headlineSize: 60,
+    bottomBandH: 320,
+    brandPadTop: 40,
+    brandLogoSize: 38,
+    brandWordmarkSize: 24,
+    brandGap: 28,
+    headlineSize: 56,
     subheadSize: 22,
     subheadGap: 18,
     ctaBtnW: 560,
     ctaBtnH: 78,
-    ctaPadTop: 80,
+    ctaPadTop: 62,
     ctaSize: 22,
     urlSize: 16,
-    urlGap: 28,
+    urlGap: 26,
     badgeH: 40,
     badgeFontSize: 17,
     badgePadX: 18,
@@ -213,6 +232,7 @@ export function drawAd(
   format: FormatSpec,
   copy: AdCopy,
   baseImage: HTMLImageElement | null,
+  logoImage: HTMLImageElement | null,
   opts: RenderOptions = {},
 ) {
   const { clear = true, placeholder = true } = opts;
@@ -226,7 +246,40 @@ export function drawAd(
     ctx.fillRect(0, 0, W, H);
   }
 
-  // Photo band
+  // ── Brand lockup (logo + wordmark) at the top of the top band ──────
+  // Center-aligned, logo-then-wordmark horizontal arrangement. A thin gold
+  // rule under the wordmark ties the top band into the overall brand.
+  const wordmark = "PAW MASTERPIECE";
+  const logoSize = format.brandLogoSize;
+  const wmSize = format.brandWordmarkSize;
+  ctx.font = `700 ${wmSize}px "Playfair Display", serif`;
+  ctx.textBaseline = "middle";
+  const wmWidth = ctx.measureText(wordmark).width;
+  const logoGap = Math.round(logoSize * 0.35);
+  const lockupW =
+    (logoImage && logoImage.complete ? logoSize + logoGap : 0) + wmWidth;
+  const lockupX = (W - lockupW) / 2;
+  const lockupCenterY = format.brandPadTop + logoSize / 2;
+
+  if (logoImage && logoImage.complete && logoImage.naturalWidth > 0) {
+    ctx.drawImage(logoImage, lockupX, format.brandPadTop, logoSize, logoSize);
+    ctx.fillStyle = BRAND.green;
+    ctx.textAlign = "left";
+    ctx.fillText(wordmark, lockupX + logoSize + logoGap, lockupCenterY);
+  } else {
+    ctx.fillStyle = BRAND.green;
+    ctx.textAlign = "center";
+    ctx.fillText(wordmark, W / 2, lockupCenterY);
+  }
+
+  // Gold accent rule under the lockup
+  const ruleY = format.brandPadTop + logoSize + Math.round(format.brandGap * 0.35);
+  const ruleW = Math.round(W * 0.12);
+  const ruleX = (W - ruleW) / 2;
+  ctx.fillStyle = BRAND.gold;
+  ctx.fillRect(ruleX, ruleY, ruleW, 2);
+
+  // ── Photo band ────────────────────────────────────────────────────
   const photoY = format.topBandH;
   const photoH = format.photoH;
 
@@ -247,17 +300,16 @@ export function drawAd(
     }
     ctx.drawImage(baseImage, sx, sy, sw, sh, 0, photoY, W, photoH);
   } else if (placeholder) {
-    // Soft placeholder so the layout reads when no image is loaded yet.
     ctx.fillStyle = "#E5E0D8";
     ctx.fillRect(0, photoY, W, photoH);
     ctx.fillStyle = "#B5AFA6";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = `500 ${Math.round(format.subheadSize * 1.3)}px "DM Sans", sans-serif`;
-    ctx.fillText("Upload a base image →", W / 2, photoY + photoH / 2);
+    ctx.fillText("Upload or generate a base image →", W / 2, photoY + photoH / 2);
   }
 
-  // Headline (multi-line, \n separated)
+  // ── Headline (multi-line, \n separated) ───────────────────────────
   ctx.fillStyle = BRAND.green;
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
@@ -265,19 +317,20 @@ export function drawAd(
 
   const hlLines = copy.headline.split("\n");
   const lineH = format.headlineSize * 1.08;
-  const headlineStartY = format.headlinePadTop;
+  // Headline sits under the brand lockup: logo size + accent rule + spacing
+  const headlineStartY = format.brandPadTop + logoSize + format.brandGap;
   hlLines.forEach((line, i) => {
     ctx.fillText(line, W / 2, headlineStartY + i * lineH);
   });
 
-  // Subhead
+  // ── Subhead ───────────────────────────────────────────────────────
   ctx.fillStyle = BRAND.muted;
   ctx.font = `500 ${format.subheadSize}px "DM Sans", sans-serif`;
   const subheadY =
     headlineStartY + hlLines.length * lineH + format.subheadGap;
   wrapLine(ctx, copy.subhead, W / 2, subheadY, W * 0.86, format.subheadSize * 1.4);
 
-  // Bottom band: CTA pill + URL
+  // ── Bottom band: CTA pill + URL ───────────────────────────────────
   const bottomY = H - format.bottomBandH;
   const btnW = Math.min(format.ctaBtnW, W - 80);
   const btnH = format.ctaBtnH;
@@ -294,12 +347,13 @@ export function drawAd(
   ctx.textBaseline = "middle";
   ctx.fillText(copy.cta, W / 2, btnY + btnH / 2);
 
-  ctx.fillStyle = BRAND.muted;
-  ctx.font = `500 ${format.urlSize}px "DM Sans", sans-serif`;
+  // URL — promoted to brand-green + bold for clearer brand reinforcement
+  ctx.fillStyle = BRAND.green;
+  ctx.font = `600 ${format.urlSize}px "DM Sans", sans-serif`;
   ctx.textBaseline = "top";
   ctx.fillText(copy.url, W / 2, btnY + btnH + format.urlGap);
 
-  // Badge pill over photo, bottom-left
+  // ── Badge pill over photo, bottom-left ────────────────────────────
   if (copy.badge) {
     const badgeY = photoY + photoH - format.badgeH - 24;
     const badgeX = 24;

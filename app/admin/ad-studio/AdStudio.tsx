@@ -13,10 +13,11 @@ interface PreviewCanvasProps {
   formatId: FormatId;
   copy: AdCopy;
   baseImage: HTMLImageElement | null;
+  logoImage: HTMLImageElement | null;
   onRegister: (id: FormatId, canvas: HTMLCanvasElement | null) => void;
 }
 
-function PreviewCanvas({ formatId, copy, baseImage, onRegister }: PreviewCanvasProps) {
+function PreviewCanvas({ formatId, copy, baseImage, logoImage, onRegister }: PreviewCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const format = FORMATS.find((f) => f.id === formatId)!;
 
@@ -27,8 +28,8 @@ function PreviewCanvas({ formatId, copy, baseImage, onRegister }: PreviewCanvasP
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    drawAd(canvasRef.current, format, copy, baseImage);
-  }, [format, copy, baseImage]);
+    drawAd(canvasRef.current, format, copy, baseImage, logoImage);
+  }, [format, copy, baseImage, logoImage]);
 
   const displayCap = formatId === "9x16" || formatId === "2x3" ? 280 : 420;
   const scale = displayCap / format.W;
@@ -70,6 +71,12 @@ export default function AdStudio() {
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [genAspectRatio, setGenAspectRatio] = useState<"1:1" | "16:9" | "3:4" | "9:16">("16:9");
+  // Editable prompt — initialized from preset when preset changes, but the
+  // user can freely edit, append extra instructions, or write from scratch.
+  const [customPrompt, setCustomPrompt] = useState<string>(PRESETS[0].copy ? PRESETS[0].imagePrompt ?? "" : "");
+  // Brand logo stamped onto every ad output. Loaded once on mount from
+  // the site's existing /logo.png asset.
+  const [logoImage, setLogoImage] = useState<HTMLImageElement | null>(null);
 
   const canvasRefs = useRef<Map<FormatId, HTMLCanvasElement>>(new Map());
 
@@ -89,6 +96,14 @@ export default function AdStudio() {
     document.fonts.ready.then(() => setFontsReady(true));
   }, []);
 
+  // Load the brand logo once. Re-renders propagate via logoImage state.
+  useEffect(() => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => setLogoImage(img);
+    img.src = "/logo.png";
+  }, []);
+
   const preset = useMemo(() => getPreset(presetId), [presetId]);
 
   const applyPreset = useCallback((id: string) => {
@@ -96,6 +111,8 @@ export default function AdStudio() {
     if (!p) return;
     setPresetId(id);
     setCopy(p.copy);
+    setCustomPrompt(p.imagePrompt ?? "");
+    setGenerateError(null);
   }, []);
 
   const onImageUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,15 +144,21 @@ export default function AdStudio() {
   }, [enabledFormats, downloadOne]);
 
   const copyPrompt = useCallback(() => {
-    if (!preset?.imagePrompt) return;
-    navigator.clipboard.writeText(preset.imagePrompt).then(() => {
+    const text = customPrompt.trim();
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
       setPromptCopied(true);
       setTimeout(() => setPromptCopied(false), 2000);
     });
+  }, [customPrompt]);
+
+  const resetPrompt = useCallback(() => {
+    if (preset?.imagePrompt) setCustomPrompt(preset.imagePrompt);
   }, [preset]);
 
   const generateImage = useCallback(async () => {
-    if (!preset?.imagePrompt || generating) return;
+    const promptText = customPrompt.trim();
+    if (!promptText || generating) return;
     setGenerating(true);
     setGenerateError(null);
     try {
@@ -143,7 +166,7 @@ export default function AdStudio() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: preset.imagePrompt,
+          prompt: promptText,
           aspectRatio: genAspectRatio,
         }),
       });
@@ -153,7 +176,7 @@ export default function AdStudio() {
       const img = new Image();
       img.onload = () => {
         setBaseImage(img);
-        setBaseImageName(`Imagen · ${preset.name}`);
+        setBaseImageName(`Imagen · ${preset?.name ?? "custom prompt"}`);
         setGenerating(false);
       };
       img.onerror = () => {
@@ -165,7 +188,11 @@ export default function AdStudio() {
       setGenerateError(err instanceof Error ? err.message : "Generation failed");
       setGenerating(false);
     }
-  }, [preset, generating, genAspectRatio]);
+  }, [customPrompt, preset, generating, genAspectRatio]);
+
+  const promptIsEdited = preset?.imagePrompt
+    ? customPrompt.trim() !== preset.imagePrompt.trim()
+    : customPrompt.trim().length > 0;
 
   const toggleFormat = useCallback((id: FormatId) => {
     setEnabledFormats((prev) => {
@@ -236,73 +263,91 @@ export default function AdStudio() {
             </div>
           </label>
 
-          {preset?.imagePrompt && (
-            <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
-              {/* Generate directly via Imagen 4 */}
-              <div>
-                <label className="block text-xs text-gray-500 mb-2">
-                  Generate with AI (Imagen 4)
+          <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+            {/* Editable prompt */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-medium text-gray-600">
+                  Prompt
                 </label>
-                <div className="flex items-center gap-2 mb-2">
-                  <label className="text-xs text-gray-500">Aspect:</label>
-                  {(["16:9", "1:1", "3:4", "9:16"] as const).map((ar) => (
-                    <button
-                      key={ar}
-                      onClick={() => setGenAspectRatio(ar)}
-                      className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-colors ${
-                        genAspectRatio === ar
-                          ? "bg-brand-green text-white border-brand-green"
-                          : "bg-white border-gray-200 text-gray-600 hover:border-brand-green/40"
-                      }`}
-                    >
-                      {ar}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={generateImage}
-                  disabled={generating}
-                  className="w-full bg-brand-green text-cream py-2.5 rounded-xl text-sm font-display font-semibold hover:bg-brand-green/90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-                >
-                  {generating ? (
-                    <>
-                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                      Generating…
-                    </>
-                  ) : (
-                    "✨ Generate with AI"
-                  )}
-                </button>
-                {generateError && (
-                  <p className="text-xs text-red-600 mt-2">{generateError}</p>
+                {promptIsEdited && preset?.imagePrompt && (
+                  <button
+                    onClick={resetPrompt}
+                    className="text-[10px] text-gray-400 hover:text-brand-green transition-colors"
+                  >
+                    Reset to preset
+                  </button>
                 )}
-                <p className="text-[10px] text-gray-400 mt-2">
-                  Uses the existing Gemini API key. ~$0.04 per image.
-                </p>
               </div>
+              <textarea
+                value={customPrompt}
+                onChange={(e) => setCustomPrompt(e.target.value)}
+                rows={6}
+                placeholder="Describe the ad scene. Start from a preset or write your own."
+                className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green resize-y font-mono"
+              />
+              <p className="text-[10px] text-gray-400 mt-1">
+                {customPrompt.length} / 4000 chars
+                {promptIsEdited && " · edited"}
+              </p>
+            </div>
 
-              {/* Or copy to paste elsewhere */}
-              <div className="pt-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-2">
-                  Prefer to use Midjourney / Sora instead?
-                </p>
-                <button
-                  onClick={copyPrompt}
-                  className="w-full text-left bg-gray-50 border border-gray-200 rounded-xl p-3 hover:border-brand-green/40 transition-colors group"
-                >
-                  <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
-                    {preset.imagePrompt}
-                  </p>
-                  <p className={`text-xs font-semibold mt-2 ${promptCopied ? "text-brand-green" : "text-gray-400 group-hover:text-brand-green"}`}>
-                    {promptCopied ? "✓ Copied to clipboard" : "Copy prompt →"}
-                  </p>
-                </button>
+            {/* Aspect ratio toggle */}
+            <div>
+              <label className="block text-xs text-gray-500 mb-1.5">Aspect ratio</label>
+              <div className="flex items-center gap-2">
+                {(["16:9", "1:1", "3:4", "9:16"] as const).map((ar) => (
+                  <button
+                    key={ar}
+                    onClick={() => setGenAspectRatio(ar)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors ${
+                      genAspectRatio === ar
+                        ? "bg-brand-green text-white border-brand-green"
+                        : "bg-white border-gray-200 text-gray-600 hover:border-brand-green/40"
+                    }`}
+                  >
+                    {ar}
+                  </button>
+                ))}
               </div>
             </div>
-          )}
+
+            {/* Actions: generate OR copy to clipboard */}
+            <div className="flex gap-2">
+              <button
+                onClick={generateImage}
+                disabled={generating || !customPrompt.trim()}
+                className="flex-1 bg-brand-green text-cream py-2.5 rounded-xl text-sm font-display font-semibold hover:bg-brand-green/90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {generating ? (
+                  <>
+                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Generating…
+                  </>
+                ) : (
+                  "✨ Generate"
+                )}
+              </button>
+              <button
+                onClick={copyPrompt}
+                disabled={!customPrompt.trim()}
+                className="bg-white border border-gray-200 text-gray-600 py-2.5 px-4 rounded-xl text-xs font-semibold hover:border-brand-green/40 transition-colors disabled:opacity-50"
+                title="Copy prompt to clipboard for use in Midjourney / Sora / etc."
+              >
+                {promptCopied ? "✓ Copied" : "Copy"}
+              </button>
+            </div>
+
+            {generateError && (
+              <p className="text-xs text-red-600">{generateError}</p>
+            )}
+            <p className="text-[10px] text-gray-400">
+              Uses Imagen 4 via the existing Gemini API key. ~$0.04 per image.
+            </p>
+          </div>
         </section>
 
         {/* Copy editor */}
@@ -421,6 +466,7 @@ export default function AdStudio() {
                 formatId={id}
                 copy={copy}
                 baseImage={baseImage}
+                logoImage={logoImage}
                 onRegister={registerCanvas}
               />
               <button
