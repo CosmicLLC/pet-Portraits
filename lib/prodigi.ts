@@ -66,6 +66,17 @@ const PRODUCT_SKU_ENV: Record<string, string> = {
   mounted: "PRODIGI_MOUNTED_SKU",
   canvas: "PRODIGI_CANVAS_SKU",
   bundle: "PRODIGI_CANVAS_SKU",
+  // 2026-04-24 expansion. Look up actual SKUs in the Prodigi catalog
+  // (https://www.prodigi.com/products/) and paste into your env vars.
+  canvas_16x20: "PRODIGI_CANVAS_16X20_SKU",
+  gallery_set: "PRODIGI_GALLERY_SET_SKU",
+  acrylic: "PRODIGI_ACRYLIC_SKU",
+  metal: "PRODIGI_METAL_SKU",
+  cards: "PRODIGI_CARDS_SKU",
+  phone_case: "PRODIGI_PHONE_CASE_SKU",
+  prism: "PRODIGI_PRISM_SKU",
+  mug: "PRODIGI_MUG_SKU",
+  pillow: "PRODIGI_PILLOW_SKU",
 };
 
 export function getProdigiSkuForProduct(productType: string): string {
@@ -84,12 +95,23 @@ export function isProdigiSkuConfigured(productType: string): boolean {
 
 // Required SKU attributes for each product type. Display + mounted prints
 // don't need attributes. Framed canvas (ECO-FRA-CAN) requires color + wrap —
-// Prodigi rejects the order without them.
+// Prodigi rejects the order without them. New additions default to no
+// attributes; when you pick a specific Prodigi SKU that requires them
+// (e.g. a framed acrylic with color options), add the row here.
 const PRODUCT_ATTRIBUTES: Record<string, Record<string, string>> = {
   display: {},
   mounted: {},
   canvas: { color: "black", wrap: "ImageWrap" },
   bundle: { color: "black", wrap: "ImageWrap" },
+  canvas_16x20: { color: "black", wrap: "ImageWrap" },
+  gallery_set: {},
+  acrylic: {},
+  metal: {},
+  cards: {},
+  phone_case: {},
+  prism: {},
+  mug: {},
+  pillow: {},
 };
 
 export function getProdigiAttributesForProduct(productType: string): Record<string, string> {

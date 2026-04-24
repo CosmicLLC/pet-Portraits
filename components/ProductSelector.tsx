@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { track, productValue } from "@/lib/analytics";
 import type { ProductType } from "@/lib/products";
 
@@ -65,6 +65,89 @@ const TIERS: Tier[] = [
     badge: "Best Value",
     highlighted: true,
   },
+  // ─── 2026-04-24 expansion ─────────────────────────────────────────
+  // Each auto-hidden until its STRIPE_*_PRICE_ID env var is set.
+  {
+    key: "canvas_16x20",
+    name: "Framed Canvas 16×20",
+    price: "$149",
+    description: "Statement-piece framed canvas",
+    features: ["Gallery-quality canvas", "Premium frame", "16×20 wall size"],
+    highlighted: false,
+  },
+  {
+    key: "gallery_set",
+    name: "Gallery Set",
+    price: "$99",
+    description: "All 4 styles, same pet",
+    features: ["4 × 11×14 prints", "Watercolor · Oil · Renaissance · Line", "Gallery-wall ready"],
+    badge: "New",
+    highlighted: false,
+  },
+  {
+    key: "acrylic",
+    name: "Acrylic Print 11×14",
+    price: "$149",
+    description: "Vibrant photo acrylic",
+    features: ["Premium acrylic", "Gallery finish", "Deep color"],
+    highlighted: false,
+  },
+  {
+    key: "metal",
+    name: "Metal Print 11×14",
+    price: "$129",
+    description: "Aluminum metal print",
+    features: ["Modern & durable", "Indoor/outdoor safe", "Sleek finish"],
+    highlighted: false,
+  },
+  {
+    key: "prism",
+    name: "Acrylic Prism",
+    price: "$69",
+    description: "Standalone photo block",
+    features: ["Desk-sized piece", "Crystal-clear acrylic", "Free-standing"],
+    highlighted: false,
+  },
+  {
+    key: "phone_case",
+    name: "Phone Case",
+    price: "$34",
+    description: "Custom iPhone case",
+    features: ["Printed back", "Slim & protective", "Snap fit"],
+    highlighted: false,
+  },
+  {
+    key: "pillow",
+    name: "Throw Pillow",
+    price: "$39",
+    description: "18×18 with insert",
+    features: ["Printed cover", "Insert included", "Zip-off washable"],
+    highlighted: false,
+  },
+  {
+    key: "mug",
+    name: "Mug",
+    price: "$24",
+    description: "11oz ceramic",
+    features: ["Dishwasher safe", "Full-wrap print", "Microwave safe"],
+    highlighted: false,
+  },
+  {
+    key: "cards",
+    name: "Greeting Cards",
+    price: "$24",
+    description: "10-pack with envelopes",
+    features: ["Premium cardstock", "10 cards + envelopes", "Holiday-ready"],
+    highlighted: false,
+  },
+  {
+    key: "multipet",
+    name: "Multi-Pet Upgrade",
+    price: "$20",
+    description: "2+ pets in one portrait",
+    features: ["Combines multiple pets", "One composed piece", "Add to any order"],
+    highlighted: false,
+  },
 ];
 
 // Session-consistent portrait count for social proof
@@ -83,6 +166,31 @@ function getSessionPortraitCount(): number {
 export default function ProductSelector({ imageId, onError, wallpaperSelected }: ProductSelectorProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [portraitCount] = useState<number>(() => getSessionPortraitCount());
+  // Which products have their Stripe price ID configured. Tiers missing
+  // from this set are auto-hidden — so scaffold-then-activate works with
+  // zero code edits. null = still loading.
+  const [enabledKeys, setEnabledKeys] = useState<Set<string> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/products/enabled")
+      .then((r) => (r.ok ? r.json() : { enabled: [] }))
+      .then((data: { enabled?: string[] }) => {
+        if (!cancelled) setEnabledKeys(new Set(data.enabled ?? []));
+      })
+      .catch(() => {
+        // If the endpoint fails, fall back to showing the original 5-tier
+        // ladder so the page is never empty. Matches pre-expansion behavior.
+        if (!cancelled) setEnabledKeys(new Set(["digital", "display", "mounted", "canvas", "bundle"]));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleTiers = enabledKeys
+    ? TIERS.filter((t) => enabledKeys.has(t.key))
+    : TIERS.filter((t) => ["digital", "display", "mounted", "canvas", "bundle"].includes(t.key));
 
   const handleSelect = async (key: string) => {
     setLoading(key);
@@ -114,9 +222,10 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected }:
         </span>
       </div>
 
-      {/* 5-tier ladder — stacks on mobile, 2-up on tablet, row on desktop */}
+      {/* Tier ladder — auto-wraps. Hidden tiles whose Stripe price isn't
+          configured are skipped. Up to 5 per row on desktop. */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {TIERS.map((tier) => (
+        {visibleTiers.map((tier) => (
           <div
             key={tier.key}
             className={`relative flex flex-col rounded-2xl border-2 overflow-hidden transition-all ${
