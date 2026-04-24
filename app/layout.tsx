@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
 import ScrollRevealInit from "@/components/ScrollRevealInit";
 import Analytics, { AnalyticsNoScript } from "@/components/Analytics";
+import RefCapture from "@/components/RefCapture";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -137,6 +138,7 @@ export default function RootLayout({
         <AuthProvider>{children}</AuthProvider>
         <ScrollRevealInit />
         <Analytics />
+        <RefCapture />
       </body>
     </html>
   );

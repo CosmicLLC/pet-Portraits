@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 const TABS = [
   { href: "/account/orders", label: "Orders", icon: OrdersIcon },
   { href: "/account/portraits", label: "Portraits", icon: PortraitsIcon },
+  { href: "/account/refer", label: "Refer & Earn", icon: ReferIcon },
   { href: "/account/addresses", label: "Addresses", icon: AddressesIcon },
   { href: "/account/payment", label: "Payment", icon: PaymentIcon },
   { href: "/account/profile", label: "Profile", icon: ProfileIcon },
@@ -71,6 +72,14 @@ function ProfileIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    </svg>
+  )
+}
+function ReferIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l-.867-2.89A1 1 0 017.093 16H10m4 0h2.907a1 1 0 01.96 1.26L17 20" />
     </svg>
   )
 }

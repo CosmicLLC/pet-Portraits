@@ -83,12 +83,87 @@ export async function POST(req: NextRequest) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const { imageId, productType, addWallpaper } = session.metadata || {};
+    const {
+      imageId,
+      productType,
+      addWallpaper,
+      referralCode,
+      referrerUserId,
+      buyerUserId,
+      buyerCreditApplied,
+    } = session.metadata || {};
     const email = session.customer_details?.email;
 
     if (!imageId || !email || !productType) {
       console.error("Missing required metadata in webhook", { imageId, email, productType });
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
+    }
+
+    // ── Referral attribution ───────────────────────────────────────────
+    // If this session came from a ?ref=CODE cookie, credit the referrer
+    // $10 and record a Referral row. We do this BEFORE order creation so
+    // attribution is durable even if fulfillment fails later.
+    if (referralCode && referrerUserId) {
+      try {
+        const existing = await prisma.referral.findUnique({
+          where: { stripeSessionId: session.id },
+        });
+        if (!existing) {
+          await prisma.$transaction([
+            prisma.user.update({
+              where: { id: referrerUserId },
+              data: { referralCredits: { increment: 1000 } },
+            }),
+            prisma.referral.create({
+              data: {
+                referrerUserId,
+                refereeEmail: email,
+                stripeSessionId: session.id,
+                status: "completed",
+                discountCents: 1000,
+                creditCents: 1000,
+                completedAt: new Date(),
+              },
+            }),
+          ]);
+          console.log(`Referral credited: ${referrerUserId} for ${email} (session ${session.id})`);
+        }
+      } catch (err) {
+        // Attribution failure is non-fatal — log and continue so the customer
+        // still gets their portrait. Admin can reconcile manually.
+        console.error("Referral attribution failed:", err);
+        await logEvent("warning", "webhook", "Referral attribution failed", {
+          sessionId: session.id,
+          referralCode,
+          referrerUserId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+
+    // ── Store credit decrement ─────────────────────────────────────────
+    // The buyer used $X of their stored referralCredits at checkout —
+    // subtract whatever was applied. Floor at 0 in case of a race.
+    if (buyerUserId && buyerCreditApplied) {
+      const applied = parseInt(buyerCreditApplied, 10);
+      if (applied > 0) {
+        try {
+          const buyer = await prisma.user.findUnique({
+            where: { id: buyerUserId },
+            select: { referralCredits: true },
+          });
+          if (buyer) {
+            const newBalance = Math.max(0, buyer.referralCredits - applied);
+            await prisma.user.update({
+              where: { id: buyerUserId },
+              data: { referralCredits: newBalance },
+            });
+            console.log(`Decremented credits for ${buyerUserId}: -${applied} cents`);
+          }
+        } catch (err) {
+          console.error("Credit decrement failed:", err);
+        }
+      }
     }
 
     // Idempotency — if we've already processed this Stripe session, return 200 without

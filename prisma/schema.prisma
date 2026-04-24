@@ -20,10 +20,17 @@ model User {
   password      String?
   // "user" (default) or "admin"
   role          String    @default("user")
+  // Personal referral code (lazy-generated on first visit to /account/refer).
+  // Guests check out with no code and later link the account to past orders.
+  referralCode     String? @unique
+  // Store credit balance in cents, auto-applied on the user's next paid order.
+  // Earned by referring a friend who completes their first purchase.
+  referralCredits  Int     @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
+  referrals     Referral[] @relation("Referrer")
 }
 
 model Account {
@@ -144,4 +151,30 @@ model BlockedEmail {
   email     String   @id
   reason    String?
   blockedAt DateTime @default(now())
+}
+
+// Refer-a-friend tracking. One row is created when a referee completes their
+// first purchase with a ref cookie present. The referrer gets referralCredits
+// bumped, the referee got the ?ref= discount at checkout. Status tracks the
+// lifecycle so we can retry or refund gracefully if Stripe refunds the order.
+model Referral {
+  id              String   @id @default(cuid())
+  referrerUserId  String
+  refereeEmail    String
+  stripeSessionId String?  @unique
+  // pending (captured at checkout-create) | completed (webhook credited the referrer)
+  // | refunded (referee refunded; referrer credit claw-back TBD)
+  status          String   @default("pending")
+  // Dollars off the referee got, in cents.
+  discountCents   Int      @default(1000)
+  // Dollars credited to the referrer's balance, in cents.
+  creditCents     Int      @default(1000)
+  createdAt       DateTime @default(now())
+  completedAt     DateTime?
+
+  referrer User @relation("Referrer", fields: [referrerUserId], references: [id], onDelete: Cascade)
+
+  @@index([referrerUserId])
+  @@index([refereeEmail])
+  @@index([status])
 }
