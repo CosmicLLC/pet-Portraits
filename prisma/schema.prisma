@@ -98,6 +98,16 @@ model Order {
   reviewEmailSentAt     DateTime?  // 7 days after purchase
   anniversaryEmailSentAt DateTime? // 365 days after purchase
 
+  // Campaign bonus (e.g. Mother's Day free 11×14 display print). Digital-
+  // only orders claim the bonus post-purchase via a separate shipping form
+  // since we didn't collect shipping at checkout. Physical orders fulfill
+  // the bonus at the same time as the main Prodigi order and set these
+  // automatically.
+  bonusClaimedAt        DateTime?
+  bonusProdigiOrderId   String?  @unique
+  bonusShippingName     String?
+  bonusShippingAddress  Json?
+
   @@index([email])
   @@index([imageId])
   @@index([createdAt])

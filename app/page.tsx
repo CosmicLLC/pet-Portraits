@@ -13,6 +13,7 @@ import StickyCartBar from "@/components/StickyCartBar";
 import FAQ from "@/components/FAQ";
 import HomeJsonLd from "@/components/HomeJsonLd";
 import SuccessReferralShare from "@/components/SuccessReferralShare";
+import ClaimFreePrint from "@/components/ClaimFreePrint";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
@@ -96,6 +97,7 @@ export default function Home() {
   const isCanceled = urlParams?.get("canceled") === "true";
   const successImageId = urlParams?.get("imageId") ?? null;
   const successProductType = urlParams?.get("productType") ?? null;
+  const successSessionId = urlParams?.get("session_id") ?? null;
   // Customers who already purchased a canvas (direct canvas or bundle) shouldn't be
   // re-pitched a canvas on the success page.
   const showCanvasUpsell =
@@ -276,6 +278,11 @@ export default function Home() {
             <p className="text-gray-600 mb-2 text-lg">Your portrait is on its way.</p>
             <p className="text-gray-500 mb-10 text-sm">Check your email for the full-resolution download link.</p>
           </div>
+
+          {/* Campaign bonus claim for digital-only orders. Self-hides on
+              physical orders (already auto-fulfilled) and outside the
+              active campaign window. */}
+          {successSessionId && <ClaimFreePrint sessionId={successSessionId} />}
 
           {/* Post-purchase upsell — Canvas Print at 25% off */}
           {showCanvasUpsell && !upsellDone && (

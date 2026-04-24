@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
         shipping_address_collection: { allowed_countries: ["US"] },
         phone_number_collection: { enabled: true },
       }),
-      success_url: `${baseUrl}?success=true&imageId=${encodeURIComponent(imageId)}&productType=${encodeURIComponent(productType)}`,
+      success_url: `${baseUrl}?success=true&imageId=${encodeURIComponent(imageId)}&productType=${encodeURIComponent(productType)}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}?canceled=true`,
     });
 
