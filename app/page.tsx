@@ -1102,21 +1102,63 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-gray-200 bg-white mt-12">
         <FooterNewsletter />
-        <div className="max-w-6xl mx-auto px-4 py-6 text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <Image src="/logo.jpg" alt="Paw Masterpiece" width={24} height={24} className="opacity-60" />
-            <span className="font-display text-sm text-gray-400">Paw Masterpiece</span>
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          {/* Sitemap nav — internal link equity to every important landing page.
+              New URLs would otherwise only surface via sitemap.xml; putting them
+              in the footer multiplies crawl priority and distributes PageRank. */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm">
+            <div>
+              <p className="font-display font-semibold text-brand-green mb-3">Gifts</p>
+              <ul className="space-y-2">
+                <li><Link href="/gifts/mothers-day" className="text-gray-500 hover:text-brand-green transition-colors">Mother&apos;s Day</Link></li>
+                <li><Link href="/gifts/fathers-day" className="text-gray-500 hover:text-brand-green transition-colors">Father&apos;s Day</Link></li>
+                <li><Link href="/gifts/christmas" className="text-gray-500 hover:text-brand-green transition-colors">Christmas</Link></li>
+                <li><Link href="/gifts/birthday" className="text-gray-500 hover:text-brand-green transition-colors">Birthday</Link></li>
+                <li><Link href="/gifts/dog-mom-gift" className="text-gray-500 hover:text-brand-green transition-colors">Dog Mom Gifts</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-display font-semibold text-brand-green mb-3">Styles</p>
+              <ul className="space-y-2">
+                <li><Link href="/styles/watercolor-pet-portrait" className="text-gray-500 hover:text-brand-green transition-colors">Watercolor</Link></li>
+                <li><Link href="/styles/oil-painting-pet-portrait" className="text-gray-500 hover:text-brand-green transition-colors">Oil Painting</Link></li>
+                <li><Link href="/styles/renaissance-pet-portrait" className="text-gray-500 hover:text-brand-green transition-colors">Renaissance</Link></li>
+                <li><Link href="/styles/line-art-pet-portrait" className="text-gray-500 hover:text-brand-green transition-colors">Line Art</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-display font-semibold text-brand-green mb-3">Collections</p>
+              <ul className="space-y-2">
+                <li><Link href="/pet-portraits/dogs" className="text-gray-500 hover:text-brand-green transition-colors">Dog Portraits</Link></li>
+                <li><Link href="/pet-portraits/cats" className="text-gray-500 hover:text-brand-green transition-colors">Cat Portraits</Link></li>
+                <li><Link href="/memorial" className="text-gray-500 hover:text-brand-green transition-colors">Memorial Portraits</Link></li>
+                <li><Link href="/reviews" className="text-gray-500 hover:text-brand-green transition-colors">Wall of Love</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-display font-semibold text-brand-green mb-3">Account</p>
+              <ul className="space-y-2">
+                <li><Link href="/account/orders" className="text-gray-500 hover:text-brand-green transition-colors">My Orders</Link></li>
+                <li><Link href="/account/refer" className="text-gray-500 hover:text-brand-green transition-colors">Refer &amp; Earn</Link></li>
+                <li><Link href="/auth/signin" className="text-gray-500 hover:text-brand-green transition-colors">Sign In</Link></li>
+                <li><a href="mailto:cosmic.company.llc@gmail.com" className="text-gray-500 hover:text-brand-green transition-colors">Contact</a></li>
+              </ul>
+            </div>
           </div>
-          <p className="text-sm text-gray-400">
-            Each portrait is uniquely generated &middot; Not satisfied? We&apos;ll redo it for free.
-          </p>
-          <p className="text-sm text-gray-400">
-            <Link href="/privacy" className="hover:text-brand-green transition-colors">Privacy Policy</Link>
-            {" "}&middot;{" "}
-            <Link href="/terms" className="hover:text-brand-green transition-colors">Terms of Service</Link>
-            {" "}&middot;{" "}
-            <a href="mailto:cosmic.company.llc@gmail.com" className="hover:text-brand-green transition-colors">cosmic.company.llc@gmail.com</a>
-          </p>
+
+          <div className="border-t border-gray-100 mt-10 pt-6 flex flex-col sm:flex-row items-center gap-3 sm:justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <Image src="/logo.jpg" alt="Paw Masterpiece" width={24} height={24} className="opacity-60" />
+              <span className="font-display text-gray-400">Paw Masterpiece</span>
+              <span className="text-gray-300">&middot;</span>
+              <span className="text-gray-400">Love it or we redo it free</span>
+            </div>
+            <p className="text-gray-400">
+              <Link href="/privacy" className="hover:text-brand-green transition-colors">Privacy</Link>
+              {" "}&middot;{" "}
+              <Link href="/terms" className="hover:text-brand-green transition-colors">Terms</Link>
+            </p>
+          </div>
         </div>
       </footer>
     </main>
