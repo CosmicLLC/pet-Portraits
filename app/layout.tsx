@@ -80,6 +80,12 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  // Pinterest domain verification — paste the token Pinterest gives you at
+  // pinterest.com/settings/claim so saves from our site become rich pins
+  // with live pricing + aggregate rating pulled from on-page schema.
+  other: process.env.PINTEREST_DOMAIN_VERIFY
+    ? { "p:domain_verify": process.env.PINTEREST_DOMAIN_VERIFY }
+    : undefined,
 };
 
 // Site-wide Organization + WebSite schema. Rich results eligibility for the
