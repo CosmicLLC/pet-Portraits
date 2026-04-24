@@ -67,6 +67,9 @@ export default function AdStudio() {
   const [fontsReady, setFontsReady] = useState(false);
   const [enabledFormats, setEnabledFormats] = useState<Set<FormatId>>(new Set(DEFAULT_FORMATS));
   const [promptCopied, setPromptCopied] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [genAspectRatio, setGenAspectRatio] = useState<"1:1" | "16:9" | "3:4" | "9:16">("16:9");
 
   const canvasRefs = useRef<Map<FormatId, HTMLCanvasElement>>(new Map());
 
@@ -130,6 +133,39 @@ export default function AdStudio() {
       setTimeout(() => setPromptCopied(false), 2000);
     });
   }, [preset]);
+
+  const generateImage = useCallback(async () => {
+    if (!preset?.imagePrompt || generating) return;
+    setGenerating(true);
+    setGenerateError(null);
+    try {
+      const res = await fetch("/api/admin/ad-studio/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: preset.imagePrompt,
+          aspectRatio: genAspectRatio,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Generation failed");
+      // Load the base64 PNG into an Image so canvases can draw it
+      const img = new Image();
+      img.onload = () => {
+        setBaseImage(img);
+        setBaseImageName(`Imagen · ${preset.name}`);
+        setGenerating(false);
+      };
+      img.onerror = () => {
+        setGenerateError("Failed to decode generated image");
+        setGenerating(false);
+      };
+      img.src = `data:${data.mimeType};base64,${data.imageBase64}`;
+    } catch (err) {
+      setGenerateError(err instanceof Error ? err.message : "Generation failed");
+      setGenerating(false);
+    }
+  }, [preset, generating, genAspectRatio]);
 
   const toggleFormat = useCallback((id: FormatId) => {
     setEnabledFormats((prev) => {
@@ -201,21 +237,70 @@ export default function AdStudio() {
           </label>
 
           {preset?.imagePrompt && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-xs text-gray-500 mb-2">
-                Don&apos;t have one? Paste this into ImageFX, Midjourney, or Sora:
-              </p>
-              <button
-                onClick={copyPrompt}
-                className="w-full text-left bg-gray-50 border border-gray-200 rounded-xl p-3 hover:border-brand-green/40 transition-colors group"
-              >
-                <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
-                  {preset.imagePrompt}
+            <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+              {/* Generate directly via Imagen 4 */}
+              <div>
+                <label className="block text-xs text-gray-500 mb-2">
+                  Generate with AI (Imagen 4)
+                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <label className="text-xs text-gray-500">Aspect:</label>
+                  {(["16:9", "1:1", "3:4", "9:16"] as const).map((ar) => (
+                    <button
+                      key={ar}
+                      onClick={() => setGenAspectRatio(ar)}
+                      className={`px-2 py-0.5 rounded-full text-[11px] font-semibold border transition-colors ${
+                        genAspectRatio === ar
+                          ? "bg-brand-green text-white border-brand-green"
+                          : "bg-white border-gray-200 text-gray-600 hover:border-brand-green/40"
+                      }`}
+                    >
+                      {ar}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={generateImage}
+                  disabled={generating}
+                  className="w-full bg-brand-green text-cream py-2.5 rounded-xl text-sm font-display font-semibold hover:bg-brand-green/90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+                >
+                  {generating ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Generating…
+                    </>
+                  ) : (
+                    "✨ Generate with AI"
+                  )}
+                </button>
+                {generateError && (
+                  <p className="text-xs text-red-600 mt-2">{generateError}</p>
+                )}
+                <p className="text-[10px] text-gray-400 mt-2">
+                  Uses the existing Gemini API key. ~$0.04 per image.
                 </p>
-                <p className={`text-xs font-semibold mt-2 ${promptCopied ? "text-brand-green" : "text-gray-400 group-hover:text-brand-green"}`}>
-                  {promptCopied ? "✓ Copied to clipboard" : "Copy prompt →"}
+              </div>
+
+              {/* Or copy to paste elsewhere */}
+              <div className="pt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-2">
+                  Prefer to use Midjourney / Sora instead?
                 </p>
-              </button>
+                <button
+                  onClick={copyPrompt}
+                  className="w-full text-left bg-gray-50 border border-gray-200 rounded-xl p-3 hover:border-brand-green/40 transition-colors group"
+                >
+                  <p className="text-xs text-gray-600 line-clamp-3 leading-relaxed">
+                    {preset.imagePrompt}
+                  </p>
+                  <p className={`text-xs font-semibold mt-2 ${promptCopied ? "text-brand-green" : "text-gray-400 group-hover:text-brand-green"}`}>
+                    {promptCopied ? "✓ Copied to clipboard" : "Copy prompt →"}
+                  </p>
+                </button>
+              </div>
             </div>
           )}
         </section>
