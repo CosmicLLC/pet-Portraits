@@ -81,6 +81,15 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  // Search-engine + social site verification tokens. Set the env vars once
+  // you've claimed each property and the corresponding meta tag appears
+  // automatically. Missing env vars render no tag, so dev stays clean.
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
+      : undefined,
+  },
   // Pinterest domain verification — paste the token Pinterest gives you at
   // pinterest.com/settings/claim so saves from our site become rich pins
   // with live pricing + aggregate rating pulled from on-page schema.
