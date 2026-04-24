@@ -12,6 +12,7 @@ import BrowseAbandonmentCapture from "@/components/BrowseAbandonmentCapture";
 import StickyCartBar from "@/components/StickyCartBar";
 import FAQ from "@/components/FAQ";
 import HomeJsonLd from "@/components/HomeJsonLd";
+import SuccessReferralShare from "@/components/SuccessReferralShare";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
@@ -64,7 +65,6 @@ export default function Home() {
   // Success page upsell state
   const [upsellLoading, setUpsellLoading] = useState(false);
   const [upsellDone, setUpsellDone] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   // Read URL params only after mount to avoid hydration mismatch
   const [mounted, setMounted] = useState(false);
@@ -254,22 +254,11 @@ export default function Home() {
     }
   }, [successImageId]);
 
-  const handleCopyLink = useCallback(() => {
-    const url = window.location.origin;
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    });
-  }, []);
-
   const navLinks = [
     { label: "How It Works", id: "how-it-works" },
     { label: "Styles", id: "styles" },
     { label: "Reviews", id: "reviews" },
   ];
-
-  const shareUrl = typeof window !== "undefined" ? window.location.origin : "https://pawmasterpiece.com";
-  const shareText = "I just got a stunning AI portrait of my pet! Check it out:";
 
   // ─── Success page ────────────────────────────────────────────────────
   if (isSuccess) {
@@ -341,60 +330,8 @@ export default function Home() {
             </div>
           )}
 
-          {/* Referral / Share section */}
-          <div className="bg-white rounded-3xl border border-gray-200 p-6 mb-8 animate-fade-in-up">
-            <h2 className="font-display text-xl text-brand-green mb-1 text-center">Share with Friends</h2>
-            <p className="text-sm text-gray-500 text-center mb-5">
-              Know a pet parent who&apos;d love this? Share the love.
-            </p>
-            {/* Copy link */}
-            <button
-              onClick={handleCopyLink}
-              className="w-full flex items-center justify-between gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 mb-3 hover:border-brand-green/40 transition-colors group"
-            >
-              <span className="text-sm text-gray-600 truncate">{shareUrl}</span>
-              <span className={`text-xs font-semibold flex-shrink-0 ${copied ? "text-brand-green" : "text-gray-400 group-hover:text-brand-green"} transition-colors`}>
-                {copied ? "Copied!" : "Copy"}
-              </span>
-            </button>
-            {/* Social share row */}
-            <div className="grid grid-cols-3 gap-3">
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-                X / Twitter
-              </a>
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-[#1877F2] hover:text-[#1877F2] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-                Facebook
-              </a>
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:border-[#25D366] hover:text-[#25D366] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                  <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.852L.057 23.9l6.234-1.637A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm.029 21.818a9.9 9.9 0 01-5.052-1.38l-.362-.215-3.753.984 1.003-3.664-.235-.374A9.86 9.86 0 012.182 12c0-5.424 4.424-9.836 9.847-9.836 5.424 0 9.836 4.412 9.836 9.836 0 5.423-4.412 9.818-9.836 9.818z" />
-                </svg>
-                WhatsApp
-              </a>
-            </div>
-          </div>
+          {/* Referral / Share section — personalized code for signed-in buyers */}
+          <SuccessReferralShare />
 
           <div className="text-center">
             <a
