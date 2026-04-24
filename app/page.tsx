@@ -1141,6 +1141,7 @@ export default function Home() {
                 <li><Link href="/memorial" className="text-gray-500 hover:text-brand-green transition-colors">Memorial Portraits</Link></li>
                 <li><Link href="/reviews" className="text-gray-500 hover:text-brand-green transition-colors">Wall of Love</Link></li>
                 <li><Link href="/blog" className="text-gray-500 hover:text-brand-green transition-colors">Blog</Link></li>
+                <li><Link href="/free-photo-guide" className="text-gray-500 hover:text-brand-green transition-colors">Free Photo Guide</Link></li>
               </ul>
             </div>
             <div>
