@@ -93,6 +93,11 @@ model Order {
   carrier             String?
   shippedAt           DateTime?
 
+  // Lifecycle email send-tracking. Each field is set once the corresponding
+  // cron fires for this order so retries / restarts don't double-send.
+  reviewEmailSentAt     DateTime?  // 7 days after purchase
+  anniversaryEmailSentAt DateTime? // 365 days after purchase
+
   @@index([email])
   @@index([imageId])
   @@index([createdAt])

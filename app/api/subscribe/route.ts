@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { prisma } from "@/lib/prisma"
 import { rateLimit, clientIp } from "@/lib/ratelimit"
+import { sendWelcomeEmail } from "@/lib/resend"
 
 export const runtime = "nodejs"
 
@@ -55,10 +56,17 @@ export async function POST(req: NextRequest) {
   const source = normalizeSource(body.source)
   const name = typeof body.name === "string" && body.name.trim() ? body.name.trim() : null
 
+  let isNewSubscriber = false
   try {
     // Upsert — if they previously unsubscribed, re-subscribe them (signaling
     // explicit consent). If they already exist and are active, it's a no-op
     // beyond possibly updating the most recent signup source.
+    const existing = await prisma.subscriber.findUnique({
+      where: { email },
+      select: { id: true, unsubscribedAt: true, lastEmailSent: true },
+    })
+    isNewSubscriber = !existing || !!existing.unsubscribedAt
+
     await prisma.subscriber.upsert({
       where: { email },
       create: { email, source, name },
@@ -71,6 +79,19 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("Subscriber upsert failed:", err)
     return NextResponse.json({ error: "Subscription failed" }, { status: 500 })
+  }
+
+  // Fire-and-forget welcome email for genuinely new subscribers. Failure
+  // here must not fail the API request — they're already in the list.
+  if (isNewSubscriber) {
+    sendWelcomeEmail(email)
+      .then(() =>
+        prisma.subscriber.update({
+          where: { email },
+          data: { lastEmailSent: new Date() },
+        }).catch(() => {})
+      )
+      .catch((err) => console.error("Welcome send failed:", err))
   }
 
   // Mirror to Resend audience if configured — gives the owner a second

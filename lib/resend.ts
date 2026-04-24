@@ -176,6 +176,254 @@ export async function sendPhysicalConfirmationEmail(to: string, productType: str
   });
 }
 
+// ─── Marketing lifecycle emails ─────────────────────────────────────────
+// Each of these is fired by a cron under /api/cron/* on a daily schedule.
+// They all use baseTemplate() for visual consistency with transactional
+// mail, and all include an unsubscribe link where CAN-SPAM requires it
+// (the review reminder is arguably transactional; the anniversary and
+// winback are marketing and must carry the footer link).
+
+function unsubscribeFooter(email: string) {
+  const url = `${siteUrl()}/unsubscribe?email=${encodeURIComponent(email)}`;
+  return `
+    <p style="text-align:center;color:#AAA;font-size:11px;margin:24px 0 0;">
+      <a href="${url}" style="color:#AAA;text-decoration:underline;">Unsubscribe</a>
+      &nbsp;&middot;&nbsp; Paw Masterpiece, Cosmic Company LLC
+    </p>
+  `;
+}
+
+export async function sendWelcomeEmail(to: string, discountCode = "PAWSOME10") {
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Welcome to Paw Masterpiece 🐾</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 20px;">
+      Thanks for joining. You're in for art made for the ones you love most — your pets.
+    </p>
+
+    <!-- Discount code -->
+    <div style="background:#fff;border:2px dashed #2D4A3E;border-radius:12px;padding:24px;text-align:center;margin-bottom:32px;">
+      <p style="margin:0 0 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#888;">Your welcome discount</p>
+      <p style="margin:0 0 8px;font-size:30px;font-weight:700;letter-spacing:8px;color:#2D4A3E;">${discountCode}</p>
+      <p style="margin:0;font-size:13px;color:#666;">Enter at checkout — 10% off your first order</p>
+    </div>
+
+    <!-- Primary CTA -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <a href="${siteUrl()}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:18px 48px;border-radius:50px;font-size:17px;font-weight:700;">
+        Create Your First Portrait
+      </a>
+      <p style="margin:12px 0 0;color:#AAA;font-size:12px;">Free to preview · Ready in 30 seconds</p>
+    </div>
+
+    <p style="color:#666;font-size:14px;line-height:1.7;margin:0 0 12px;">
+      What to expect next:
+    </p>
+    <ul style="color:#666;font-size:14px;line-height:1.7;margin:0 0 20px;padding-left:20px;">
+      <li>New art styles and seasonal drops, first</li>
+      <li>Occasional gift-giving tips (Mother's Day, Father's Day, Christmas)</li>
+      <li>Rare promos — we don't email often, but when we do it's worth opening</li>
+    </ul>
+    ${unsubscribeFooter(to)}
+  `;
+
+  await getResend().emails.send({
+    from: fromEmail(),
+    to,
+    subject: "Your 10% off code inside 🐾",
+    html: baseTemplate(content),
+  });
+}
+
+// Sent 7 days post-purchase. Transactional-ish — asks for an honest review
+// and offers a referral reminder. Includes the customer's own ?ref= link.
+export async function sendReviewRequestEmail(to: string, opts: { referralUrl?: string } = {}) {
+  const referralBlock = opts.referralUrl
+    ? `
+      <hr style="border:none;border-top:1px solid #E5E0D8;margin:32px 0;" />
+      <div style="background:#fff;border:1px solid #E5E0D8;border-radius:12px;padding:20px;text-align:center;">
+        <p style="margin:0 0 6px;font-size:13px;color:#888;">Know another pet parent who'd love this?</p>
+        <p style="margin:0 0 12px;font-size:17px;font-weight:700;color:#2D4A3E;">
+          Give $10, get $10
+        </p>
+        <a href="${opts.referralUrl}"
+           style="display:inline-block;background:#C4A35A;color:#fff;text-decoration:none;padding:12px 32px;border-radius:50px;font-size:14px;font-weight:700;">
+          Share Your Link
+        </a>
+      </div>`
+    : "";
+
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">How's the portrait?</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 20px;">
+      A week ago you got a portrait from us. We'd love to hear how it turned out — if it's framed, on your wall, or still sitting in your downloads folder, we want to know.
+    </p>
+
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
+      Two easy ways to share:
+    </p>
+
+    <div style="margin-bottom:28px;">
+      <p style="margin:0 0 8px;color:#2D4A3E;font-weight:700;font-size:15px;">📷 Post it on social</p>
+      <p style="margin:0;color:#666;font-size:14px;line-height:1.6;">
+        Tag us with #PawMasterpiece on Instagram — we repost our favorites weekly.
+      </p>
+    </div>
+
+    <div style="margin-bottom:32px;">
+      <p style="margin:0 0 8px;color:#2D4A3E;font-weight:700;font-size:15px;">⭐️ Leave us a review</p>
+      <p style="margin:0 0 12px;color:#666;font-size:14px;line-height:1.6;">
+        Just reply to this email — we read every one and feature the best on our site (with your permission).
+      </p>
+    </div>
+
+    ${referralBlock}
+    ${unsubscribeFooter(to)}
+  `;
+
+  await getResend().emails.send({
+    from: fromEmail(),
+    to,
+    subject: "How did your Paw Masterpiece turn out?",
+    html: baseTemplate(content),
+  });
+}
+
+// Sent 365 days post-purchase. Celebrates the pet portrait anniversary and
+// pushes a "try a different style" upsell — the highest-ROI nudge we have
+// for repeat orders since the customer is already a converted fan.
+export async function sendAnniversaryEmail(
+  to: string,
+  opts: { imageId?: string; style?: string } = {}
+) {
+  const tryStyleCta =
+    opts.style && opts.style !== "watercolor"
+      ? `/?style=watercolor`
+      : opts.style === "watercolor"
+        ? `/?style=oil`
+        : "/";
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">One year ago today 🎂</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 20px;">
+      You commissioned a Paw Masterpiece a year ago. That's kind of a long time in the life of a pet — new toys, new habits, maybe a few more gray hairs around the muzzle.
+    </p>
+
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
+      Want to capture this year's version? Try a different style and see them in a new light — watercolor, oil, Renaissance, or line art.
+    </p>
+
+    <!-- Primary CTA -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <a href="${siteUrl()}${tryStyleCta}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:18px 48px;border-radius:50px;font-size:17px;font-weight:700;">
+        Create This Year's Portrait
+      </a>
+    </div>
+
+    <!-- Gift angle -->
+    <div style="background:#fff;border:1px solid #E5E0D8;border-radius:12px;padding:20px;margin-bottom:20px;">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#C4A35A;">Or — a gift idea</p>
+      <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#2D4A3E;">Portrait gallery wall</p>
+      <p style="margin:0;color:#666;font-size:13px;line-height:1.5;">
+        A lot of our customers commission a new portrait each year in a different style. Same pet, four frames, one wall — aged together.
+      </p>
+    </div>
+    ${unsubscribeFooter(to)}
+  `;
+
+  await getResend().emails.send({
+    from: fromEmail(),
+    to,
+    subject: "One year of portraits 🎂",
+    html: baseTemplate(content),
+  });
+}
+
+// Sent to customers who purchased 90+ days ago and haven't engaged since.
+// Soft winback — not "come back!" but "here's what's new."
+export async function sendWinbackEmail(to: string) {
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">A few things you might have missed</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 20px;">
+      It's been a minute since we last heard from you. Quick update — a lot has happened since your first Paw Masterpiece:
+    </p>
+
+    <ul style="color:#555;font-size:15px;line-height:1.8;margin:0 0 28px;padding-left:20px;">
+      <li><strong>Phone wallpaper add-on</strong> — $1.99, iPhone-optimised, instant download</li>
+      <li><strong>Framed canvas prints</strong> — 8×12 gallery-quality, ships in 3–5 days</li>
+      <li><strong>Memorial portrait funnel</strong> — gentle tone, unlimited revisions</li>
+      <li><strong>Refer a friend</strong> — $10 for them, $10 back for you</li>
+    </ul>
+
+    <!-- Primary CTA -->
+    <div style="text-align:center;margin-bottom:28px;">
+      <a href="${siteUrl()}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:18px 48px;border-radius:50px;font-size:17px;font-weight:700;">
+        See What's New
+      </a>
+    </div>
+
+    <p style="color:#888;font-size:13px;line-height:1.6;margin:0 0 20px;text-align:center;">
+      No pressure. We just wanted you to know.
+    </p>
+    ${unsubscribeFooter(to)}
+  `;
+
+  await getResend().emails.send({
+    from: fromEmail(),
+    to,
+    subject: "A few things you might have missed 🐾",
+    html: baseTemplate(content),
+  });
+}
+
+// Sent when a guest viewer bails without buying but left an email via the
+// browse-abandonment or exit-intent capture. Mentions their saved portrait
+// (by image) and nudges with the discount code.
+export async function sendAbandonedPortraitEmail(
+  to: string,
+  opts: { imageUrl?: string; discountCode?: string } = {}
+) {
+  const code = opts.discountCode ?? "PAWSOME10";
+  const imgBlock = opts.imageUrl
+    ? `
+    <div style="text-align:center;margin-bottom:24px;">
+      <img src="${opts.imageUrl}" alt="Your Paw Masterpiece preview" style="max-width:280px;border-radius:12px;border:1px solid #E5E0D8;" />
+    </div>`
+    : "";
+
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your portrait is saved</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 20px;">
+      You were about to create something great. We saved your preview — it's still here whenever you're ready.
+    </p>
+
+    ${imgBlock}
+
+    <!-- Discount -->
+    <div style="background:#fff;border:2px dashed #2D4A3E;border-radius:12px;padding:20px;text-align:center;margin-bottom:28px;">
+      <p style="margin:0 0 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#888;">10% off — expires in 48 hours</p>
+      <p style="margin:0;font-size:26px;font-weight:700;letter-spacing:6px;color:#2D4A3E;">${code}</p>
+    </div>
+
+    <!-- Primary CTA -->
+    <div style="text-align:center;margin-bottom:28px;">
+      <a href="${siteUrl()}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:18px 48px;border-radius:50px;font-size:17px;font-weight:700;">
+        Finish My Portrait
+      </a>
+    </div>
+    ${unsubscribeFooter(to)}
+  `;
+
+  await getResend().emails.send({
+    from: fromEmail(),
+    to,
+    subject: "Your Paw Masterpiece is saved 🐾",
+    html: baseTemplate(content),
+  });
+}
+
 export async function sendPrintShippedEmail(
   to: string,
   tracking: { carrier: string; trackingNumber: string; trackingUrl: string | null }

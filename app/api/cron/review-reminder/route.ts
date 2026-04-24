@@ -1,42 +1,86 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { sendReviewRequestEmail } from "@/lib/resend";
+import { ensureReferralCode } from "@/lib/referrals";
+import { logEvent } from "@/lib/events";
 
-/**
- * Review reminder cron job — designed to be called 7 days after purchase.
- *
- * To activate on Vercel, add to vercel.json:
- * {
- *   "crons": [{ "path": "/api/cron/review-reminder", "schedule": "0 10 * * *" }]
- * }
- *
- * Set CRON_SECRET in Vercel environment variables to secure this endpoint.
- *
- * TODO: When you have a database, implement:
- *   1. Query orders placed exactly 7 days ago (where reviewEmailSentAt is null)
- *   2. For each order, send a review request email via Resend
- *   3. Mark the order as reviewed (set reviewEmailSentAt = now)
- *
- * The review email should:
- *   - Show the customer their portrait
- *   - Ask them to share on Instagram with #PawMasterpieceAI
- *   - Include a "Leave a review" link (Trustpilot, Google, etc.)
- */
+// Daily cron — schedule in vercel.json:
+//   { "path": "/api/cron/review-reminder", "schedule": "0 15 * * *" }
+// Fires to customers whose order turned 7 days old today, asking for a
+// review and nudging the referral link in the same email.
+//
+// Idempotency: reviewEmailSentAt is set after a successful send. Window
+// is 6–8 days so a missed cron day doesn't skip anyone.
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const auth = req.headers.get("authorization");
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // TODO: Replace with real database query
-  // const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  // const orders = await db.orders.findMany({
-  //   where: { createdAt: { lte: sevenDaysAgo }, reviewEmailSentAt: null }
-  // });
-  // for (const order of orders) {
-  //   await sendReviewRequestEmail(order.email, order.portraitUrl);
-  //   await db.orders.update({ where: { id: order.id }, data: { reviewEmailSentAt: new Date() } });
-  // }
+  const now = new Date();
+  const lowerBound = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
+  const upperBound = new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000);
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || "https://pawmasterpiece.com";
+
+  const candidates = await prisma.order.findMany({
+    where: {
+      createdAt: { gte: lowerBound, lte: upperBound },
+      reviewEmailSentAt: null,
+    },
+    select: { id: true, email: true },
+    take: 200,
+  });
+
+  let sent = 0;
+  let failed = 0;
+  for (const order of candidates) {
+    try {
+      const sub = await prisma.subscriber.findUnique({
+        where: { email: order.email },
+        select: { unsubscribedAt: true },
+      });
+      if (sub?.unsubscribedAt) {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { reviewEmailSentAt: new Date() },
+        });
+        continue;
+      }
+
+      // Surface the customer's referral URL if their email matches an
+      // existing account — guests don't have a code yet.
+      let referralUrl: string | undefined;
+      const user = await prisma.user.findUnique({
+        where: { email: order.email },
+        select: { id: true, referralCode: true },
+      });
+      if (user) {
+        const code = user.referralCode ?? (await ensureReferralCode(user.id));
+        referralUrl = `${baseUrl}/?ref=${code}`;
+      }
+
+      await sendReviewRequestEmail(order.email, { referralUrl });
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { reviewEmailSentAt: new Date() },
+      });
+      sent++;
+    } catch (err) {
+      failed++;
+      await logEvent("error", "email", "Review reminder send failed", {
+        orderId: order.id,
+        email: order.email,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
 
   return NextResponse.json({
-    message: "Review reminder cron placeholder — connect a database to activate",
+    candidates: candidates.length,
+    sent,
+    failed,
+    lowerBound: lowerBound.toISOString(),
+    upperBound: upperBound.toISOString(),
   });
 }

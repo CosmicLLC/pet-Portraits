@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/review-reminder",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/anniversary",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/winback",
+      "schedule": "0 16 * * 2"
+    }
+  ]
+}
