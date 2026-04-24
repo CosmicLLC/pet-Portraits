@@ -1140,6 +1140,7 @@ export default function Home() {
                 <li><Link href="/pet-portraits/cats" className="text-gray-500 hover:text-brand-green transition-colors">Cat Portraits</Link></li>
                 <li><Link href="/memorial" className="text-gray-500 hover:text-brand-green transition-colors">Memorial Portraits</Link></li>
                 <li><Link href="/reviews" className="text-gray-500 hover:text-brand-green transition-colors">Wall of Love</Link></li>
+                <li><Link href="/blog" className="text-gray-500 hover:text-brand-green transition-colors">Blog</Link></li>
               </ul>
             </div>
             <div>

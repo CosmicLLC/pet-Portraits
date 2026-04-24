@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next"
 import { allProgrammaticUrls } from "@/lib/seo-data"
 import { GIFT_OCCASIONS } from "@/lib/gift-occasions"
+import { BLOG_POSTS } from "@/lib/blog-posts"
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || "https://pawmasterpiece.com"
@@ -12,6 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/`, lastModified: now, changeFrequency: "weekly", priority: 1.0 },
     { url: `${BASE_URL}/memorial`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
     { url: `${BASE_URL}/reviews`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${BASE_URL}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE_URL}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ]
@@ -37,5 +39,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   })
 
-  return [...staticEntries, ...giftEntries, ...programmatic]
+  // Blog posts — each becomes its own indexable URL with the post's
+  // publishedAt as lastModified for proper crawl scheduling.
+  const blogEntries: MetadataRoute.Sitemap = BLOG_POSTS.map((p) => ({
+    url: `${BASE_URL}/blog/${p.slug}`,
+    lastModified: p.updatedAt ? new Date(p.updatedAt) : new Date(p.publishedAt),
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }))
+
+  return [...staticEntries, ...giftEntries, ...blogEntries, ...programmatic]
 }
