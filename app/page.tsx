@@ -1133,7 +1133,12 @@ export default function Home() {
         <section id="reviews" className="bg-white border-t border-gray-100 py-16 sm:py-20">
           <div className="max-w-4xl mx-auto px-4 text-center reveal">
             <h2 className="font-display text-3xl sm:text-4xl text-brand-green mb-3">What Pet Parents Say</h2>
-            <p className="text-gray-500 mb-12 max-w-md mx-auto">Thousands of happy customers and counting.</p>
+            <p className="text-gray-500 mb-12 max-w-md mx-auto">
+              Thousands of happy customers and counting.{" "}
+              <Link href="/reviews" className="text-brand-green font-semibold hover:underline">
+                Read the Wall of Love →
+              </Link>
+            </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {HOME_REVIEWS.map((r) => (
                 <div key={r.name} className="bg-gray-50 rounded-2xl p-6 text-left">
