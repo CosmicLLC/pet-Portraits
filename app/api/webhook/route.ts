@@ -16,6 +16,7 @@ import {
   type ProdigiAddress,
 } from "@/lib/prodigi";
 import { isPhysicalProduct } from "@/lib/products";
+import { shouldApplyFreeBonus } from "@/lib/campaigns";
 import { upscaleForPrint, isUpscalerConfigured } from "@/lib/upscale";
 
 // Upscaling + Prodigi can take 15-30s on a physical order.
@@ -352,6 +353,47 @@ export async function POST(req: NextRequest) {
               },
             });
             console.log(`Prodigi order created ${prodigi.order.id} for ${order.id}`);
+
+            // ── Campaign bonus fulfillment ────────────────────────
+            // Mother's Day 2026 (and future campaigns via lib/campaigns):
+            // auto-create a second Prodigi order for the free bonus
+            // product. Uses the same shipping address + upscaled image
+            // asset so there's no extra cost beyond Prodigi print fees.
+            const bonus = shouldApplyFreeBonus({
+              orderCreatedAt: new Date(),
+              paidProductType: productType,
+              isPhysical: true,
+            });
+            if (bonus && isProdigiSkuConfigured(bonus.bonusProductType)) {
+              try {
+                const bonusOrder = await createProdigiOrder({
+                  merchantReference: `${order.id}-bonus`,
+                  sku: getProdigiSkuForProduct(bonus.bonusProductType),
+                  imageUrl: printImageUrl,
+                  attributes: getProdigiAttributesForProduct(bonus.bonusProductType),
+                  recipient: {
+                    name: shippingName,
+                    email,
+                    phoneNumber: session.customer_details?.phone ?? undefined,
+                    address: prodigiAddress,
+                  },
+                });
+                console.log(`Campaign bonus Prodigi order ${bonusOrder.order.id} for ${order.id}`);
+                await logEvent("info", "webhook", "Campaign bonus fulfilled", {
+                  orderId: order.id,
+                  bonusOrderId: bonusOrder.order.id,
+                  bonusProductType: bonus.bonusProductType,
+                  campaign: "mothers-day",
+                });
+              } catch (bonusErr) {
+                console.error("Campaign bonus fulfillment failed:", bonusErr);
+                await logEvent("warning", "webhook", "Campaign bonus failed", {
+                  orderId: order.id,
+                  bonusProductType: bonus.bonusProductType,
+                  error: bonusErr instanceof Error ? bonusErr.message : String(bonusErr),
+                });
+              }
+            }
           } catch (prodigiErr) {
             console.error("Prodigi order creation failed:", prodigiErr);
             await prisma.order.update({
