@@ -247,25 +247,46 @@ export function drawAd(
   }
 
   // ── Brand lockup (logo + wordmark) at the top of the top band ──────
-  // Center-aligned, logo-then-wordmark horizontal arrangement. A thin gold
+  // Center-aligned, logo-then-wordmark horizontal arrangement. Thin gold
   // rule under the wordmark ties the top band into the overall brand.
+  // The logo is drawn at its natural aspect ratio and clipped to a rounded
+  // rect so any background from the source asset (e.g. white in a JPG) is
+  // hidden.
   const wordmark = "PAW MASTERPIECE";
-  const logoSize = format.brandLogoSize;
+  const logoH = format.brandLogoSize;
+  const logoHasAsset =
+    !!logoImage && logoImage.complete && logoImage.naturalWidth > 0;
+  const logoAspect = logoHasAsset
+    ? logoImage!.naturalWidth / logoImage!.naturalHeight
+    : 1;
+  const logoW = Math.round(logoH * logoAspect);
+  const logoRadius = Math.round(logoH * 0.2);
+
   const wmSize = format.brandWordmarkSize;
   ctx.font = `700 ${wmSize}px "Playfair Display", serif`;
   ctx.textBaseline = "middle";
   const wmWidth = ctx.measureText(wordmark).width;
-  const logoGap = Math.round(logoSize * 0.35);
-  const lockupW =
-    (logoImage && logoImage.complete ? logoSize + logoGap : 0) + wmWidth;
+  const logoGap = Math.round(logoH * 0.4);
+  const lockupW = (logoHasAsset ? logoW + logoGap : 0) + wmWidth;
   const lockupX = (W - lockupW) / 2;
-  const lockupCenterY = format.brandPadTop + logoSize / 2;
+  const lockupCenterY = format.brandPadTop + logoH / 2;
 
-  if (logoImage && logoImage.complete && logoImage.naturalWidth > 0) {
-    ctx.drawImage(logoImage, lockupX, format.brandPadTop, logoSize, logoSize);
+  if (logoHasAsset) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(lockupX + logoRadius, format.brandPadTop);
+    ctx.arcTo(lockupX + logoW, format.brandPadTop, lockupX + logoW, format.brandPadTop + logoH, logoRadius);
+    ctx.arcTo(lockupX + logoW, format.brandPadTop + logoH, lockupX, format.brandPadTop + logoH, logoRadius);
+    ctx.arcTo(lockupX, format.brandPadTop + logoH, lockupX, format.brandPadTop, logoRadius);
+    ctx.arcTo(lockupX, format.brandPadTop, lockupX + logoW, format.brandPadTop, logoRadius);
+    ctx.closePath();
+    ctx.clip();
+    ctx.drawImage(logoImage!, lockupX, format.brandPadTop, logoW, logoH);
+    ctx.restore();
+
     ctx.fillStyle = BRAND.green;
     ctx.textAlign = "left";
-    ctx.fillText(wordmark, lockupX + logoSize + logoGap, lockupCenterY);
+    ctx.fillText(wordmark, lockupX + logoW + logoGap, lockupCenterY);
   } else {
     ctx.fillStyle = BRAND.green;
     ctx.textAlign = "center";
@@ -273,7 +294,7 @@ export function drawAd(
   }
 
   // Gold accent rule under the lockup
-  const ruleY = format.brandPadTop + logoSize + Math.round(format.brandGap * 0.35);
+  const ruleY = format.brandPadTop + logoH + Math.round(format.brandGap * 0.35);
   const ruleW = Math.round(W * 0.12);
   const ruleX = (W - ruleW) / 2;
   ctx.fillStyle = BRAND.gold;
@@ -318,7 +339,7 @@ export function drawAd(
   const hlLines = copy.headline.split("\n");
   const lineH = format.headlineSize * 1.08;
   // Headline sits under the brand lockup: logo size + accent rule + spacing
-  const headlineStartY = format.brandPadTop + logoSize + format.brandGap;
+  const headlineStartY = format.brandPadTop + logoH + format.brandGap;
   hlLines.forEach((line, i) => {
     ctx.fillText(line, W / 2, headlineStartY + i * lineH);
   });

@@ -96,12 +96,12 @@ export default function AdStudio() {
     document.fonts.ready.then(() => setFontsReady(true));
   }, []);
 
-  // Load the brand logo once. Re-renders propagate via logoImage state.
+  // Load the brand logo once. Uses /logo.jpg (the current canonical logo —
+  // a2bdf8f replaced the older PNG). Re-renders propagate via logoImage state.
   useEffect(() => {
     const img = new Image();
-    img.crossOrigin = "anonymous";
     img.onload = () => setLogoImage(img);
-    img.src = "/logo.png";
+    img.src = "/logo.jpg";
   }, []);
 
   const preset = useMemo(() => getPreset(presetId), [presetId]);
