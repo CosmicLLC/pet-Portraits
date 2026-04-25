@@ -43,7 +43,7 @@ Cold audience (Meta / TikTok / Pinterest)
   → Landing page (/gifts/[occasion] or /memorial for that persona)
     → Upload photo + preview (30s)
       → Email captured via exit-intent or browse-abandonment if they leave
-      → Purchase (digital $19 / canvas $79 / bundle $89 / etc.)
+      → Purchase (digital $6 / canvas $79 / bundle $79 with free digital / etc.)
         → Post-purchase upsell (canvas at 25% off if they bought digital)
         → 7-day review-request email
         → 365-day anniversary email
@@ -54,7 +54,7 @@ Cold audience (Meta / TikTok / Pinterest)
 
 - Digital portrait ($19): entry price, instant gratification, gift-morning-of play.
 - Framed canvas ($79 / $149): the hero product. "The gift that gets hung on the wall, not put in a drawer."
-- Bundle ($89, save $9): captures indecision; highest AOV for first-order gifters.
+- Bundle ($79, includes digital free): captures indecision; highest perceived value for first-order gifters since they get the digital file at no extra cost.
 - Gallery Set ($99): new for Q4 — four prints, same pet, all four styles. Christmas flagship.
 - Memorial path: same products, different funnel, unlimited revisions, no time-pressure language.
 

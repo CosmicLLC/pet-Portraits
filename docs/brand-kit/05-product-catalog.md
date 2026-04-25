@@ -11,7 +11,7 @@ _Current as of 2026-04-24. When SKUs or pricing change, update this file and re-
 | Display Print 11×14 | $15.99 | 3–5 days US | Mother's Day freebie; otherwise a light upsell. Bagged-ready-to-frame. |
 | Mounted Print 11×14 | $33 | 3–5 days US | Middle-tier upgrade — nicer than display, no canvas weight. |
 | Framed Canvas 8×12 | $79 | 3–5 days US | **The hero product.** Anchor every campaign here. "Gallery-quality, ships to your door, ready to hang." |
-| Complete Bundle | $89 (saves $9) | 3–5 days US | Best AOV. Default tile when a gifter is indecisive. Digital + Canvas combo. |
+| Complete Bundle | $79 (digital free with canvas) | 3–5 days US | Best AOV play. Same price as canvas alone, includes the full-res digital file free. Default tile when a gifter is indecisive. |
 
 ## Expansion catalog (light up individually as Stripe Price IDs land)
 
@@ -32,7 +32,7 @@ _Current as of 2026-04-24. When SKUs or pricing change, update this file and re-
 
 - **$19 entry price anchor**: every campaign. Lead with "starting at $19."
 - **$79 canvas hero shot**: 90% of ad creative. The physical product drives the emotional wall-hang moment.
-- **$89 bundle**: "Complete Bundle" label — for the indecisive-gifter persona.
+- **$79 bundle**: "Complete Bundle" label — same price as canvas alone, but includes the digital file free. The pitch is "digital free with canvas," not "save $X" since they're paying canvas-equivalent.
 - **$149 16×20**: creative for established customers or premium-decor personas. Not cold acquisition.
 - **Gallery Set**: Christmas-only flagship. Hero creative in Nov/Dec.
 - **Memorial**: same catalog, but creative leads with "framed canvas" and "display print" — never emphasize accessories.
@@ -42,7 +42,7 @@ _Current as of 2026-04-24. When SKUs or pricing change, update this file and re-
 
 - Display prices as `$79`, never `$79.00`.
 - No minimizers: no "only $19" or "just $19."
-- Strike-through pricing is allowed when a bundle or sale is real ("$89 ~~$98~~" for Complete Bundle). Never fake a strike-through.
+- Strike-through pricing is allowed when a bundle or sale is real ("$79 ~~$85~~" for Complete Bundle — the $85 is canvas + digital separately). Never fake a strike-through.
 - Discount codes get the `PAWSOME` prefix: `PAWSOME10` (exit intent 10%), `PAWSOME15` (winback). Rotate codes; don't use the same one for multiple campaigns.
 
 ## Upsell paths

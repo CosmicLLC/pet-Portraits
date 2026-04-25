@@ -48,11 +48,11 @@ export default function StickyCartBar({ watermarkedImage, imageId, onError, wall
         <div className="flex-1 min-w-0">
           <p className="text-[10px] text-gray-400 uppercase tracking-wider">Best Value</p>
           <div className="flex items-baseline gap-1.5">
-            <span className="font-display font-bold text-brand-green text-base">$89</span>
-            <span className="text-gray-400 text-xs line-through">$98</span>
-            <span className="text-[10px] text-brand-gold font-semibold bg-brand-gold/10 px-1.5 py-0.5 rounded-full">Save $9</span>
+            <span className="font-display font-bold text-brand-green text-base">$79</span>
+            <span className="text-gray-400 text-xs line-through">$85</span>
+            <span className="text-[10px] text-brand-gold font-semibold bg-brand-gold/10 px-1.5 py-0.5 rounded-full">Digital FREE</span>
           </div>
-          <p className="text-xs text-gray-500 truncate">Digital + Framed Canvas</p>
+          <p className="text-xs text-gray-500 truncate">Canvas + free digital</p>
         </div>
 
         {/* CTA */}

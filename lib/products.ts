@@ -35,9 +35,9 @@ export const PRODUCTS = {
   },
   bundle: {
     label: "Complete Bundle",
-    price: "$89",
-    originalPrice: "$98",
-    description: "Digital download + framed canvas print",
+    price: "$79",
+    originalPrice: "$85",
+    description: "Framed canvas + digital download free",
   },
   // ─── 2026-04-24 expansion ─────────────────────────────────────────
   // Higher-AOV canvas tier for statement-piece buyers. Same Prodigi
