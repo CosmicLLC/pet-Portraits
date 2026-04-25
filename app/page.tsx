@@ -216,7 +216,11 @@ export default function Home() {
   const handleGenerate = useCallback(
     async (overrideStyle?: StyleKey) => {
       if (!file) return;
-      const useStyle = overrideStyle ?? style;
+      // Guard — if an event handler accidentally passes a non-string
+      // (e.g. a MouseEvent), ignore it and use the selected style state.
+      // Keeps us from sending "[object Object]" to the API.
+      const useStyle =
+        typeof overrideStyle === "string" ? overrideStyle : style;
       if (!useStyle) return;
       setLoading(true);
       setError(null);
@@ -807,7 +811,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <GenerateButton disabled={!file || !style} loading={loading} onClick={handleGenerate} />
+              <GenerateButton disabled={!file || !style} loading={loading} onClick={() => handleGenerate()} />
             </div>
           )}
 
