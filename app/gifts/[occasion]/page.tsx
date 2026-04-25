@@ -108,14 +108,17 @@ export default function GiftOccasionPage({ params }: Props) {
 
       <LandingHeader />
 
-      {/* Hero */}
+      {/* Hero — inspired by the Mother's Day ad creative: warm cream
+          background, editorial lifestyle photography, centered trust badge
+          pill overlay on the image, Playfair headline, brand-green CTA pill,
+          URL line. Shared template across all gift occasions. */}
       <section className="relative bg-cream border-b border-gray-100 overflow-hidden">
-        <div className="max-w-6xl mx-auto px-4 py-16 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="text-center md:text-left">
+        <div className="max-w-6xl mx-auto px-4 py-14 sm:py-20 grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          <div className="text-center md:text-left md:order-1 order-2">
             <p className="text-xs font-display font-semibold uppercase tracking-[0.18em] text-brand-gold mb-4">
               {occ.eyebrow}
             </p>
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.25rem] text-brand-green leading-[1.1] mb-5">
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-[3.25rem] text-brand-green leading-[1.08] mb-5">
               {occ.heroHeadline}
             </h1>
             <p className="text-gray-700 text-lg sm:text-xl max-w-xl md:mx-0 mx-auto mb-8 leading-relaxed">
@@ -123,24 +126,36 @@ export default function GiftOccasionPage({ params }: Props) {
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-3 bg-brand-green text-cream px-8 py-4 rounded-full text-base font-display font-semibold shadow-[0_12px_30px_-10px_rgba(45,74,62,0.45)] hover:bg-brand-green/90 hover:shadow-[0_18px_38px_-12px_rgba(45,74,62,0.55)] hover:-translate-y-0.5 transition-all"
+              className="inline-flex items-center gap-3 bg-brand-green text-cream px-8 py-4 rounded-full text-base font-display font-semibold shadow-[0_12px_30px_-10px_rgba(45,74,62,0.45)] hover:bg-brand-green/90 hover:shadow-[0_18px_38px_-12px_rgba(45,74,62,0.55)] hover:-translate-y-0.5 transition-all uppercase tracking-wider"
             >
-              Start Your Portrait
+              {occ.heroCta ?? "Start Your Portrait"}
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </Link>
-            <p className="text-gray-500 text-sm mt-5">{occ.heroTrust}</p>
+            <p className="text-brand-green/80 text-sm font-display font-medium mt-4">
+              pawmasterpiece.com
+            </p>
+            <p className="text-gray-500 text-xs mt-3">{occ.heroTrust}</p>
           </div>
-          <div className="relative aspect-[3/4] max-w-md w-full mx-auto rounded-3xl overflow-hidden shadow-[0_30px_60px_-25px_rgba(45,74,62,0.3)] ring-1 ring-gray-100 bg-white">
-            <Image
-              src={occ.heroImage}
-              alt={occ.heroImageAlt}
-              fill
-              priority
-              sizes="(max-width: 768px) 90vw, 420px"
-              className="object-cover"
-            />
+          <div className="relative md:order-2 order-1">
+            <div className="relative aspect-[4/3] sm:aspect-[5/4] w-full mx-auto rounded-3xl overflow-hidden shadow-[0_30px_60px_-25px_rgba(45,74,62,0.3)] ring-1 ring-gray-100 bg-white">
+              <Image
+                src={occ.heroImage}
+                alt={occ.heroImageAlt}
+                fill
+                priority
+                sizes="(max-width: 768px) 90vw, 540px"
+                className="object-cover"
+              />
+              {/* Trust badge pill overlay, bottom-left corner — matches ad */}
+              <div className="absolute bottom-3 left-3 bg-cream/92 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                <span className="text-brand-gold text-sm leading-none">★</span>
+                <span className="text-xs font-display font-semibold text-brand-green">
+                  4.9 · Ships in 3–5 days
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

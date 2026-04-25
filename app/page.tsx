@@ -437,6 +437,12 @@ export default function Home() {
                 {link.label}
               </button>
             ))}
+            <Link
+              href="/products"
+              className="text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
+            >
+              Products
+            </Link>
             <button
               onClick={resetState}
               className="bg-brand-green text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-brand-green/90 transition-all hover:shadow-md"
@@ -550,6 +556,13 @@ export default function Home() {
                 {link.label}
               </button>
             ))}
+            <Link
+              href="/products"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-700 hover:text-brand-green hover:bg-gray-50 transition-colors font-medium"
+            >
+              Products
+            </Link>
             <button
               onClick={resetState}
               className="mt-1 w-full bg-brand-green text-white py-2.5 px-3 rounded-lg text-sm font-semibold hover:bg-brand-green/90 transition-all text-center"
@@ -1216,6 +1229,7 @@ export default function Home() {
             <div>
               <p className="font-display font-semibold text-brand-green mb-3">Collections</p>
               <ul className="space-y-2">
+                <li><Link href="/products" className="text-gray-500 hover:text-brand-green transition-colors">All Products</Link></li>
                 <li><Link href="/pet-portraits/dogs" className="text-gray-500 hover:text-brand-green transition-colors">Dog Portraits</Link></li>
                 <li><Link href="/pet-portraits/cats" className="text-gray-500 hover:text-brand-green transition-colors">Cat Portraits</Link></li>
                 <li><Link href="/memorial" className="text-gray-500 hover:text-brand-green transition-colors">Memorial Portraits</Link></li>

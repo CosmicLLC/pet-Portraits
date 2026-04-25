@@ -20,6 +20,8 @@ export interface GiftOccasion {
   heroTrust: string;
   heroImage: string;
   heroImageAlt: string;
+  /** CTA button label. Defaults to "Start Your Portrait" when unset. */
+  heroCta?: string;
   /** Three unique content sections that appear in order below the hero. */
   sections: [
     { heading: string; body: string },
@@ -42,12 +44,13 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     metaDescription:
       "A Mother's Day gift the dog mom in your life will actually display. Turn her pet's photo into a gallery-quality portrait. Digital download in 30 seconds or framed canvas shipped to her door.",
     eyebrow: "Mother's Day Gifts",
-    heroHeadline: "A Mother's Day gift she'll actually hang on the wall.",
+    heroHeadline: "Make her cry (happy tears, promise).",
     heroSubhead:
-      "Turn her favorite photo of her pet into a gallery-quality portrait. Ready to preview in 30 seconds — email her the digital file the morning of, or ship the framed canvas in advance.",
-    heroTrust: "Free preview · Instant digital delivery · US canvas shipping 3–5 days",
-    heroImage: "/examples/watercolor.png",
-    heroImageAlt: "Mother's Day pet portrait gift — watercolor dog painting",
+      "Custom portrait, ready in 30 seconds. Free 11×14 display print with any order — through May 10.",
+    heroTrust: "★ 4.9 · Ships in 3–5 days · Free preview",
+    heroImage: "/ads/mothers-day-renaissance-reveal-v1.png",
+    heroImageAlt: "Mom reacting to her framed pet portrait — Mother's Day gift reveal",
+    heroCta: "Shop Mother's Day",
     sections: [
       {
         heading: "The gift dog moms actually want.",

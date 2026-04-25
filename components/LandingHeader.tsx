@@ -14,12 +14,20 @@ export default function LandingHeader() {
             Paw Masterpiece
           </span>
         </Link>
-        <Link
-          href="/"
-          className="bg-brand-green text-cream px-5 py-2.5 rounded-full text-sm font-display font-semibold hover:bg-brand-green/90 transition-colors"
-        >
-          Create Portrait
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/products"
+            className="hidden sm:inline-block text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
+          >
+            Products
+          </Link>
+          <Link
+            href="/"
+            className="bg-brand-green text-cream px-5 py-2.5 rounded-full text-sm font-display font-semibold hover:bg-brand-green/90 transition-colors"
+          >
+            Create Portrait
+          </Link>
+        </div>
       </div>
     </header>
   )
