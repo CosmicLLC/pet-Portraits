@@ -25,7 +25,7 @@ const TIERS: Tier[] = [
   {
     key: "digital",
     name: "Digital Download",
-    price: "$19",
+    price: "$6",
     description: "Instant email delivery",
     features: ["Full-resolution PNG", "Print-ready file", "Lifetime access"],
     highlighted: false,
@@ -195,7 +195,7 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected }:
   const handleSelect = async (key: string) => {
     setLoading(key);
     const productType = key as ProductType;
-    const value = productValue(productType) + (wallpaperSelected ? 1.99 : 0);
+    const value = productValue(productType) + (wallpaperSelected ? 5 : 0);
     track({ name: "begin_checkout", productType, value, imageId });
     try {
       const res = await fetch("/api/create-checkout", {
@@ -259,7 +259,7 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected }:
                   )}
                   {wallpaperSelected && (
                     <span className="text-xs font-semibold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full">
-                      +$1.99 wallpaper
+                      +$5 wallpaper
                     </span>
                   )}
                 </div>

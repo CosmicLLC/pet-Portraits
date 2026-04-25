@@ -10,12 +10,12 @@
 export const PRODUCTS = {
   digital: {
     label: "Digital Download",
-    price: "$19",
+    price: "$6",
     description: "Full-res PNG, instant email delivery",
   },
   wallpaper: {
     label: "Phone Wallpaper",
-    price: "$15",
+    price: "$5",
     description: "Optimized for mobile screens",
   },
   display: {

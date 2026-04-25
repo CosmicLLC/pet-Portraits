@@ -349,7 +349,7 @@ export async function sendWinbackEmail(to: string) {
     </p>
 
     <ul style="color:#555;font-size:15px;line-height:1.8;margin:0 0 28px;padding-left:20px;">
-      <li><strong>Phone wallpaper add-on</strong> — $1.99, iPhone-optimised, instant download</li>
+      <li><strong>Phone wallpaper add-on</strong> — $5, iPhone-optimised, instant download</li>
       <li><strong>Framed canvas prints</strong> — 8×12 gallery-quality, ships in 3–5 days</li>
       <li><strong>Memorial portrait funnel</strong> — gentle tone, unlimited revisions</li>
       <li><strong>Refer a friend</strong> — $10 for them, $10 back for you</li>

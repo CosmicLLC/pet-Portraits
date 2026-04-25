@@ -210,7 +210,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
       {
         q: "What if I need a last-minute gift and I missed the shipping cutoff?",
-        a: "Buy the digital download ($19), email the recipient the full-resolution file Christmas morning, and follow up with a printed version in January. Many customers do this — the on-day gift plus the follow-up-arrival-gift often lands better than one box on Christmas morning.",
+        a: "Buy the digital download ($6), email the recipient the full-resolution file Christmas morning, and follow up with a printed version in January. Many customers do this — the on-day gift plus the follow-up-arrival-gift often lands better than one box on Christmas morning.",
       },
     ],
     closingHeadline: "Order by Dec 15 for Christmas morning. After that, digital still works.",
@@ -268,7 +268,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
       {
         q: "What's the best last-minute birthday option?",
-        a: "Buy the digital download ($19), preview appears in about 30 seconds, full-resolution file arrives by email within minutes. Email it to them with a birthday message. Total time: under 10 minutes.",
+        a: "Buy the digital download ($6), preview appears in about 30 seconds, full-resolution file arrives by email within minutes. Email it to them with a birthday message. Total time: under 10 minutes.",
       },
     ],
     closingHeadline: "One photo. One portrait. One gift they'll hang on the wall.",
@@ -303,7 +303,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       {
         heading: "Not sure which style she'd like? Get the digital bundle.",
         body:
-          "If you're debating between watercolor and oil painting, the digital download ($19) works as a preview — you can show it to her, see which she responds to, and then order the framed canvas in her preferred style. Or order the Complete Bundle ($89) and get both the digital file and the framed canvas together, saving $9.",
+          "If you're debating between watercolor and oil painting, the digital download ($6) works as a preview — you can show it to her, see which she responds to, and then order the framed canvas in her preferred style. Or order the Complete Bundle ($89) and get both the digital file and the framed canvas together, saving $9.",
       },
     ],
     recommendedStyles: [

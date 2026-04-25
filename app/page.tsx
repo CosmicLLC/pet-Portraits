@@ -806,7 +806,7 @@ export default function Home() {
                       Add Phone Wallpaper
                     </p>
                     <span className="text-xs font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full flex-shrink-0">
-                      $1.99
+                      $5
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 leading-snug">
@@ -984,7 +984,7 @@ export default function Home() {
                     ["Money-back guarantee", true, false],
                     ["Multiple art styles", true, false],
                     ["Canvas print shipping", true, true],
-                    ["Starting price", "$19", "$50+"],
+                    ["Starting price", "$6", "$50+"],
                     ["Turnaround time", "30 seconds", "1–2 weeks"],
                   ].map(([feature, ours, theirs], i) => (
                     <tr key={i} className={`border-b border-gray-100 last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
@@ -1142,6 +1142,7 @@ export default function Home() {
                 <li><Link href="/reviews" className="text-gray-500 hover:text-brand-green transition-colors">Wall of Love</Link></li>
                 <li><Link href="/blog" className="text-gray-500 hover:text-brand-green transition-colors">Blog</Link></li>
                 <li><Link href="/free-photo-guide" className="text-gray-500 hover:text-brand-green transition-colors">Free Photo Guide</Link></li>
+                <li><Link href="/free-wallpaper" className="text-gray-500 hover:text-brand-green transition-colors">Free Phone Wallpaper</Link></li>
               </ul>
             </div>
             <div>

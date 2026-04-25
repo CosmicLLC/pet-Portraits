@@ -69,13 +69,13 @@ export const BLOG_POSTS: BlogPost[] = [
 
 <p>This is the category we know best, so we'll be direct: a custom watercolor or oil painting of her pet, generated in 30 seconds from any phone photo, emailed to her on Mother's Day morning, is the gift that wins last-minute. Three reasons:</p>
 
-<p><strong>1. The reaction beats anything else.</strong> A digital portrait of her dog or cat hits an emotional note that a gift card or a delivery delay can't. We've watched people cry over a $19 file emailed at 8am Mother's Day morning.</p>
+<p><strong>1. The reaction beats anything else.</strong> A digital portrait of her dog or cat hits an emotional note that a gift card or a delivery delay can't. We've watched people cry over a $6 file emailed at 8am Mother's Day morning.</p>
 
 <p><strong>2. She can print it instantly.</strong> CVS, Walgreens, FedEx Office, and any local frame shop will print and frame an emailed file the same day. Most have curbside pickup. So she gets the digital reveal AND a physical thing for the wall, all on Mother's Day.</p>
 
 <p><strong>3. It pairs perfectly with a follow-up canvas.</strong> The on-the-day surprise plus a framed canvas that arrives Tuesday is, statistically, our highest-rated gift configuration. Two arrivals, one perfect gift, half the panic.</p>
 
-<p>Our digital download is $19. Preview is free in 30 seconds. <a href="/">Upload her pet's photo here</a> and pick the style.</p>
+<p>Our digital download is $6. Preview is free in 30 seconds. <a href="/">Upload her pet's photo here</a> and pick the style.</p>
 
 <h2>Printable gifts she can hang today</h2>
 
@@ -89,7 +89,7 @@ export const BLOG_POSTS: BlogPost[] = [
 
 <p>The Sunday email is the emotional moment. The Tuesday arrival is the surprise reinforcement. She gets two reactions for one gift, and you get the cover of "I planned this for weeks" because of course you did. (You didn't. We won't tell.)</p>
 
-<p>Through Mother's Day 2026, our orders also include a <strong>FREE 11×14 display print</strong> automatically. So even the $19 digital includes a physical art piece on her wall — at no extra cost. <a href="/gifts/mothers-day">Details on the offer page.</a></p>
+<p>Through Mother's Day 2026, our orders also include a <strong>FREE 11×14 display print</strong> automatically. So even the $6 digital includes a physical art piece on her wall — at no extra cost. <a href="/gifts/mothers-day">Details on the offer page.</a></p>
 
 <h2>Gift cards done right (if you absolutely must)</h2>
 
@@ -352,9 +352,9 @@ export const BLOG_POSTS: BlogPost[] = [
 
 <h2>Last-minute? You're still fine</h2>
 
-<p>If Mother's Day is in the next 24 hours and you're reading this in panic, here's the move: order the <strong>digital download</strong> ($19), email her the full-resolution file Sunday morning with a note explaining the canvas is on its way, and follow up with the framed canvas a few days later. The reaction is usually better — you get the on-the-day surprise <em>and</em> the second arrival.</p>
+<p>If Mother's Day is in the next 24 hours and you're reading this in panic, here's the move: order the <strong>digital download</strong> ($6), email her the full-resolution file Sunday morning with a note explaining the canvas is on its way, and follow up with the framed canvas a few days later. The reaction is usually better — you get the on-the-day surprise <em>and</em> the second arrival.</p>
 
-<p>Plus, through Mother's Day 2026, every order ships with a <strong>FREE 11×14 display print</strong>. So even the $19 digital includes a real piece of art on her wall. We auto-fulfill it on physical orders and let digital buyers claim it after checkout.</p>
+<p>Plus, through Mother's Day 2026, every order ships with a <strong>FREE 11×14 display print</strong>. So even the $6 digital includes a real piece of art on her wall. We auto-fulfill it on physical orders and let digital buyers claim it after checkout.</p>
 
 <h2>How long does it actually take to make one?</h2>
 

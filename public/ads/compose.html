@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Paw Masterpiece — Ad Composer</title>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=DM+Sans:wght@400;500;600;700&display=swap");
+  :root {
+    --brand-green: #2D4A3E;
+    --brand-gold:  #C4A35A;
+    --cream:       #FAF7F2;
+    --ink:         #1C1C1C;
+    --muted:       #666;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a1a;
+    color: #ccc;
+    font-family: "DM Sans", sans-serif;
+    padding: 24px;
+    min-height: 100vh;
+  }
+  h1 { color: #fff; font-family: "Playfair Display"; font-size: 28px; margin-bottom: 8px; }
+  p.meta { color: #888; font-size: 14px; margin-bottom: 24px; }
+  .controls { margin-bottom: 32px; display: flex; gap: 12px; flex-wrap: wrap; }
+  button {
+    background: var(--brand-green); color: var(--cream);
+    border: 0; padding: 12px 20px; border-radius: 999px;
+    font-family: "DM Sans"; font-weight: 600; font-size: 14px; cursor: pointer;
+  }
+  button:hover { background: #1f3a30; }
+  button.secondary { background: transparent; color: #ccc; border: 1px solid #444; }
+  .sizes { display: grid; gap: 40px; grid-template-columns: 1fr; }
+  .size-block { background: #000; padding: 20px; border-radius: 12px; }
+  .size-block h2 { color: #fff; font-family: "Playfair Display"; font-size: 20px; margin-bottom: 12px; }
+  .size-block .scaled { max-width: 100%; height: auto; }
+  canvas { display: block; background: var(--cream); }
+  #status { position: fixed; bottom: 20px; right: 20px; background: var(--brand-green); color: var(--cream); padding: 12px 20px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .2s; }
+  #status.show { opacity: 1; }
+</style>
+</head>
+<body>
+<h1>Paw Masterpiece — Ad Composer</h1>
+<p class="meta">Renders the full Meta ad creative across all placements. Uses brand fonts + palette + aggregate rating schema.</p>
+
+<div class="controls">
+  <button onclick="downloadAll()">Download all (3 files)</button>
+  <button class="secondary" onclick="rerender()">Re-render</button>
+</div>
+
+<div class="sizes">
+  <div class="size-block">
+    <h2>1:1 — Meta feed (1080 × 1080)</h2>
+    <canvas id="canvas-1x1" width="1080" height="1080" class="scaled" style="max-width: 540px;"></canvas>
+  </div>
+  <div class="size-block">
+    <h2>4:5 — Meta feed vertical (1080 × 1350)</h2>
+    <canvas id="canvas-4x5" width="1080" height="1350" class="scaled" style="max-width: 540px;"></canvas>
+  </div>
+  <div class="size-block">
+    <h2>9:16 — Reels / Stories / TikTok (1080 × 1920)</h2>
+    <canvas id="canvas-9x16" width="1080" height="1920" class="scaled" style="max-width: 400px;"></canvas>
+  </div>
+</div>
+
+<div id="status"></div>
+
+<script>
+const BASE_IMAGE = "mothers-day-renaissance-reveal-v1.png";
+const COPY = {
+  headline: "She Saw Him In Oil Paint\nAnd Cried Harder Than\nOur Wedding.",
+  subhead: "Real reactions. Real pet moms. 4.9★ from 40,000+ pet parents.",
+  ctaPrimary: "Preview Free — 30 Seconds",
+  ctaSecondary: "pawmasterpiece.com",
+  badge: "⭐ 4.9  ·  Ships in 3–5 days",
+};
+const BRAND = {
+  green: "#2D4A3E",
+  gold:  "#C4A35A",
+  cream: "#FAF7F2",
+  ink:   "#1C1C1C",
+  muted: "#666666",
+};
+
+function status(msg) {
+  const el = document.getElementById("status");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove("show"), 2000);
+}
+
+// Shared draw: takes a canvas + a layout spec and paints the ad.
+// Layout spec dictates the heights of top banner / image / bottom banner
+// so each aspect ratio can breathe correctly.
+function drawAd(canvas, spec, baseImg) {
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
+
+  // Cream background
+  ctx.fillStyle = BRAND.cream;
+  ctx.fillRect(0, 0, W, H);
+
+  // Photo band — clip the landscape base image to fit the photo band area.
+  // We letterbox it centered so neither the woman nor the portrait get cropped out.
+  const photoY = spec.topBandH;
+  const photoH = spec.photoH;
+  const photoBandRatio = W / photoH;
+  const imgRatio = baseImg.width / baseImg.height;
+  let sx, sy, sw, sh;
+  if (imgRatio > photoBandRatio) {
+    // Source wider than band — crop the sides
+    sh = baseImg.height;
+    sw = baseImg.height * photoBandRatio;
+    sx = (baseImg.width - sw) / 2;
+    sy = 0;
+  } else {
+    // Source taller than band — crop the top/bottom
+    sw = baseImg.width;
+    sh = baseImg.width / photoBandRatio;
+    sx = 0;
+    sy = (baseImg.height - sh) / 2;
+  }
+  ctx.drawImage(baseImg, sx, sy, sw, sh, 0, photoY, W, photoH);
+
+  // ── Top band: headline + subhead
+  drawTopBand(ctx, W, spec);
+  // ── Bottom band: CTA button + micro trust
+  drawBottomBand(ctx, W, H, spec);
+  // ── Corner badge (over the photo, top-right)
+  drawBadge(ctx, W, spec);
+}
+
+function drawTopBand(ctx, W, spec) {
+  // Centered headline, serif, brand-green
+  ctx.fillStyle = BRAND.green;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "top";
+  ctx.font = `800 ${spec.headlineSize}px "Playfair Display", serif`;
+
+  const lines = COPY.headline.split("\n");
+  const lineH = spec.headlineSize * 1.08;
+  const headlineBlockH = lines.length * lineH;
+  const headlineStartY = spec.headlinePadTop;
+  lines.forEach((line, i) => {
+    ctx.fillText(line, W / 2, headlineStartY + i * lineH);
+  });
+
+  // Subhead underneath
+  ctx.fillStyle = BRAND.muted;
+  ctx.font = `500 ${spec.subheadSize}px "DM Sans", sans-serif`;
+  const subheadY = headlineStartY + headlineBlockH + spec.subheadGap;
+  // Word-wrap the subhead to maxWidth
+  wrapText(ctx, COPY.subhead, W / 2, subheadY, W * 0.86, spec.subheadSize * 1.4);
+}
+
+function drawBottomBand(ctx, W, H, spec) {
+  const bottomY = H - spec.bottomBandH;
+
+  // CTA button (pill, brand-green fill)
+  const btnW = Math.min(spec.ctaBtnW, W - 80);
+  const btnH = spec.ctaBtnH;
+  const btnX = (W - btnW) / 2;
+  const btnY = bottomY + spec.ctaPadTop;
+
+  ctx.fillStyle = BRAND.green;
+  roundRect(ctx, btnX, btnY, btnW, btnH, btnH / 2);
+  ctx.fill();
+
+  ctx.fillStyle = BRAND.cream;
+  ctx.font = `700 ${spec.ctaSize}px "DM Sans", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(COPY.ctaPrimary, W / 2, btnY + btnH / 2);
+
+  // URL / secondary CTA underneath
+  ctx.fillStyle = BRAND.muted;
+  ctx.font = `500 ${spec.urlSize}px "DM Sans", sans-serif`;
+  ctx.textBaseline = "top";
+  ctx.fillText(COPY.ctaSecondary, W / 2, btnY + btnH + spec.urlGap);
+}
+
+function drawBadge(ctx, W, spec) {
+  // Small pill badge on photo band, bottom-left corner. Warm cream translucent,
+  // brand-gold star + brand-green text.
+  const padX = spec.badgePadX;
+  const padY = 14;
+  const badgeY = spec.topBandH + spec.photoH - spec.badgeH - 24;
+  const badgeX = 24;
+
+  ctx.font = `600 ${spec.badgeFontSize}px "DM Sans", sans-serif`;
+  const textMetrics = ctx.measureText(COPY.badge);
+  const badgeW = textMetrics.width + padX * 2;
+
+  ctx.fillStyle = "rgba(250, 247, 242, 0.92)";
+  roundRect(ctx, badgeX, badgeY, badgeW, spec.badgeH, spec.badgeH / 2);
+  ctx.fill();
+
+  ctx.fillStyle = BRAND.green;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText(COPY.badge, badgeX + padX, badgeY + spec.badgeH / 2);
+}
+
+// Canvas utility: roundRect polyfill since older Chrome canvas doesn't have it.
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function wrapText(ctx, text, cx, y, maxWidth, lineHeight) {
+  const words = text.split(" ");
+  let line = "";
+  const lines = [];
+  for (const word of words) {
+    const test = line ? line + " " + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  lines.forEach((l, i) => {
+    ctx.fillText(l, cx, y + i * lineHeight);
+  });
+  return lines.length;
+}
+
+// Layout specs per placement. Tuned so the headline dominates, the photo is
+// the hero, and the CTA feels crisp without crowding.
+const SPECS = {
+  "1x1": {
+    topBandH: 280,
+    photoH: 540,
+    bottomBandH: 260,
+    headlinePadTop: 36,
+    headlineSize: 58,
+    subheadSize: 22,
+    subheadGap: 14,
+    ctaBtnW: 520,
+    ctaBtnH: 72,
+    ctaPadTop: 50,
+    ctaSize: 22,
+    urlSize: 16,
+    urlGap: 22,
+    badgeH: 36,
+    badgeFontSize: 15,
+    badgePadX: 16,
+  },
+  "4x5": {
+    topBandH: 320,
+    photoH: 700,
+    bottomBandH: 330,
+    headlinePadTop: 50,
+    headlineSize: 62,
+    subheadSize: 24,
+    subheadGap: 18,
+    ctaBtnW: 580,
+    ctaBtnH: 80,
+    ctaPadTop: 70,
+    ctaSize: 24,
+    urlSize: 18,
+    urlGap: 28,
+    badgeH: 40,
+    badgeFontSize: 17,
+    badgePadX: 18,
+  },
+  "9x16": {
+    topBandH: 460,
+    photoH: 980,
+    bottomBandH: 480,
+    headlinePadTop: 110,
+    headlineSize: 72,
+    subheadSize: 28,
+    subheadGap: 28,
+    ctaBtnW: 680,
+    ctaBtnH: 92,
+    ctaPadTop: 120,
+    ctaSize: 28,
+    urlSize: 20,
+    urlGap: 32,
+    badgeH: 46,
+    badgeFontSize: 19,
+    badgePadX: 22,
+  },
+};
+
+async function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+async function render() {
+  // Ensure fonts are loaded before we paint (otherwise they fall back to
+  // system serif/sans-serif and the brand doesn't render)
+  await document.fonts.ready;
+  const baseImg = await loadImage(BASE_IMAGE);
+  for (const size of ["1x1", "4x5", "9x16"]) {
+    const canvas = document.getElementById(`canvas-${size}`);
+    drawAd(canvas, SPECS[size], baseImg);
+  }
+  status("Rendered");
+}
+
+function downloadAll() {
+  for (const size of ["1x1", "4x5", "9x16"]) {
+    const canvas = document.getElementById(`canvas-${size}`);
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = `mothers-day-renaissance-reveal-v1-${size}.png`;
+    a.click();
+  }
+  status("Downloaded 3 files");
+}
+
+function rerender() { render(); }
+
+// Expose for programmatic control (Claude driving the browser)
+window.__composer = { render, downloadAll };
+render();
+</script>
+</body>
+</html>
