@@ -215,28 +215,70 @@ export default function Home() {
     setError(null);
   }, []);
 
-  const handleGenerate = useCallback(async () => {
-    if (!file || !style) return;
+  const handleGenerate = useCallback(
+    async (overrideStyle?: StyleKey) => {
+      if (!file) return;
+      const useStyle = overrideStyle ?? style;
+      if (!useStyle) return;
+      setLoading(true);
+      setError(null);
+      track({ name: "portrait_generation_start", style: useStyle });
+      try {
+        const formData = new FormData();
+        formData.append("image", file);
+        formData.append("style", useStyle);
+        const res = await fetch("/api/generate", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        setStyle(useStyle);
+        setWatermarkedImage(data.watermarkedImage);
+        setImageId(data.imageId);
+        setStep("preview");
+        track({ name: "portrait_generated", style: useStyle, imageId: data.imageId });
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Generation failed — please try again or use a clearer photo."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [file, style]
+  );
+
+  // Re-render the current pet photo in a different style without leaving
+  // the preview screen. Tap a style button → fresh generation, same file.
+  const handleSwitchStyle = useCallback(
+    (next: StyleKey) => {
+      if (!file || loading || next === style) return;
+      handleGenerate(next);
+    },
+    [file, loading, style, handleGenerate]
+  );
+
+  // Buy ONLY the phone wallpaper ($5) — direct path to Stripe checkout,
+  // not an add-on to a bigger product. Requires a generated imageId so
+  // the webhook knows which portrait to build the wallpaper from.
+  const handleBuyWallpaper = useCallback(async () => {
+    if (!imageId || loading) return;
     setLoading(true);
-    setError(null);
-    track({ name: "portrait_generation_start", style });
+    track({ name: "begin_checkout", productType: "wallpaper" as ProductType, value: 5, imageId });
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("style", style);
-      const res = await fetch("/api/generate", { method: "POST", body: formData });
+      const res = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productType: "wallpaper", imageId }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setWatermarkedImage(data.watermarkedImage);
-      setImageId(data.imageId);
-      setStep("preview");
-      track({ name: "portrait_generated", style, imageId: data.imageId });
+      window.location.href = data.url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Generation failed — please try again or use a clearer photo.");
-    } finally {
+      setError(err instanceof Error ? err.message : "Checkout error — please try again.");
       setLoading(false);
     }
-  }, [file, style]);
+  }, [imageId, loading]);
 
   const handleUpsell = useCallback(async () => {
     if (!successImageId) return;
@@ -784,15 +826,61 @@ export default function Home() {
                 </a>
               )}
 
-              {/* ─── Phone Wallpaper Upsell ─────────────────────────── */}
+              {/* ─── Try another style (same pet, fresh generation) ─── */}
+              <div className="mt-6 bg-white rounded-2xl border border-gray-200 p-4">
+                <p className="text-[11px] font-display font-semibold uppercase tracking-widest text-brand-gold mb-2.5 text-center">
+                  Try another style
+                </p>
+                <div className="grid grid-cols-4 gap-2">
+                  {([
+                    { key: "watercolor", label: "Watercolor", img: "/examples/watercolor.png" },
+                    { key: "oil",        label: "Oil",        img: "/examples/oil.png" },
+                    { key: "renaissance", label: "Renaissance", img: "/examples/renaissance.png" },
+                    { key: "lineart",    label: "Line Art",   img: "/examples/lineart.png" },
+                  ] as const).map((s) => {
+                    const active = style === s.key;
+                    return (
+                      <button
+                        key={s.key}
+                        type="button"
+                        onClick={() => handleSwitchStyle(s.key)}
+                        disabled={loading || active}
+                        className={`relative aspect-[3/4] rounded-lg overflow-hidden ring-2 transition-all ${
+                          active ? "ring-brand-green" : "ring-transparent hover:ring-brand-green/40"
+                        } ${loading && !active ? "opacity-40 cursor-wait" : ""}`}
+                        title={active ? `Currently showing ${s.label}` : `Switch to ${s.label}`}
+                      >
+                        <img
+                          src={s.img}
+                          alt={`${s.label} style`}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent h-2/3" />
+                        <span className="absolute inset-x-0 bottom-1 text-center text-[10px] sm:text-xs font-semibold text-white drop-shadow">
+                          {s.label}
+                        </span>
+                        {active && (
+                          <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-brand-green text-white flex items-center justify-center">
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                {loading && (
+                  <p className="text-[11px] text-gray-500 text-center mt-2">Rendering new style — hold tight.</p>
+                )}
+              </div>
+
+              {/* ─── Phone Wallpaper — direct checkout ────────────────── */}
               <button
                 type="button"
-                onClick={() => setWallpaperSelected((s) => !s)}
-                className={`mt-6 w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
-                  wallpaperSelected
-                    ? "border-brand-green bg-brand-green/5 shadow-sm"
-                    : "border-gray-200 bg-white hover:border-brand-green/40"
-                }`}
+                onClick={handleBuyWallpaper}
+                disabled={loading}
+                className="mt-6 w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-brand-green bg-brand-green/5 text-left hover:bg-brand-green/10 hover:shadow-md transition-all disabled:opacity-60"
               >
                 {/* Phone mockup */}
                 <div className="flex-shrink-0">
@@ -803,9 +891,9 @@ export default function Home() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <p className="font-display text-sm font-semibold text-brand-green leading-tight">
-                      Add Phone Wallpaper
+                      Buy Phone Wallpaper
                     </p>
-                    <span className="text-xs font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                    <span className="text-xs font-bold text-cream bg-brand-green px-2 py-0.5 rounded-full flex-shrink-0">
                       $5
                     </span>
                   </div>
@@ -817,23 +905,15 @@ export default function Home() {
                   </p>
                 </div>
 
-                {/* Checkbox indicator */}
-                <div
-                  className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                    wallpaperSelected
-                      ? "border-brand-green bg-brand-green"
-                      : "border-gray-300"
-                  }`}
-                >
-                  {wallpaperSelected && (
-                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
+                {/* Forward arrow (CTA affordance) */}
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-brand-green flex items-center justify-center">
+                  <svg className="w-4 h-4 text-cream" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </button>
 
-              <ProductSelector imageId={imageId} onError={setError} wallpaperSelected={wallpaperSelected} />
+              <ProductSelector imageId={imageId} onError={setError} wallpaperSelected={false} />
 
               {/* Quantity discount nudge */}
               <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
@@ -863,7 +943,7 @@ export default function Home() {
                 watermarkedImage={watermarkedImage}
                 imageId={imageId}
                 onError={setError}
-                wallpaperSelected={wallpaperSelected}
+                wallpaperSelected={false}
               />
             </div>
           )}
