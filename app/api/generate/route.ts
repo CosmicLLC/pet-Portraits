@@ -43,8 +43,13 @@ export async function POST(req: NextRequest) {
 
     const ip = clientIp(req.headers);
 
-    // Layer 3 — per-IP rate limit: 5 calls / minute
-    const limit = await rateLimit(`generate:${ip}`, 5, 60);
+    // Layer 3 — per-IP rate limit: 20 calls / minute. Bumped from 5
+    // because mobile carriers + corporate NAT collapse many users into
+    // a single x-forwarded-for IP, and we want a real customer to
+    // freely churn through styles without hitting a wall mid-shopping.
+    // Worst case: a single bot at the cap costs us 20 × $0.04 = $0.80/min,
+    // bounded by the daily cap below.
+    const limit = await rateLimit(`generate:${ip}`, 20, 60);
     if (!limit.ok) {
       return NextResponse.json(
         { error: "Too many requests — please wait a moment and try again." },
@@ -54,7 +59,9 @@ export async function POST(req: NextRequest) {
 
     // Layer 4 — global daily cap across ALL callers. Caps worst-case Gemini
     // spend from distributed IP rotation attacks. Tighten via DAILY_GENERATE_CAP.
-    const dailyCap = Number(process.env.DAILY_GENERATE_CAP || "300");
+    // Default raised from 300 → 1500 for the Mother's Day window (May 10).
+    // 1500 × $0.04 ≈ $60/day worst case, still bounded.
+    const dailyCap = Number(process.env.DAILY_GENERATE_CAP || "1500");
     const today = new Date().toISOString().slice(0, 10);
     const daily = await rateLimit(`generate:global:${today}`, dailyCap, 24 * 60 * 60);
     if (!daily.ok) {
