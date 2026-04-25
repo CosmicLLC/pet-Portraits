@@ -52,7 +52,6 @@ export default function Home() {
   const [portraitEmailCaptured, setPortraitEmailCaptured] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
-  const [wallpaperSelected, setWallpaperSelected] = useState(false);
   const { data: session } = useSession();
 
   // Countdown timer for preview step
@@ -167,7 +166,6 @@ export default function Home() {
     setPortraitEmailCaptured(false);
     setMobileMenuOpen(false);
     setAvatarOpen(false);
-    setWallpaperSelected(false);
     requestAnimationFrame(() => {
       document.getElementById("create")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });

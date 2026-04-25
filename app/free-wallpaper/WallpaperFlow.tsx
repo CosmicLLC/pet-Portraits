@@ -24,7 +24,6 @@ export default function WallpaperFlow() {
   const [emailSubmitting, setEmailSubmitting] = useState(false);
 
   const [style, setStyle] = useState<StyleKey | null>(null);
-  const [file, setFile] = useState<File | null>(null);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
   const [watermarkedImage, setWatermarkedImage] = useState<string | null>(null);
@@ -61,7 +60,6 @@ export default function WallpaperFlow() {
   const handleFile = useCallback(
     async (f: File) => {
       if (!style) return;
-      setFile(f);
       setStep("generating");
       setGenerating(true);
       setGenError(null);
