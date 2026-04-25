@@ -222,84 +222,95 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected }:
         </span>
       </div>
 
-      {/* Tier ladder — auto-wraps. Hidden tiles whose Stripe price isn't
-          configured are skipped. Up to 5 per row on desktop. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {visibleTiers.map((tier) => (
-          <div
-            key={tier.key}
-            className={`relative flex flex-col rounded-2xl border-2 overflow-hidden transition-all ${
-              tier.highlighted
-                ? "border-brand-green shadow-xl ring-4 ring-brand-green/10 scale-[1.02]"
-                : "border-gray-200"
-            }`}
-          >
-            {/* Tier badge */}
-            {tier.badge && (
-              <div className={`text-center py-1.5 text-xs font-bold uppercase tracking-widest ${
+      {/* Tier ladder — entire card is the click target so a mis-tap
+          anywhere on the tile still routes to checkout (bigger hitbox,
+          fewer dropped conversions on mobile). Stacks on phone, 2-up
+          on tablet, 3-up on desktop — deliberately bigger than before
+          so each tier is a full scroll "section" rather than a
+          cramped row. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {visibleTiers.map((tier) => {
+          const isLoading = loading === tier.key;
+          const anyLoading = loading !== null;
+          return (
+            <button
+              key={tier.key}
+              type="button"
+              onClick={() => handleSelect(tier.key)}
+              disabled={anyLoading}
+              className={`relative flex flex-col rounded-2xl border-2 overflow-hidden transition-all text-left w-full disabled:cursor-not-allowed ${
                 tier.highlighted
-                  ? "bg-brand-green text-white"
-                  : "bg-brand-green/10 text-brand-green"
-              }`}>
-                {tier.badge}
-              </div>
-            )}
+                  ? "border-brand-green shadow-xl ring-4 ring-brand-green/10 hover:ring-brand-green/20 hover:shadow-2xl active:scale-[0.99]"
+                  : "border-gray-200 hover:border-brand-green hover:shadow-lg active:scale-[0.99]"
+              } ${anyLoading && !isLoading ? "opacity-50" : ""}`}
+            >
+              {/* Tier badge */}
+              {tier.badge && (
+                <div className={`text-center py-1.5 text-xs font-bold uppercase tracking-widest ${
+                  tier.highlighted
+                    ? "bg-brand-green text-white"
+                    : "bg-brand-green/10 text-brand-green"
+                }`}>
+                  {tier.badge}
+                </div>
+              )}
 
-            <div className={`flex flex-col flex-1 p-5 ${tier.highlighted ? "bg-white" : "bg-white"}`}>
-              <p className="font-display text-base font-semibold text-brand-green mb-1">
-                {tier.name}
-              </p>
-              <p className="text-xs text-gray-400 mb-4">{tier.description}</p>
+              <div className="flex flex-col flex-1 p-5 bg-white">
+                <p className="font-display text-base font-semibold text-brand-green mb-1">
+                  {tier.name}
+                </p>
+                <p className="text-xs text-gray-400 mb-4">{tier.description}</p>
 
-              <div className="mb-5">
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <span className="font-display text-3xl font-bold text-brand-green">{tier.price}</span>
-                  {tier.originalPrice && (
-                    <span className="text-sm text-gray-400 line-through">{tier.originalPrice}</span>
-                  )}
-                  {wallpaperSelected && (
-                    <span className="text-xs font-semibold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full">
-                      +$5 wallpaper
+                <div className="mb-5">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="font-display text-3xl font-bold text-brand-green">{tier.price}</span>
+                    {tier.originalPrice && (
+                      <span className="text-sm text-gray-400 line-through">{tier.originalPrice}</span>
+                    )}
+                  </div>
+                </div>
+
+                <ul className="space-y-1.5 mb-6 flex-1">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
+                      <svg className="w-3.5 h-3.5 text-brand-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                      </svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Decorative CTA label — the whole card is the button, this
+                    is just a visual affordance so the click target is obvious. */}
+                <div
+                  className={`w-full py-3 rounded-xl font-display font-semibold text-sm text-center ${
+                    tier.highlighted
+                      ? "bg-brand-green text-white"
+                      : "bg-gray-100 text-brand-green"
+                  }`}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Processing…
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-1.5">
+                      Get This
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                      </svg>
                     </span>
                   )}
                 </div>
               </div>
-
-              <ul className="space-y-1.5 mb-6 flex-1">
-                {tier.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
-                    <svg className="w-3.5 h-3.5 text-brand-green flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={() => handleSelect(tier.key)}
-                disabled={loading !== null}
-                className={`w-full py-3 rounded-xl font-display font-semibold text-sm transition-all ${
-                  tier.highlighted
-                    ? "bg-brand-green text-white hover:bg-brand-green/90 hover:shadow-lg disabled:opacity-60"
-                    : "bg-gray-100 text-brand-green hover:bg-brand-green hover:text-white disabled:opacity-60"
-                }`}
-              >
-                {loading === tier.key ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Processing…
-                  </span>
-                ) : (
-                  "Get This"
-                )}
-              </button>
-            </div>
-          </div>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       {/* Trust badges */}
