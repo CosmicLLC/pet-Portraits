@@ -133,6 +133,41 @@ export default function Home() {
     return () => document.removeEventListener("mousedown", handler);
   }, [avatarOpen]);
 
+  // Wire wizard step state into browser history so the phone back button
+  // (and Android system back / iOS swipe-back) walks back through steps
+  // instead of exiting the page. Each forward step transition pushState's
+  // a `pmStep` marker; the popstate listener mirrors that back into React.
+  // The flag prevents the sync effect below from re-pushing on popstate.
+  const popstateRef = useRef(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Tag the initial entry so back-from-style can still distinguish "wizard"
+    // from "left the page entirely."
+    window.history.replaceState({ pmStep: "style" }, "");
+    const onPop = (e: PopStateEvent) => {
+      const target = e.state?.pmStep;
+      if (target && (STEPS as readonly string[]).includes(target)) {
+        popstateRef.current = true;
+        setError(null);
+        setStep(target as Step);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Sync history with step on every change. Skip the push when the change
+  // came from popstate (history is already where it should be).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (popstateRef.current) {
+      popstateRef.current = false;
+      return;
+    }
+    if (window.history.state?.pmStep === step) return;
+    window.history.pushState({ pmStep: step }, "");
+  }, [step]);
+
   const resetState = useCallback(() => {
     setStep("style");
     setFile(null);
@@ -163,8 +198,14 @@ export default function Home() {
     }
   }, [step]);
 
+  // Route in-app back through history.back() so the phone back button and
+  // the on-page back arrow stay synchronized — both pop the same entry.
   const handleBack = useCallback(() => {
     setError(null);
+    if (typeof window !== "undefined" && window.history.state?.pmStep) {
+      window.history.back();
+      return;
+    }
     if (step === "upload") setStep("style");
     else if (step === "generate") setStep("upload");
     else if (step === "preview") setStep("generate");
@@ -175,6 +216,11 @@ export default function Home() {
     const targetIndex = STEPS.indexOf(targetStep);
     if (targetIndex < currentIndex) {
       setError(null);
+      // Pop N history entries so phone back stays consistent with the jump.
+      if (typeof window !== "undefined" && window.history.state?.pmStep) {
+        window.history.go(targetIndex - currentIndex);
+        return;
+      }
       setStep(targetStep);
     }
   }, [step]);
