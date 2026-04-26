@@ -23,12 +23,6 @@ import { track, productValue } from "@/lib/analytics";
 import type { ProductType } from "@/lib/products";
 import { HOME_REVIEWS } from "@/lib/reviews";
 
-const ANNOUNCEMENTS = [
-  "Custom Paw Masterpiece — Ready in Seconds, Not Days",
-  "Love it or we redo it free — within 7 days of purchase",
-  "Canvas + Digital Bundle Available",
-];
-
 type Step = "upload" | "style" | "generate" | "preview";
 
 const STEPS: Step[] = ["style", "upload", "generate", "preview"];
@@ -57,10 +51,6 @@ export default function Home() {
   // Countdown timer for preview step
   const [countdown, setCountdown] = useState(10 * 60);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Announcement bar rotation
-  const [annIdx, setAnnIdx] = useState(0);
-  const [annVisible, setAnnVisible] = useState(true);
 
   // Success page upsell state
   const [upsellLoading, setUpsellLoading] = useState(false);
@@ -142,18 +132,6 @@ export default function Home() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [avatarOpen]);
-
-  // Announcement bar rotation: fade out → swap → fade in every 5s
-  useEffect(() => {
-    const id = setInterval(() => {
-      setAnnVisible(false);
-      setTimeout(() => {
-        setAnnIdx((i) => (i + 1) % ANNOUNCEMENTS.length);
-        setAnnVisible(true);
-      }, 400);
-    }, 5000);
-    return () => clearInterval(id);
-  }, []);
 
   const resetState = useCallback(() => {
     setStep("style");
@@ -407,16 +385,6 @@ export default function Home() {
       {isBrowsing && <HomeJsonLd />}
       {isBrowsing && <ExitIntentPopup />}
 
-      {/* Rotating top banner */}
-      <div className="bg-brand-green text-white text-center py-2.5 text-sm font-medium tracking-wide overflow-hidden">
-        <span
-          className="inline-block transition-opacity duration-400"
-          style={{ opacity: annVisible ? 1 : 0 }}
-        >
-          {ANNOUNCEMENTS[annIdx]}
-        </span>
-      </div>
-
       {/* Header */}
       <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -650,9 +618,9 @@ export default function Home() {
                 ))}
                 <span className="text-sm text-gray-600 ml-2 drop-shadow-[0_1px_0_rgba(250,247,242,0.8)]">Loved by pet parents</span>
               </div>
-              <h2 className="font-display text-4xl sm:text-5xl lg:text-[4rem] text-brand-green mb-5 leading-[1.05] drop-shadow-[0_1px_0_rgba(250,247,242,0.9)]">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-[4rem] text-brand-green mb-5 leading-[1.05] drop-shadow-[0_1px_0_rgba(250,247,242,0.9)]">
                 Turn Your Pet Into<br />a Work of Art
-              </h2>
+              </h1>
               <p className="text-gray-600 text-lg sm:text-xl max-w-xl md:mx-0 mx-auto mb-8 drop-shadow-[0_1px_0_rgba(250,247,242,0.9)]">
                 Upload a photo, choose a style, and get a stunning portrait in under a minute. The perfect gift for any pet lover.
               </p>
@@ -1032,7 +1000,7 @@ export default function Home() {
                 >
                   <Image
                     src={s.src}
-                    alt={`${s.name} pet portrait from photo — custom AI-generated ${s.name.toLowerCase()} dog painting example`}
+                    alt={`${s.name} pet portrait from photo — custom ${s.name.toLowerCase()} dog painting example`}
                     fill
                     sizes="(max-width: 640px) 45vw, 22vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"

@@ -18,7 +18,7 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: Props): Metadata {
   const cat = petCategoryBySlug(params.slug)
   if (!cat) return {}
-  const title = `Custom ${cat.singular.charAt(0).toUpperCase() + cat.singular.slice(1)} Portraits from Photo | AI ${cat.singular.charAt(0).toUpperCase() + cat.singular.slice(1)} Paintings`
+  const title = `Custom ${cat.singular.charAt(0).toUpperCase() + cat.singular.slice(1)} Portraits from Photo | Hand-Finished ${cat.singular.charAt(0).toUpperCase() + cat.singular.slice(1)} Paintings`
   const description = cat.description
   return {
     title,
@@ -64,7 +64,7 @@ export default function PetCategoryPage({ params }: Props) {
         headline={cat.headline}
         subhead={cat.description}
         previewImage={cat.singular === "cat" ? "/examples/watercolor.png" : "/examples/oil.png"}
-        previewAlt={`Custom ${cat.singular} portrait from photo — AI ${cat.singular} painting example`}
+        previewAlt={`Custom ${cat.singular} portrait from photo — ${cat.singular} painting example`}
       />
 
       {/* Style showcase for this pet type */}
@@ -85,7 +85,7 @@ export default function PetCategoryPage({ params }: Props) {
               >
                 <Image
                   src={s.image}
-                  alt={`${s.fullName} example — custom AI ${s.shortName.toLowerCase()} ${cat.singular} portrait from photo`}
+                  alt={`${s.fullName} example — custom ${s.shortName.toLowerCase()} ${cat.singular} portrait from photo`}
                   fill
                   sizes="(max-width: 640px) 50vw, 25vw"
                   className="object-cover group-hover:scale-[1.03] transition-transform duration-500"

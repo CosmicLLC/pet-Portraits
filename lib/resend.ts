@@ -31,7 +31,7 @@ function baseTemplate(content: string) {
           Questions? Just reply to this email — we&rsquo;re here to help.
         </p>
         <p style="margin:0;color:#CCC;font-size:11px;">
-          Paw Masterpiece &nbsp;&middot;&nbsp; AI-powered portraits for every pet lover
+          Paw Masterpiece &nbsp;&middot;&nbsp; Custom portraits for every pet lover
         </p>
       </div>
     </div>

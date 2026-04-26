@@ -12,7 +12,7 @@ const BASE_URL =
 const productJsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
-  name: "Custom AI Pet Portrait",
+  name: "Custom Pet Portrait",
   description:
     "A custom fine art portrait of your pet, generated from any photo. Choose watercolor, oil painting, Renaissance, or line art. Instant digital download or shipped as a framed canvas.",
   brand: { "@type": "Brand", name: "Paw Masterpiece" },

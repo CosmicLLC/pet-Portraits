@@ -114,7 +114,7 @@ export default function BreedStylePage({ params }: Props) {
         headline={`Custom ${breed.displayName} ${style.shortName} Portrait from Your Photo`}
         subhead={`Upload any photo of your ${breed.displayName} and watch it transform into a gallery-quality ${style.shortName.toLowerCase()} portrait in about 30 seconds.`}
         previewImage={style.image}
-        previewAlt={`${style.fullName} example — custom AI ${breed.displayName} ${style.shortName.toLowerCase()} portrait from photo`}
+        previewAlt={`${style.fullName} example — custom ${breed.displayName} ${style.shortName.toLowerCase()} portrait from photo`}
       />
 
       {/* Unique breed + style content */}
@@ -137,7 +137,7 @@ export default function BreedStylePage({ params }: Props) {
               What photo works best?
             </h2>
             <p className="text-gray-700 leading-relaxed text-lg">
-              For a {breed.displayName}, aim for a head-and-shoulders shot in natural daylight. Their {breed.traits.slice(0, 2).join(" and ")} expression usually comes through best when they're relaxed at home, not posed. Phone snapshots work fine — our AI doesn't need a studio photo.
+              For a {breed.displayName}, aim for a head-and-shoulders shot in natural daylight. Their {breed.traits.slice(0, 2).join(" and ")} expression usually comes through best when they're relaxed at home, not posed. Phone snapshots work fine — no studio photo needed.
             </p>
           </div>
 

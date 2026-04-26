@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import type { StyleKey } from "@/lib/gemini";
 
 const STYLES: {
@@ -73,14 +72,16 @@ export default function StylePicker({ selected, onSelect }: StylePickerProps) {
                 : "border-gray-200 hover:border-brand-green/30"
             }`}
           >
-            {/* Style preview — real portrait example */}
+            {/* Style preview — real portrait example. Plain <img> on purpose:
+                source files are pre-optimized to ~100KB, so the next/image
+                pipeline (multiple srcset variants, optimizer pass) adds
+                latency without saving bytes for thumbnails this small. */}
             <div className="relative h-36 overflow-hidden">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={style.image}
                 alt={`${style.name} portrait example`}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                sizes="(max-width: 640px) 45vw, 220px"
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               {/* Subtle overlay with style name hint */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />

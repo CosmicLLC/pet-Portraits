@@ -42,7 +42,7 @@ export default function ReferDashboard({
     });
   };
 
-  const shareText = `I just got a stunning AI portrait of my pet from Paw Masterpiece — thought you'd love it. Here's ${dollars(discountCents)} off your first order:`;
+  const shareText = `I just got a stunning custom portrait of my pet from Paw Masterpiece — thought you'd love it. Here's ${dollars(discountCents)} off your first order:`;
 
   return (
     <div className="max-w-3xl">

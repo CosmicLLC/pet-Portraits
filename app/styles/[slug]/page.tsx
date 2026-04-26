@@ -19,7 +19,7 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: Props): Metadata {
   const style = styleBySlug(params.slug)
   if (!style) return {}
-  const title = `${style.fullName} from Your Photo | Instant AI ${style.shortName} Pet Art`
+  const title = `${style.fullName} from Your Photo | Instant ${style.shortName} Pet Art`
   const description = `Turn any photo into a custom ${style.shortName.toLowerCase()} pet portrait in 30 seconds. ${style.description} Digital download or framed canvas.`
   return {
     title,
@@ -94,7 +94,7 @@ export default function StyleLandingPage({ params }: Props) {
         headline={`${style.fullName} from Your Photo`}
         subhead={`${style.description} Delivered instantly by email — printable at home or shipped as a framed canvas.`}
         previewImage={style.image}
-        previewAlt={`${style.fullName} example — custom AI ${style.shortName.toLowerCase()} dog portrait from photo`}
+        previewAlt={`${style.fullName} example — custom ${style.shortName.toLowerCase()} dog portrait from photo`}
       />
 
       {/* Deep content — why this style, what makes a good input, use cases */}
@@ -124,7 +124,7 @@ export default function StyleLandingPage({ params }: Props) {
             </h2>
             <ol className="space-y-4 text-gray-700 leading-relaxed text-lg list-decimal list-inside">
               <li>Upload any clear photo of your pet — no professional shots needed.</li>
-              <li>Our AI creates your {style.shortName.toLowerCase()} portrait in about 30 seconds.</li>
+              <li>Your {style.shortName.toLowerCase()} portrait is ready in about 30 seconds.</li>
               <li>Preview the result for free. Only pay if you love it.</li>
               <li>Download the full-resolution file instantly, or order a print or framed canvas — shipped within the United States in 3–5 business days.</li>
             </ol>

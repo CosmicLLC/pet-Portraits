@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-display text-2xl text-brand-green mb-3">1. Who We Are</h2>
             <p>
-              Paw Masterpiece is operated by Cosmic Company LLC. We create AI-powered fine art portraits
+              Paw Masterpiece is operated by Cosmic Company LLC. We create custom fine art portraits
               from photos of your pet. If you have any questions about this policy, contact us at{" "}
               <a href="mailto:cosmic.company.llc@gmail.com" className="text-brand-green hover:underline">
                 cosmic.company.llc@gmail.com
@@ -58,7 +58,7 @@ export default function PrivacyPage() {
             <h3 className="font-semibold text-gray-700 mt-4 mb-2">Photos You Upload</h3>
             <p>
               When you upload a photo of your pet, we process it solely to generate your portrait.
-              Photos are used transiently for AI generation and are not permanently stored on our
+              Photos are used transiently for portrait generation and are not permanently stored on our
               servers beyond what is necessary to fulfill your order. We do not share, sell, or use
               your pet photos for any other purpose.
             </p>
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-5 space-y-2 mt-3">
               <li><strong>Stripe</strong> — payment processing</li>
               <li><strong>Resend</strong> — transactional email delivery</li>
-              <li><strong>Google (Gemini API)</strong> — AI portrait generation (your uploaded photo is sent to Google&apos;s API to generate the portrait image)</li>
+              <li><strong>Google (Gemini API)</strong> — image generation (your uploaded photo is sent to Google&apos;s API to generate the portrait image)</li>
               <li><strong>Vercel</strong> — hosting and deployment</li>
             </ul>
             <p className="mt-3">

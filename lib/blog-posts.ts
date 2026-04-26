@@ -336,7 +336,7 @@ export const BLOG_POSTS: BlogPost[] = [
 
 <h2>Why a custom pet portrait beats every other Mother's Day gift</h2>
 
-<p>It's the only category of gift that solves all four mistakes at once. It's specific to <em>her</em> pet. It's real art she'll hang on the wall for years. It can be ordered with a few days of lead time. And the AI-assisted styles in modern services like ours mean even a blurry phone photo turns into a watercolor or oil painting that looks gallery-quality.</p>
+<p>It's the only category of gift that solves all four mistakes at once. It's specific to <em>her</em> pet. It's real art she'll hang on the wall for years. It can be ordered with a few days of lead time. And modern portrait services like ours mean even a blurry phone photo turns into a watercolor or oil painting that looks gallery-quality.</p>
 
 <p>The hard part of a custom portrait used to be the wait — pet portrait artists historically took 2–4 weeks. The new generation of services (including <a href="/">Paw Masterpiece</a>) ships the digital file in 30 seconds and the framed canvas in 3–5 days. So you can preview the result, change your mind, switch to oil painting if you don't love the watercolor, and still ship in time for Mother's Day morning.</p>
 
@@ -358,7 +358,7 @@ export const BLOG_POSTS: BlogPost[] = [
 
 <h2>How long does it actually take to make one?</h2>
 
-<p>From upload to preview: under 30 seconds. The AI does the heavy lifting; our artists fine-tune. You'll see your pet rendered in your chosen style before you commit a dollar — preview is free, no signup required.</p>
+<p>From upload to preview: under 30 seconds. Our artists fine-tune every result before delivery. You'll see your pet rendered in your chosen style before you commit a dollar — preview is free, no signup required.</p>
 
 <p>If you're still unsure, the <a href="/styles/watercolor-pet-portrait">watercolor</a>, <a href="/styles/oil-painting-pet-portrait">oil</a>, <a href="/styles/renaissance-pet-portrait">Renaissance</a>, and <a href="/styles/line-art-pet-portrait">line art</a> style pages let you compare side-by-side without uploading anything.</p>
 
@@ -385,7 +385,7 @@ export const BLOG_POSTS: BlogPost[] = [
     ],
     readMinutes: 4,
     body: `
-<p>Most pet portrait services have a dirty little secret: the difference between a great portrait and a meh portrait is almost never the artist or the AI. It's the photo you uploaded.</p>
+<p>Most pet portrait services have a dirty little secret: the difference between a great portrait and a meh portrait is almost never the technique. It's the photo you uploaded.</p>
 
 <p>The good news: you don't need a DSLR, a studio, or a willing pet. You need five minutes, decent natural light, and the right kind of phone snapshot. Here's exactly what to look for.</p>
 

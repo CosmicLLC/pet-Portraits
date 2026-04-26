@@ -30,7 +30,7 @@ export default function ReviewsPage() {
   const reviewPageJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: "Custom AI Pet Portrait",
+    name: "Custom Pet Portrait",
     description: PAGE_DESCRIPTION,
     brand: { "@type": "Brand", name: "Paw Masterpiece" },
     image: `${BASE_URL}/examples/oil.png`,

@@ -63,7 +63,7 @@ export default function SuccessReferralShare() {
   if (status !== "authenticated" || !me) {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://pawmasterpiece.com";
     const shareText =
-      "I just got a stunning AI portrait of my pet from Paw Masterpiece — thought you'd love it:";
+      "I just got a stunning custom portrait of my pet from Paw Masterpiece — thought you'd love it:";
     return (
       <div className="bg-white rounded-3xl border border-gray-200 p-6 mb-8 animate-fade-in-up">
         <h2 className="font-display text-xl text-brand-green mb-1 text-center">
@@ -133,7 +133,7 @@ export default function SuccessReferralShare() {
   // Authenticated buyer — real personalized refer-and-earn pitch.
   const origin = typeof window !== "undefined" ? window.location.origin : "https://pawmasterpiece.com";
   const shareUrl = `${origin}/?ref=${me.code}`;
-  const shareText = `I just got a stunning AI portrait of my pet from Paw Masterpiece — thought you'd love it. Here's ${dollars(me.discountCents)} off your first order:`;
+  const shareText = `I just got a stunning custom portrait of my pet from Paw Masterpiece — thought you'd love it. Here's ${dollars(me.discountCents)} off your first order:`;
   const firstName = sessionData?.user?.name?.split(" ")[0] ?? "Give";
   const heroTitle =
     firstName === "Give"

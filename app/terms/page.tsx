@@ -48,7 +48,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-2xl text-brand-green mb-3">2. Service Description</h2>
             <p>
-              Paw Masterpiece is an AI-powered service that transforms your pet&apos;s photo into a
+              Paw Masterpiece is a custom portrait service that transforms your pet&apos;s photo into a
               fine art portrait using various artistic styles (watercolor, oil painting, Renaissance,
               pencil/line art, and others). You may preview a watermarked version of your portrait
               for free. To receive the full-resolution, unwatermarked portrait file, a purchase is
@@ -153,7 +153,7 @@ export default function TermsPage() {
             <h2 className="font-display text-2xl text-brand-green mb-3">7. Disclaimer of Warranties</h2>
             <p>
               The service is provided &quot;as is&quot; without warranties of any kind, express or
-              implied. AI-generated portraits are unique and may vary in quality depending on the
+              implied. Each portrait is unique and may vary in quality depending on the
               input photo. We do not guarantee any specific artistic result, though we stand behind
               our free regeneration guarantee.
             </p>

@@ -80,7 +80,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
       {
         q: "What if I don't have a photo of her pet?",
-        a: "Check her Instagram, her Facebook, her camera roll if you share it, or just ask — \"send me your favorite photo of Max, I have something in mind.\" The AI works with any clear photo, even a casual phone snapshot.",
+        a: "Check her Instagram, her Facebook, her camera roll if you share it, or just ask — \"send me your favorite photo of Max, I have something in mind.\" Any clear photo works, even a casual phone snapshot.",
       },
       {
         q: "Can I include a printable gift card?",
@@ -325,7 +325,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
       {
         q: "How do I get her dog's photo without asking?",
-        a: "Check her Instagram, Facebook, or group chats — dog moms usually have 100+ public photos of their dog. A screenshot from a phone is plenty for the AI to work with.",
+        a: "Check her Instagram, Facebook, or group chats — dog moms usually have 100+ public photos of their dog. A screenshot from a phone is plenty to work with.",
       },
       {
         q: "Can I order multiple portraits as a gift?",

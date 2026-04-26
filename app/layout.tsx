@@ -20,7 +20,7 @@ const dmSans = DM_Sans({
 });
 
 const SEO_TITLE =
-  "Custom AI Pet Portraits from Your Photo | Paw Masterpiece"
+  "Custom Pet Portraits from Your Photo | Paw Masterpiece"
 const SEO_DESCRIPTION =
   "Turn any photo into a custom pet portrait in 30 seconds. Choose watercolor, oil painting, Renaissance royalty, or line art. Instant digital download, or shipped as a framed canvas. Loved by 40,000+ pet parents."
 
@@ -36,7 +36,6 @@ export const metadata: Metadata = {
   keywords: [
     "custom pet portrait",
     "pet portrait from photo",
-    "AI pet portrait",
     "watercolor pet portrait",
     "oil painting pet portrait",
     "renaissance pet portrait",
@@ -62,7 +61,7 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Custom AI pet portrait examples — watercolor, oil painting, Renaissance, and line art",
+        alt: "Custom pet portrait examples — watercolor, oil painting, Renaissance, and line art",
       },
     ],
   },
@@ -111,7 +110,7 @@ const organizationJsonLd = {
   url: BASE_URL,
   logo: `${BASE_URL}/logo.jpg`,
   description:
-    "Custom AI-generated pet portraits from your photo — watercolor, oil painting, Renaissance, and line art styles delivered in 30 seconds.",
+    "Custom pet portraits from your photo — watercolor, oil painting, Renaissance, and line art styles delivered in 30 seconds.",
   slogan: "Turn Your Pet Into a Work of Art",
 };
 
@@ -121,7 +120,7 @@ const websiteJsonLd = {
   name: "Paw Masterpiece",
   url: BASE_URL,
   description:
-    "Custom AI-generated pet portraits from your photo, delivered in seconds.",
+    "Custom pet portraits from your photo, delivered in seconds.",
 };
 
 export default function RootLayout({
