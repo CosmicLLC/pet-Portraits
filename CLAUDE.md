@@ -15,3 +15,9 @@ If you're cleaning up dead files or reorganizing `public/`, skip anything matchi
 - SEO + analytics + referral + email stack was shipped in commits `918b11f` → `257a394` between 2026-04-24. See [docs/GO_LIVE.md](docs/GO_LIVE.md) for the deploy checklist.
 - Ad creatives live in [public/ads/](public/ads/). Prompts in [docs/ad-creative-prompts.md](docs/ad-creative-prompts.md). Brief for human creators in [docs/ad-creative-brief.md](docs/ad-creative-brief.md).
 - Mother's Day is 2026-05-10 — time-sensitive. Don't schedule non-critical refactors that block that ship window.
+
+## gstack
+
+Use the `/browse` skill from gstack for all web browsing. Never use `mcp__claude-in-chrome__*` tools.
+
+Available gstack skills: `/office-hours`, `/plan-ceo-review`, `/plan-eng-review`, `/plan-design-review`, `/design-consultation`, `/design-shotgun`, `/design-html`, `/review`, `/ship`, `/land-and-deploy`, `/canary`, `/benchmark`, `/browse`, `/connect-chrome`, `/qa`, `/qa-only`, `/design-review`, `/setup-browser-cookies`, `/setup-deploy`, `/setup-gbrain`, `/retro`, `/investigate`, `/document-release`, `/codex`, `/cso`, `/autoplan`, `/plan-devex-review`, `/devex-review`, `/careful`, `/freeze`, `/guard`, `/unfreeze`, `/gstack-upgrade`, `/learn`.
