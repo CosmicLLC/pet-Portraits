@@ -193,3 +193,43 @@ model Referral {
   @@index([refereeEmail])
   @@index([status])
 }
+
+// Outreach pipeline — pet bloggers, influencers, podcasters, etc.
+// Tracks the status of every cold pitch we send so we don't double-send and
+// can see at a glance who's pending a follow-up. Seeded with the 9 pet
+// blogger drafts from docs/marketing/outreach/pet-blogger-outreach.md;
+// admins add new influencers (Instagram/TikTok) through /admin/outreach.
+model OutreachContact {
+  id             String    @id @default(cuid())
+  name           String
+  // "blogger" | "instagram" | "tiktok" | "podcast" | "youtube" | "other"
+  channel        String
+  // The publication/handle/username — DogTipper.com, @bertiethedog, etc.
+  handle         String
+  email          String?
+  // Niche keywords: "dog mom, watercolor, gift guide" — used for DM personalization
+  niche          String?
+  followers      Int?
+  // Reference URL — their site, IG profile, TikTok, etc.
+  url            String?
+  // Pre-drafted subject line for email channels; null for IG/TT (use DM)
+  subject        String?
+  // Pre-drafted body (markdown OK)
+  body           String?
+  // "pending" | "sent" | "replied" | "accepted" | "posted" | "passed" | "no_reply"
+  status         String    @default("pending")
+  // Tier of expected payoff: 1 (DogTipper sponsored) → 3 (cold IG nobody knows)
+  priority       Int       @default(2)
+  notes          String?
+  sentAt         DateTime?
+  repliedAt      DateTime?
+  acceptedAt     DateTime?
+  postedAt       DateTime?
+  followUpAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([status])
+  @@index([channel])
+  @@index([priority])
+}
