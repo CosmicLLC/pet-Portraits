@@ -80,3 +80,105 @@ export async function generatePortrait(
 
   throw new Error("No image data in Gemini response");
 }
+
+// ─── Breed identification (free top-of-funnel tool) ────────────────────────
+// Used by /tools/breed-identifier — accepts a pet photo, returns a structured
+// breed guess via Gemini Flash (text model, no image generation). Much cheaper
+// than the portrait pipeline. Designed to be backlink-friendly: free, fast,
+// shareable, with a soft funnel into the portrait creator.
+
+export interface BreedIdentification {
+  species: "dog" | "cat" | "unknown";
+  primaryBreed: string;
+  primaryConfidence: "high" | "medium" | "low";
+  /** ~2 sentences about the breed — personality + visual traits. */
+  description: string;
+  /** Suggested portrait styles for this breed, ordered by best fit. */
+  recommendedStyles: StyleKey[];
+  /** Alternative breed guesses if the primary is uncertain. Empty if confident. */
+  alternatives: { breed: string; why: string }[];
+  /** Friendly fact about the breed people remember. */
+  funFact: string;
+}
+
+const BREED_ID_SYSTEM = `You are an expert canine and feline visual identifier with knowledge of all AKC and TICA-recognized breeds plus common mixed-breed appearance patterns. Given a photo of a pet, you produce a single structured JSON object with the breed identification. Be specific where possible, gentle where uncertain. If the image is not a dog or cat, return species: "unknown".
+
+For mixed-breed dogs, name the most likely primary breed (e.g. "Labrador Mix") and include up to 2 alternatives.
+
+For recommendedStyles, pick from: watercolor, oil, renaissance, lineart. Match the breed's energy:
+- Renaissance suits regal/dignified breeds (Pugs, Cavaliers, Persians, anything noble-looking)
+- Oil painting suits classic/traditional breeds (Labs, Goldens, German Shepherds)
+- Watercolor suits soft/sweet breeds (small dogs, kittens, gentle expressions)
+- Lineart suits sleek/modern breeds (Greyhounds, Sphynx, minimalist dogs)
+
+Never invent breeds. Never speculate about the pet's name, owner, or health. Description should be visual + temperamental, ~2 sentences, factual.`;
+
+export async function identifyBreed(
+  photoBuffer: Buffer,
+  mimeType: string
+): Promise<BreedIdentification> {
+  const response = await getAI().models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: BREED_ID_SYSTEM },
+          {
+            inlineData: {
+              mimeType,
+              data: photoBuffer.toString("base64"),
+            },
+          },
+          {
+            text: `Return ONLY a JSON object with this exact shape (no markdown, no commentary):
+{
+  "species": "dog" | "cat" | "unknown",
+  "primaryBreed": string,
+  "primaryConfidence": "high" | "medium" | "low",
+  "description": string,
+  "recommendedStyles": ["watercolor" | "oil" | "renaissance" | "lineart", ...],
+  "alternatives": [{ "breed": string, "why": string }, ...],
+  "funFact": string
+}`,
+          },
+        ],
+      },
+    ],
+    config: {
+      responseMimeType: "application/json",
+    },
+  });
+
+  const text = response.candidates?.[0]?.content?.parts
+    ?.map((p) => ("text" in p ? p.text : ""))
+    .join("")
+    .trim();
+  if (!text) throw new Error("Empty breed-identification response");
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    // Sometimes the model wraps in ```json — strip and retry.
+    const cleaned = text.replace(/^```json\s*|```\s*$/g, "").trim();
+    parsed = JSON.parse(cleaned);
+  }
+  // Light validation — fall back to safe defaults for anything missing
+  const p = parsed as Partial<BreedIdentification>;
+  const valid: BreedIdentification = {
+    species: p.species === "dog" || p.species === "cat" ? p.species : "unknown",
+    primaryBreed: typeof p.primaryBreed === "string" ? p.primaryBreed : "Unknown",
+    primaryConfidence:
+      p.primaryConfidence === "high" || p.primaryConfidence === "medium" || p.primaryConfidence === "low"
+        ? p.primaryConfidence
+        : "low",
+    description: typeof p.description === "string" ? p.description : "",
+    recommendedStyles: Array.isArray(p.recommendedStyles)
+      ? (p.recommendedStyles.filter((s) => STYLE_KEYS.includes(s as StyleKey)) as StyleKey[])
+      : ["oil", "watercolor", "renaissance"],
+    alternatives: Array.isArray(p.alternatives) ? p.alternatives.slice(0, 3) : [],
+    funFact: typeof p.funFact === "string" ? p.funFact : "",
+  };
+  return valid;
+}
