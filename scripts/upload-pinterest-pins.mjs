@@ -69,7 +69,10 @@ const ONLY = onlyArg
   : null;
 
 // ─── Pinterest API client ─────────────────────────────────────────────────
-const API = "https://api.pinterest.com/v5";
+// Pinterest splits prod and sandbox into separate hostnames. Sandbox tokens
+// (the default for new apps, which we use) ONLY work against api-sandbox.
+// Override via PINTEREST_API_BASE if you've been approved for production.
+const API = process.env.PINTEREST_API_BASE || "https://api-sandbox.pinterest.com/v5";
 
 async function pinterest(pathname, opts = {}) {
   const token = process.env.PINTEREST_ACCESS_TOKEN;
