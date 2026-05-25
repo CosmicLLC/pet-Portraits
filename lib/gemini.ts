@@ -78,16 +78,17 @@ BACKGROUND — strict, no exceptions:
 - NO other elements, no text, no logos, no decorative shapes
 - The background color must extend cleanly to all four edges so the image can be padded into a phone aspect ratio with seamless extension
 
-COMPOSITION — follow these constraints exactly:
-- Pet's head and upper chest are the subject — no full body, no legs
-- Pet's NOSE aligned with the horizontal center axis of the canvas (vertically centered left-to-right)
-- Pet's EYES sit in the upper third of the canvas (slightly above the horizontal midline)
-- Crop the pet at lower chest level — front legs and paws are NOT visible
+COMPOSITION — follow these constraints exactly (this image will become a phone wallpaper, so the pet must dominate the lower half of the screen):
+- Pet's head and chest are the subject — no full body, no legs
+- The pet's chest crop sits FLUSH WITH THE BOTTOM EDGE of the canvas — the pet's body extends ALL THE WAY to the bottom edge with NO empty background below the pet
+- Pet's NOSE aligned with the horizontal center axis (perfectly centered left-to-right)
 - Pet faces the camera directly, head straight forward or with at most a 10-15° tilt
-- The pet's silhouette occupies roughly 50-65% of the canvas width, with equal background margins on the left and right
-- Top of the pet's head sits approximately 15-20% down from the top edge of the canvas
-- The lower 25-30% of the canvas is solid empty background, below the pet's chest crop
-- Symmetrical breathing room around the subject
+- The pet's silhouette occupies 60-75% of the canvas width — the pet should be LARGE, dominating the frame, not small or floating
+- Pet's head and chest fill the lower 70-80% of the canvas vertically
+- Top of the pet's head sits approximately 20-30% down from the top edge
+- The top 20-30% of the canvas (above the pet's head) is solid empty background — this is where the phone wallpaper's negative space lives
+- Equal background margins on the LEFT and RIGHT of the pet's silhouette
+- Symmetrical breathing room left and right
 
 OUTPUT:
 - Square 1:1 aspect ratio, high resolution

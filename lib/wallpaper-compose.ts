@@ -30,20 +30,19 @@ export async function composePhoneWallpaper(squareBuffer: Buffer): Promise<Buffe
   const b = sample[2];
 
   // Resize the square to fill the wallpaper width (1290 wide → 1290×1290).
-  // Then we'll extend top + bottom with the sampled background color to
-  // reach the target 2796 height (9:19.5 phone ratio).
+  // Then extend ONLY upward to reach the target 2796 height — the pet's
+  // chest crop (anchored to the bottom edge in the Gemini prompt) ends up
+  // flush with the bottom of the phone wallpaper. All ~1506px of padding
+  // goes above the pet's head, where the lock-screen clock + home-screen
+  // icons sit, leaving the pet unobscured in the lower half of the screen.
   const resized = await sharp(squareBuffer)
     .resize(WALLPAPER_W, WALLPAPER_W, { fit: "cover", position: "center" })
     .toBuffer();
 
-  const extendTotal = WALLPAPER_H - WALLPAPER_W; // 1506 px of padding
-  const top = Math.ceil(extendTotal / 2);
-  const bottom = extendTotal - top;
-
   return sharp(resized)
     .extend({
-      top,
-      bottom,
+      top: WALLPAPER_H - WALLPAPER_W,
+      bottom: 0,
       left: 0,
       right: 0,
       background: { r, g, b, alpha: 1 },
