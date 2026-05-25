@@ -10,12 +10,16 @@ export default function LandingFooterCTA({
   subhead = "Upload a photo, pick a style, see your portrait in about 30 seconds — free to preview, no signup required.",
   ctaLabel = "Create Your Portrait",
   showTrust = true,
+  /** Where the CTA points. Defaults to /start (zero-scroll upload page).
+   * Pass a style query like "/start?style=oil" to pre-select a style for
+   * users landing from a style-specific page. */
+  ctaHref = "/start",
 }: {
   headline?: string
   subhead?: string
   ctaLabel?: string
-  /** Set false on pages that already render their own trust block above the CTA. */
   showTrust?: boolean
+  ctaHref?: string
 }) {
   return (
     <>
@@ -42,7 +46,7 @@ export default function LandingFooterCTA({
             {subhead}
           </p>
           <Link
-            href="/"
+            href={ctaHref}
             className="inline-flex items-center gap-3 bg-cream text-brand-green px-8 py-4 rounded-full text-base font-display font-semibold hover:bg-white hover:-translate-y-0.5 transition-all shadow-xl"
           >
             {ctaLabel}

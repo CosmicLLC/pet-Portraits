@@ -34,7 +34,7 @@ export default function LandingHeader() {
             Reviews
           </Link>
           <Link
-            href="/"
+            href="/start"
             className="bg-brand-green text-cream px-5 py-2.5 rounded-full text-sm font-display font-semibold hover:bg-brand-green/90 transition-colors"
           >
             Create Portrait
