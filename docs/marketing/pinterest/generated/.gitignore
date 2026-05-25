@@ -1,0 +1,5 @@
+# Pin PNG outputs are regenerable via scripts/generate-pinterest-pins.mjs.
+# Keep them out of git to avoid bloating the repo with 13MB+ of binary
+# assets that change every run. The _upload-batch.csv is committed because
+# it's the upload metadata source-of-truth.
+*.png
