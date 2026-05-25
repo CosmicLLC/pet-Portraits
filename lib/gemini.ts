@@ -29,6 +29,81 @@ export const STYLE_KEYS = ["watercolor", "oil", "renaissance", "lineart"] as con
 
 export type StyleKey = (typeof STYLE_KEYS)[number];
 
+// ─── Phone wallpaper generation ─────────────────────────────────────────────
+// Standalone $0.99 SKU — minimalist flat illustration on a solid color the
+// user picks from the curated palette. Distinct from the 4 portrait styles
+// (those produce ornate gallery-style art). Wallpaper aesthetic favors
+// negative space, simple shapes, and a strict single-color background that
+// can extend cleanly to phone aspect ratio without seams.
+
+export const WALLPAPER_PALETTE = [
+  { name: "Sage Green", hex: "#9DAF8E" },
+  { name: "Dusty Rose", hex: "#D4A5A5" },
+  { name: "Warm Cream", hex: "#F5E6D3" },
+  { name: "Deep Navy", hex: "#2C3E50" },
+  { name: "Terracotta", hex: "#C77B58" },
+  { name: "Soft Butter", hex: "#F2E2A8" },
+  { name: "Slate Blue", hex: "#7B97AF" },
+  { name: "Blush", hex: "#F0CCD0" },
+  { name: "Forest", hex: "#3A5A40" },
+  { name: "Charcoal", hex: "#3A3A3A" },
+] as const;
+
+export type WallpaperColorHex = (typeof WALLPAPER_PALETTE)[number]["hex"];
+
+export function isValidWallpaperHex(hex: string): hex is WallpaperColorHex {
+  return WALLPAPER_PALETTE.some((c) => c.hex.toLowerCase() === hex.toLowerCase());
+}
+
+function wallpaperPrompt(colorName: string, hex: string): string {
+  return `The image is a pet photo. Transform the pet into a clean modern flat-illustration portrait on a completely solid ${colorName} (${hex}) background.
+
+Preserve the pet's exact likeness, fur color, markings, ear shape, eye color, and personality. The viewer must instantly recognize THIS specific pet.
+
+Style: minimalist editorial flat illustration with soft shading and gentle gradients WITHIN the pet only. Clean rounded forms, simplified shapes, subtle highlights for dimension. NOT photorealistic. NOT a painting. Think modern children's-book illustration or contemporary editorial poster art.
+
+Background: 100% solid uniform ${colorName} field (${hex}) — absolutely no texture, no gradient, no pattern, no shadow under the pet, no border, no other elements, no text. The same flat color must fill the entire background corner to corner.
+
+Composition: pet centered, head and shoulders visible, generous negative space around the subject (especially top and bottom) so the image works when extended to a phone wallpaper aspect ratio.
+
+Output: square format, high quality, no text, no watermarks, no logos.`;
+}
+
+export async function generateWallpaperPortrait(
+  petPhotoBuffer: Buffer,
+  colorName: string,
+  hex: string
+): Promise<Buffer> {
+  const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
+    { text: wallpaperPrompt(colorName, hex) },
+    {
+      inlineData: {
+        mimeType: "image/png",
+        data: petPhotoBuffer.toString("base64"),
+      },
+    },
+  ];
+
+  const response = await getAI().models.generateContent({
+    model: "gemini-2.5-flash-image",
+    contents: [{ role: "user", parts }],
+    config: {
+      responseModalities: ["IMAGE", "TEXT"],
+    },
+  });
+
+  const responseParts = response.candidates?.[0]?.content?.parts;
+  if (!responseParts) throw new Error("No response from Gemini");
+
+  for (const part of responseParts) {
+    if (part.inlineData?.data) {
+      return Buffer.from(part.inlineData.data, "base64");
+    }
+  }
+
+  throw new Error("No image data in Gemini response");
+}
+
 export async function generatePortrait(
   petPhotoBuffer: Buffer,
   style: StyleKey

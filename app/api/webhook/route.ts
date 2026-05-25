@@ -89,11 +89,16 @@ export async function POST(req: NextRequest) {
       imageId,
       productType,
       addWallpaper,
+      bgHex,
       referralCode,
       referrerUserId,
       buyerUserId,
       buyerCreditApplied,
     } = session.metadata || {};
+    // Standalone wallpaper SKU ($0.99) — bgHex in metadata means the image
+    // is already a composed phone-aspect wallpaper at wallpapers/<imageId>
+    // and no portrait blob exists. Routes around the buildWallpaper step.
+    const isStandaloneWallpaper = productType === "wallpaper" && !!bgHex;
     const email = session.customer_details?.email;
 
     if (!imageId || !email || !productType) {
@@ -179,18 +184,30 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      // Find the original portrait blob by imageId prefix
-      const { blobs } = await list({ prefix: `portraits/${imageId}` });
+      // Locate the source blob. Standalone wallpapers ($0.99 SKU) were
+      // composed pre-purchase and live at wallpapers/<imageId>. Everything
+      // else (digital, canvas, bundle, the $5 add-on, etc.) starts from a
+      // portrait at portraits/<imageId>.
+      const blobPrefix = isStandaloneWallpaper
+        ? `wallpapers/${imageId}`
+        : `portraits/${imageId}`;
+      const { blobs } = await list({ prefix: blobPrefix });
       if (!blobs.length) {
-        console.error("No blob found for imageId:", imageId);
+        console.error("No blob found for imageId:", imageId, "prefix:", blobPrefix);
         return NextResponse.json({ error: "Image not found" }, { status: 404 });
       }
-      const portraitBlobUrl = blobs[0].url;
+      const sourceBlobUrl = blobs[0].url;
+      // For standalone wallpaper, the wallpaper IS the primary deliverable —
+      // we record it as both portraitBlobUrl (the order's main image) and
+      // wallpaperBlobUrl (so the download email's wallpaper link works).
+      const portraitBlobUrl = sourceBlobUrl;
+      let wallpaperBlobUrl: string | null = isStandaloneWallpaper ? sourceBlobUrl : null;
 
-      // Generate phone wallpaper when add-on was purchased.
-      // Failure here is non-fatal — we still fulfill the main portrait.
-      let wallpaperBlobUrl: string | null = null;
-      if (addWallpaper === "true") {
+      // Generate phone wallpaper when the $5 add-on was purchased. Failure
+      // here is non-fatal — we still fulfill the main portrait. Skipped
+      // entirely for the standalone wallpaper SKU (no buildWallpaper needed
+      // since the image already IS the wallpaper).
+      if (addWallpaper === "true" && !isStandaloneWallpaper) {
         try {
           const wallpaperBuffer = await buildWallpaper(portraitBlobUrl);
           // Private — served through /api/download/[orderId]?type=wallpaper,

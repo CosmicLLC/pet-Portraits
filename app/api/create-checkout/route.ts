@@ -13,7 +13,7 @@ import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
   try {
-    const { productType, imageId, customerEmail, addWallpaper } = await req.json();
+    const { productType, imageId, customerEmail, addWallpaper, bgHex } = await req.json();
 
     if (!productType) {
       return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
@@ -111,6 +111,10 @@ export async function POST(req: NextRequest) {
         imageId,
         productType,
         addWallpaper: addWallpaper ? "true" : "false",
+        // Standalone wallpaper SKU only — bgHex is the user's picked color.
+        // Presence of this field in webhook is how we dispatch the standalone
+        // fulfillment path vs the existing portrait-add-on flow.
+        ...(productType === "wallpaper" && bgHex ? { bgHex } : {}),
         ...referralMeta,
       },
       ...(customerEmail && { customer_email: customerEmail }),
@@ -119,8 +123,17 @@ export async function POST(req: NextRequest) {
         shipping_address_collection: { allowed_countries: ["US"] },
         phone_number_collection: { enabled: true },
       }),
-      success_url: `${baseUrl}?success=true&imageId=${encodeURIComponent(imageId)}&productType=${encodeURIComponent(productType)}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}?canceled=true`,
+      // Wallpaper standalone returns to its own landing page so the
+      // success state is contextual ("your wallpaper is on its way" vs the
+      // home page portrait success flow).
+      success_url:
+        productType === "wallpaper" && bgHex
+          ? `${baseUrl}/wallpaper?success=true&imageId=${encodeURIComponent(imageId)}&session_id={CHECKOUT_SESSION_ID}`
+          : `${baseUrl}?success=true&imageId=${encodeURIComponent(imageId)}&productType=${encodeURIComponent(productType)}&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url:
+        productType === "wallpaper" && bgHex
+          ? `${baseUrl}/wallpaper?canceled=true`
+          : `${baseUrl}?canceled=true`,
     });
 
     return NextResponse.json({
