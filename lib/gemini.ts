@@ -58,15 +58,40 @@ export function isValidWallpaperHex(hex: string): hex is WallpaperColorHex {
 function wallpaperPrompt(colorName: string, hex: string): string {
   return `The image is a pet photo. Transform the pet into a clean modern flat-illustration portrait on a completely solid ${colorName} (${hex}) background.
 
-Preserve the pet's exact likeness, fur color, markings, ear shape, eye color, and personality. The viewer must instantly recognize THIS specific pet.
+LIKENESS — preserve exactly:
+- The pet's specific face shape, fur color pattern, ear shape and angle, eye color, nose color, muzzle markings, and breed character must be unmistakable
+- Anyone who knows this pet must instantly recognize THIS specific individual — not a generic example of its breed
+- Do NOT "average" toward typical breed appearance; preserve the individual's quirks
 
-Style: minimalist editorial flat illustration with soft shading and gentle gradients WITHIN the pet only. Clean rounded forms, simplified shapes, subtle highlights for dimension. NOT photorealistic. NOT a painting. Think modern children's-book illustration or contemporary editorial poster art.
+STYLE — minimalist editorial flat illustration:
+- Clean rounded forms with simplified shapes
+- Soft shading and gentle tonal gradients WITHIN the pet's body only, for dimension
+- Subtle highlights suggesting top-left light direction
+- Slightly painterly edges — not vector-sharp, not photoreal
+- Modern editorial poster art / contemporary children's-book illustration sensibility
+- NOT photorealistic, NOT a painting, NOT 3D-rendered, NO line art outlines
 
-Background: 100% solid uniform ${colorName} field (${hex}) — absolutely no texture, no gradient, no pattern, no shadow under the pet, no border, no other elements, no text. The same flat color must fill the entire background corner to corner.
+BACKGROUND — strict, no exceptions:
+- 100% solid uniform ${colorName} (hex ${hex}) field, edge to edge, every single pixel
+- NO texture, NO gradient, NO pattern, NO border, NO frame
+- NO shadow under or behind or around the pet
+- NO other elements, no text, no logos, no decorative shapes
+- The background color must extend cleanly to all four edges so the image can be padded into a phone aspect ratio with seamless extension
 
-Composition: pet centered, head and shoulders visible, generous negative space around the subject (especially top and bottom) so the image works when extended to a phone wallpaper aspect ratio.
+COMPOSITION — follow these constraints exactly:
+- Pet's head and upper chest are the subject — no full body, no legs
+- Pet's NOSE aligned with the horizontal center axis of the canvas (vertically centered left-to-right)
+- Pet's EYES sit in the upper third of the canvas (slightly above the horizontal midline)
+- Crop the pet at lower chest level — front legs and paws are NOT visible
+- Pet faces the camera directly, head straight forward or with at most a 10-15° tilt
+- The pet's silhouette occupies roughly 50-65% of the canvas width, with equal background margins on the left and right
+- Top of the pet's head sits approximately 15-20% down from the top edge of the canvas
+- The lower 25-30% of the canvas is solid empty background, below the pet's chest crop
+- Symmetrical breathing room around the subject
 
-Output: square format, high quality, no text, no watermarks, no logos.`;
+OUTPUT:
+- Square 1:1 aspect ratio, high resolution
+- No text, no watermarks, no logos, no signature, no border anywhere in the image`;
 }
 
 export async function generateWallpaperPortrait(
@@ -83,6 +108,20 @@ export async function generateWallpaperPortrait(
       },
     },
   ];
+
+  // Optional style reference image — included if references/wallpaper.jpg
+  // exists. Anchors the aesthetic more reliably than text alone. Falls
+  // through to text-only if the reference isn't shipped yet.
+  const refPath = path.join(process.cwd(), "references", "wallpaper.jpg");
+  if (fs.existsSync(refPath)) {
+    const refBuffer = fs.readFileSync(refPath);
+    parts.push({
+      inlineData: {
+        mimeType: "image/jpeg",
+        data: refBuffer.toString("base64"),
+      },
+    });
+  }
 
   const response = await getAI().models.generateContent({
     model: "gemini-2.5-flash-image",
