@@ -13,6 +13,7 @@ import StickyCartBar from "@/components/StickyCartBar";
 import FAQ from "@/components/FAQ";
 import HomeJsonLd from "@/components/HomeJsonLd";
 import SuccessReferralShare from "@/components/SuccessReferralShare";
+import NewsletterInline from "@/components/NewsletterInline";
 import ClaimFreePrint from "@/components/ClaimFreePrint";
 import Image from "next/image";
 import Link from "next/link";
@@ -408,6 +409,19 @@ export default function Home() {
 
           {/* Referral / Share section — personalized code for signed-in buyers */}
           <SuccessReferralShare />
+
+          {/* Newsletter opt-in. They're already on the order-updates list via
+              CAN-SPAM existing-customer exemption; this adds explicit consent
+              for marketing content (style drops, anniversary reminders) and
+              tags them as success_page source for segmentation. */}
+          <div className="mb-8">
+            <NewsletterInline
+              source="success_page"
+              headline="Want first dibs on new styles?"
+              copy="We send one short email a week — new style drops, framing inspiration, and a reminder before your pet's portrait anniversary. Unsubscribe anytime."
+              size="compact"
+            />
+          </div>
 
           <div className="text-center">
             <a

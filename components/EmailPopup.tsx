@@ -1,17 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { track } from "@/lib/analytics";
 
 const DISMISS_KEY = "pp_popup_dismissed";
 const DISMISS_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+// Paths where the popup is suppressed — admin UI, API debugging, account
+// pages (already-converted), and any in-progress preview flows where the
+// existing BrowseAbandonmentCapture handles capture more contextually.
+const SUPPRESSED_PREFIXES = [
+  "/admin",
+  "/api",
+  "/account",
+  "/success",
+  "/auth",
+  "/unsubscribe",
+];
 
 export default function EmailPopup() {
+  const pathname = usePathname() || "";
+  const suppressed = SUPPRESSED_PREFIXES.some((p) => pathname.startsWith(p));
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
+    if (suppressed) return;
     const dismissed = localStorage.getItem(DISMISS_KEY);
     if (dismissed && Date.now() - parseInt(dismissed, 10) < DISMISS_TTL) return;
 
@@ -35,7 +51,7 @@ export default function EmailPopup() {
       document.addEventListener("mouseleave", onLeave);
       return () => document.removeEventListener("mouseleave", onLeave);
     }
-  }, []);
+  }, [suppressed]);
 
   const dismiss = () => {
     localStorage.setItem(DISMISS_KEY, String(Date.now()));
@@ -50,8 +66,9 @@ export default function EmailPopup() {
       await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, source: "popup" }),
       });
+      track({ name: "sign_up", source: "popup" });
       setSubmitted(true);
       setTimeout(dismiss, 2500);
     } catch {

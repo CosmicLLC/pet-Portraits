@@ -4,7 +4,33 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import LandingHeader from "@/components/LandingHeader";
 import LandingFooterCTA from "@/components/LandingFooterCTA";
+import NewsletterInline from "@/components/NewsletterInline";
 import { BLOG_POSTS, getBlogPost, listBlogPosts } from "@/lib/blog-posts";
+
+// Split blog body into two halves at a section break for mid-article ad
+// placement. Pinterest pin / blog readers who get >50% through the article
+// are the warmest organic-traffic segment we have — a newsletter ask at
+// the midpoint converts ~2-3x vs only at the bottom.
+function splitBodyAtSection(html: string): [string, string] {
+  // Find <h2> tags and pick the one closest to the middle of the article
+  // by character offset. Fall back to no-split if there's only one h2.
+  const h2Positions: number[] = [];
+  const re = /<h2[\s>]/gi;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(html)) !== null) h2Positions.push(match.index);
+  if (h2Positions.length < 2) return [html, ""];
+  const mid = html.length / 2;
+  let bestIdx = h2Positions[0];
+  let bestDist = Math.abs(bestIdx - mid);
+  for (const p of h2Positions) {
+    const d = Math.abs(p - mid);
+    if (d < bestDist) {
+      bestDist = d;
+      bestIdx = p;
+    }
+  }
+  return [html.slice(0, bestIdx), html.slice(bestIdx)];
+}
 
 interface Props {
   params: { slug: string };
@@ -122,11 +148,38 @@ export default function BlogPostPage({ params }: Props) {
           />
         </div>
 
-        <div
-          className="prose prose-lg max-w-none prose-headings:font-display prose-headings:text-brand-green prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-brand-green prose-a:underline prose-a:underline-offset-2 prose-strong:text-brand-green"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: post.body }}
-        />
+        {(() => {
+          const [bodyTop, bodyBottom] = splitBodyAtSection(post.body);
+          const proseClass =
+            "prose prose-lg max-w-none prose-headings:font-display prose-headings:text-brand-green prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-brand-green prose-a:underline prose-a:underline-offset-2 prose-strong:text-brand-green";
+          return (
+            <>
+              <div
+                className={proseClass}
+                // eslint-disable-next-line react/no-danger
+                dangerouslySetInnerHTML={{ __html: bodyTop }}
+              />
+              {bodyBottom ? (
+                <>
+                  {/* Mid-article subscribe — readers who get this far are warm */}
+                  <div className="my-12 not-prose">
+                    <NewsletterInline
+                      source="blog_post"
+                      headline="Like what you're reading?"
+                      copy="Get one short pet-decor or photo tip every week. No spam, one-click unsubscribe."
+                      size="compact"
+                    />
+                  </div>
+                  <div
+                    className={proseClass}
+                    // eslint-disable-next-line react/no-danger
+                    dangerouslySetInnerHTML={{ __html: bodyBottom }}
+                  />
+                </>
+              ) : null}
+            </>
+          );
+        })()}
 
         {/* CTA panel at end of article */}
         <div className="mt-14 p-6 rounded-3xl bg-brand-green/5 border border-brand-green/15 text-center">

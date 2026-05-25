@@ -22,11 +22,11 @@ export default function BrowseAbandonmentCapture({ imageId, onCaptured }: Props)
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "browse-abandonment", imageId }),
+        body: JSON.stringify({ email, source: "abandonment", imageId }),
       });
       if (!res.ok) throw new Error("Failed");
       setSubmitted(true);
-      track({ name: "sign_up", source: "browse-abandonment" });
+      track({ name: "sign_up", source: "abandonment" });
       onCaptured();
     } catch {
       setError("Something went wrong — please try again.");

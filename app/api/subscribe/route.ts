@@ -2,16 +2,25 @@ import { NextRequest, NextResponse } from "next/server"
 import { Resend } from "resend"
 import { prisma } from "@/lib/prisma"
 import { rateLimit, clientIp } from "@/lib/ratelimit"
-import { sendWelcomeEmail } from "@/lib/resend"
+import { sendWelcomeEmail, sendAbandonedPortraitEmail } from "@/lib/resend"
 
 export const runtime = "nodejs"
 
+// Source enum drives segmentation for retargeting + Custom Audience exports.
+// Add new sources here when adding a new capture surface — anything else falls
+// through to "other" and you lose segmentation for that traffic.
 const ALLOWED_SOURCES = new Set([
-  "footer",
-  "exit_intent",
-  "abandonment",
-  "portrait",
-  "purchase",
+  "footer",            // legacy home-footer newsletter
+  "landing_footer",    // newsletter inline in LandingFooterCTA (all landing pages)
+  "exit_intent",       // ExitIntentPopup
+  "popup",             // EmailPopup (sitewide, 7-day cooldown)
+  "abandonment",       // BrowseAbandonmentCapture (preview step, 30s idle)
+  "portrait",          // reserved
+  "blog_post",         // inline + end-of-post newsletter on /blog/[slug]
+  "success_page",      // post-purchase explicit opt-in
+  "wallpaper",         // /free-wallpaper lead magnet (formerly "other")
+  "photo_guide",       // /free-photo-guide lead magnet (formerly "other")
+  "purchase",          // silent auto-enroll from Stripe webhook
   "other",
 ])
 
@@ -81,9 +90,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Subscription failed" }, { status: 500 })
   }
 
-  // Fire-and-forget welcome email for genuinely new subscribers. Failure
-  // here must not fail the API request — they're already in the list.
-  if (isNewSubscriber) {
+  // Source-specific email triggers. Order matters: abandonment beats the
+  // generic welcome — if someone bailed mid-preview, they need the "your
+  // portrait is saved + 10% code" email, not a brand-tour welcome.
+  const existingLastSent = await prisma.subscriber
+    .findUnique({ where: { email }, select: { lastEmailSent: true } })
+    .then((s) => s?.lastEmailSent ?? null)
+    .catch(() => null)
+  const lastSentMs = existingLastSent?.getTime() ?? 0
+  const oneDayMs = 24 * 60 * 60 * 1000
+  const cooledDown = Date.now() - lastSentMs > oneDayMs
+
+  if (source === "abandonment" && cooledDown) {
+    // Fire-and-forget. Rate-limited to once per day so a user who churns
+    // through multiple previews doesn't get bombarded.
+    sendAbandonedPortraitEmail(email)
+      .then(() =>
+        prisma.subscriber
+          .update({ where: { email }, data: { lastEmailSent: new Date() } })
+          .catch(() => {})
+      )
+      .catch((err) => console.error("Abandonment send failed:", err))
+  } else if (isNewSubscriber && source !== "abandonment") {
+    // Fire-and-forget welcome email for genuinely new subscribers from any
+    // capture surface other than abandonment. Failure here must not fail
+    // the API request — they're already in the list.
     sendWelcomeEmail(email)
       .then(() =>
         prisma.subscriber.update({

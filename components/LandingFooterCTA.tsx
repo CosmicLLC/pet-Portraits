@@ -1,5 +1,6 @@
 import Link from "next/link"
 import TrustStrip from "./TrustStrip"
+import NewsletterInline from "./NewsletterInline"
 
 // Conversion-focused footer block that lives at the bottom of every SEO
 // landing page. Trust strip on cream (rating/guarantee/shipping/speed) sits
@@ -25,6 +26,15 @@ export default function LandingFooterCTA({
           </div>
         </section>
       )}
+      <section className="bg-cream py-10 sm:py-12 border-t border-gray-100">
+        <div className="max-w-xl mx-auto px-4">
+          <NewsletterInline
+            source="landing_footer"
+            headline="Get one piece of pet art advice a week."
+            copy="Style drops, framing tips, last-minute holiday deadlines, and the occasional discount. No spam — unsubscribe in one click."
+          />
+        </div>
+      </section>
       <section className="bg-brand-green text-cream py-16 sm:py-20">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="font-display text-3xl sm:text-4xl mb-4">{headline}</h2>

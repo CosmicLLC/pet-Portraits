@@ -11,18 +11,78 @@ async function requireAdmin() {
   return session
 }
 
+// Query params:
+//   ?source=blog_post           — filter to one source (omit for all)
+//   ?from=2026-01-01            — subscribed on/after this date (ISO)
+//   ?to=2026-12-31              — subscribed on/before this date (ISO)
+//   ?status=active|unsubscribed|all  — defaults to active
+//   ?nonPurchaser=true          — exclude emails that exist in Order table
+//                                 (use this to build retargeting Custom Audiences)
+//   ?format=csv                 — download as CSV instead of JSON
+//
+// CSV columns: email, name, source, subscribed_at, unsubscribed_at,
+//              last_email_sent, has_purchased
+// Upload to Meta Events Manager → Audiences → Customer file → Custom Audience.
+// Meta hashes the email column for you on upload. Same workflow for TikTok.
 export async function GET(req: NextRequest) {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 })
   }
 
-  const format = req.nextUrl.searchParams.get("format")
-  const subscribers = await prisma.subscriber.findMany({
+  const sp = req.nextUrl.searchParams
+  const sourceFilter = sp.get("source")?.trim() || null
+  const fromIso = sp.get("from")?.trim() || null
+  const toIso = sp.get("to")?.trim() || null
+  const status = (sp.get("status") || "active").trim()
+  const nonPurchaser = sp.get("nonPurchaser") === "true"
+  const format = sp.get("format")
+
+  const where: Record<string, unknown> = {}
+  if (sourceFilter) where.source = sourceFilter
+  if (status === "active") where.unsubscribedAt = null
+  else if (status === "unsubscribed") where.unsubscribedAt = { not: null }
+  if (fromIso || toIso) {
+    const subscribedAt: Record<string, Date> = {}
+    if (fromIso) {
+      const d = new Date(fromIso)
+      if (!isNaN(d.getTime())) subscribedAt.gte = d
+    }
+    if (toIso) {
+      const d = new Date(toIso)
+      if (!isNaN(d.getTime())) {
+        // Inclusive end-of-day so a "to" of 2026-05-25 includes that day.
+        d.setUTCHours(23, 59, 59, 999)
+        subscribedAt.lte = d
+      }
+    }
+    if (Object.keys(subscribedAt).length > 0) where.subscribedAt = subscribedAt
+  }
+
+  const allSubs = await prisma.subscriber.findMany({
+    where,
     orderBy: { subscribedAt: "desc" },
   })
 
+  // Cross-reference with Order to know which subscribers have purchased.
+  // We always compute this so the JSON response can show "has_purchased"
+  // segmentation — it's also what the nonPurchaser filter needs.
+  const emails = allSubs.map((s) => s.email)
+  const orderEmails = emails.length
+    ? await prisma.order.findMany({
+        where: { email: { in: emails } },
+        select: { email: true },
+        distinct: ["email"],
+      })
+    : []
+  const purchaserSet = new Set(orderEmails.map((o) => o.email))
+
+  const subscribers = nonPurchaser
+    ? allSubs.filter((s) => !purchaserSet.has(s.email))
+    : allSubs
+
   if (format === "csv") {
-    const header = "email,name,source,subscribed_at,unsubscribed_at,last_email_sent\n"
+    const header =
+      "email,name,source,subscribed_at,unsubscribed_at,last_email_sent,has_purchased\n"
     const rows = subscribers
       .map((s) =>
         [
@@ -32,16 +92,23 @@ export async function GET(req: NextRequest) {
           s.subscribedAt.toISOString(),
           s.unsubscribedAt?.toISOString() ?? "",
           s.lastEmailSent?.toISOString() ?? "",
+          purchaserSet.has(s.email) ? "1" : "0",
         ]
           .map((v) => `"${String(v).replace(/"/g, '""')}"`)
           .join(",")
       )
       .join("\n")
+    // Filename encodes the active filters so multiple downloads stay sorted.
+    const parts = ["subscribers"]
+    if (sourceFilter) parts.push(sourceFilter)
+    if (nonPurchaser) parts.push("non-purchaser")
+    parts.push(new Date().toISOString().slice(0, 10))
+    const filename = `${parts.join("-")}.csv`
     return new NextResponse(header + rows, {
       status: 200,
       headers: {
         "Content-Type": "text/csv",
-        "Content-Disposition": `attachment; filename="subscribers-${new Date().toISOString().slice(0, 10)}.csv"`,
+        "Content-Disposition": `attachment; filename="${filename}"`,
         "Cache-Control": "no-store",
       },
     })
@@ -57,12 +124,14 @@ export async function GET(req: NextRequest) {
       acc[s.source] = (acc[s.source] ?? 0) + 1
       return acc
     }, {}),
-    subscribers: subscribers.slice(0, 100).map((s) => ({
+    nonPurchaserCount: subscribers.filter((s) => !purchaserSet.has(s.email)).length,
+    subscribers: subscribers.slice(0, 200).map((s) => ({
       email: s.email,
       name: s.name,
       source: s.source,
       subscribedAt: s.subscribedAt.toISOString(),
       unsubscribedAt: s.unsubscribedAt?.toISOString() ?? null,
+      hasPurchased: purchaserSet.has(s.email),
     })),
   })
 }
