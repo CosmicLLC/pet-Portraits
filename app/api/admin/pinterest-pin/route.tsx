@@ -58,7 +58,7 @@ export async function GET(req: NextRequest) {
     spec.layout === "split" ? (
       <SplitLayout spec={spec} sampleUrl={sampleUrl} cream={cream} green={green} gold={gold} />
     ) : (
-      <OverlayLayout spec={spec} sampleUrl={sampleUrl} cream={cream} green={green} gold={gold} />
+      <OverlayLayout spec={spec} sampleUrl={sampleUrl} cream={cream} gold={gold} />
     ),
     { width: 1000, height: 1500 }
   );
@@ -68,13 +68,11 @@ function OverlayLayout({
   spec,
   sampleUrl,
   cream,
-  green,
   gold,
 }: {
   spec: PinSpec;
   sampleUrl: string;
   cream: string;
-  green: string;
   gold: string;
 }) {
   return (
