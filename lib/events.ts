@@ -1,7 +1,16 @@
 import { prisma } from "@/lib/prisma"
 
 type EventType = "error" | "warning" | "info"
-type EventSource = "generate" | "webhook" | "auth" | "email" | "checkout" | "subscribe" | "admin"
+type EventSource =
+  | "generate"
+  | "webhook"
+  | "auth"
+  | "email"
+  | "checkout"
+  | "subscribe"
+  | "admin"
+  | "breed-identifier"
+  | "wallpaper-preview"
 
 export async function logEvent(
   type: EventType,
