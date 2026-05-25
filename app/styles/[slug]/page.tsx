@@ -6,6 +6,16 @@ import { STYLE_SEO, styleBySlug, STYLE_SLUGS, BREEDS } from "@/lib/seo-data"
 import LandingHeader from "@/components/LandingHeader"
 import LandingHero from "@/components/LandingHero"
 import LandingFooterCTA from "@/components/LandingFooterCTA"
+import { reviewsByStyle, reviewJsonLd } from "@/lib/reviews"
+
+// Map style slug → review tag key. The style slugs are SEO-prefixed
+// ("watercolor-pet-portrait") while reviews use the short key ("watercolor").
+const STYLE_SLUG_TO_REVIEW_KEY: Record<string, "watercolor" | "oil" | "renaissance" | "lineart"> = {
+  "watercolor-pet-portrait": "watercolor",
+  "oil-painting-pet-portrait": "oil",
+  "renaissance-pet-portrait": "renaissance",
+  "line-art-pet-portrait": "lineart",
+}
 
 interface Props {
   params: { slug: string }
@@ -41,6 +51,13 @@ export default function StyleLandingPage({ params }: Props) {
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || "https://pawmasterpiece.com"
 
+  // Pull style-specific reviews so the Product schema carries Review markup
+  // for THIS style only — Google requires review markup to be about the
+  // product on the page, not the brand in general.
+  const styleReviewKey = STYLE_SLUG_TO_REVIEW_KEY[style.slug]
+  const styleReviews = styleReviewKey ? reviewsByStyle(styleReviewKey) : []
+  const reviewMarkup = reviewJsonLd(styleReviews)
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -60,6 +77,7 @@ export default function StyleLandingPage({ params }: Props) {
       ratingValue: "4.9",
       reviewCount: "487",
     },
+    ...(reviewMarkup ? { review: reviewMarkup } : {}),
   }
 
   const breadcrumbLd = {

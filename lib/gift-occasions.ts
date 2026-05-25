@@ -40,13 +40,13 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
   {
     slug: "mothers-day",
     displayName: "Mother's Day",
-    metaTitle: "Mother's Day Pet Portrait Gifts — Ready in 30 Seconds",
+    metaTitle: "Mother's Day Pet Portrait Gifts — Custom Art from Her Pet's Photo",
     metaDescription:
       "A Mother's Day gift the dog mom in your life will actually display. Turn her pet's photo into a gallery-quality portrait. Digital download in 30 seconds or framed canvas shipped to her door.",
     eyebrow: "Mother's Day Gifts",
     heroHeadline: "Make her cry (happy tears, promise).",
     heroSubhead:
-      "Custom portrait, ready in 30 seconds. Free 11×14 display print with any order — through May 10.",
+      "Turn the photo of her pet that's already on her phone into a framed portrait she'll hang on the wall. Preview free in 30 seconds.",
     heroTrust: "★ 4.9 · Ships in 3–5 days · Free preview",
     heroImage: "/ads/mothers-day-renaissance-reveal-v1.png",
     heroImageAlt: "Mom reacting to her framed pet portrait — Mother's Day gift reveal",
@@ -58,9 +58,9 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
           "Ask any dog mom what she'd frame and hang in her house, and it's not a mug, not a tote, not another pair of pet-print socks. It's a real piece of art that shows her pet the way she sees them. Paw Masterpiece turns the photo already on her phone into that piece of art — watercolor, oil painting, Renaissance, or line art — and delivers it as a full-resolution digital file she can print herself, or as a framed canvas you order shipped directly to her door.",
       },
       {
-        heading: "Forgot Mother's Day is this weekend? Good — you're fine.",
+        heading: "Last-minute? The digital download is instant.",
         body:
-          "The digital portrait is ready to email within 30 seconds of upload. You can buy the full-resolution file Mother's Day morning, forward her the download link, and she'll have a framed piece of art printed at her local print shop before brunch. For gifters planning ahead, the framed canvas prints ship in 3–5 business days within the United States.",
+          "The digital portrait is ready to email within 30 seconds of upload. You can buy the full-resolution file the morning of, forward her the download link, and she'll have a framed piece of art printed at her local print shop the same day. For gifters planning further ahead, the framed canvas prints ship in 3–5 business days within the United States.",
       },
       {
         heading: "Pair with a printable card for a complete gift.",
@@ -76,7 +76,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     faqs: [
       {
         q: "How fast can I get a Mother's Day pet portrait?",
-        a: "The digital download is ready in about 30 seconds. You can forward the full-resolution file to her directly from your phone. Framed canvas prints ship within 3–5 business days inside the United States — order by the Tuesday before Mother's Day to be safe.",
+        a: "The digital download is ready in about 30 seconds. You can forward the full-resolution file to her directly from your phone. Framed canvas prints ship within 3–5 business days inside the United States — for Mother's Day delivery, order by the Tuesday of the week before to be safe.",
       },
       {
         q: "What if I don't have a photo of her pet?",

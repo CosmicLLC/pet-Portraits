@@ -3,6 +3,8 @@ import Script from "next/script";
 const GA4_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID;
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 const TIKTOK_PIXEL_ID = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID;
+const PINTEREST_TAG_ID = process.env.NEXT_PUBLIC_PINTEREST_TAG_ID;
+const CLARITY_ID = process.env.NEXT_PUBLIC_CLARITY_ID;
 
 // Renders the tracking scripts for any pixel whose ID is configured. Missing
 // IDs render nothing — so dev and unbranded preview environments stay clean.
@@ -49,24 +51,59 @@ export default function Analytics() {
           }(window, document, 'ttq');
         `}</Script>
       )}
+
+      {PINTEREST_TAG_ID && (
+        <Script id="pinterest-tag-init" strategy="afterInteractive">{`
+          !function(e){if(!window.pintrk){window.pintrk = function () {
+            window.pintrk.queue.push(Array.prototype.slice.call(arguments))};var
+            n=window.pintrk;n.queue=[],n.version="3.0";var
+            t=document.createElement("script");t.async=!0,t.src=e;var
+            r=document.getElementsByTagName("script")[0];
+            r.parentNode.insertBefore(t,r)}}("https://s.pinimg.com/ct/core.js");
+          pintrk('load', '${PINTEREST_TAG_ID}');
+          pintrk('page');
+        `}</Script>
+      )}
+
+      {CLARITY_ID && (
+        <Script id="clarity-init" strategy="afterInteractive">{`
+          (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+          })(window, document, "clarity", "script", "${CLARITY_ID}");
+        `}</Script>
+      )}
     </>
   );
 }
 
-// Meta Pixel needs a <noscript> img fallback to register non-JS page views.
-// Rendered inside <body> so it's part of the initial HTML.
+// Meta + Pinterest both want a <noscript> img fallback to register non-JS
+// page views. Rendered inside <body> so it's part of the initial HTML.
 export function AnalyticsNoScript() {
-  if (!META_PIXEL_ID) return null;
+  if (!META_PIXEL_ID && !PINTEREST_TAG_ID) return null;
   return (
     <noscript>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        height="1"
-        width="1"
-        style={{ display: "none" }}
-        src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
-        alt=""
-      />
+      {META_PIXEL_ID && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          height="1"
+          width="1"
+          style={{ display: "none" }}
+          src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+          alt=""
+        />
+      )}
+      {PINTEREST_TAG_ID && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          height="1"
+          width="1"
+          style={{ display: "none" }}
+          src={`https://ct.pinterest.com/v3/?event=init&tid=${PINTEREST_TAG_ID}&noscript=1`}
+          alt=""
+        />
+      )}
     </noscript>
   );
 }

@@ -56,7 +56,7 @@ export default function BlogIndexPage() {
             Stories, gift guides, and pet portrait advice.
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">
-            How to take a great phone photo of your pet, the best Mother's Day gift you can give a dog mom, and a gentle guide to memorial portraits.
+            How to take a great phone photo of your pet, the best gifts you can give a dog mom, and a gentle guide to memorial portraits.
           </p>
         </div>
       </section>

@@ -90,14 +90,18 @@ export async function applyWatermark(imageBuffer: Buffer): Promise<Buffer> {
   // Scale watermark to image — pixel size ~1.2% of min dimension
   const pixel = Math.max(3, Math.round(Math.min(width, height) * 0.012));
   const word = renderWord("PREVIEW", pixel, "#ffffff", 0.55);
-  const wordShadow = renderWord("PREVIEW", pixel, "#000000", 0.35);
+  const wordShadow = renderWord("PREVIEW", pixel, "#000000", 0.4);
 
-  // Tile the word diagonally across the image
-  const tileSpacingX = word.width + pixel * 12;
-  const tileSpacingY = word.height + pixel * 18;
+  // Tile the word diagonally across the image. Spacing tightened (8/10 from
+  // 12/18) so corner-crop attacks can't extract an unwatermarked square —
+  // any 256×256 region of the result image contains at least one "PREVIEW".
+  // +4 rows/cols of overshoot guarantees the rotated tile pattern fills past
+  // the image edges with no exposed corner triangles.
+  const tileSpacingX = word.width + pixel * 8;
+  const tileSpacingY = word.height + pixel * 10;
   const diag = Math.ceil(Math.sqrt(width * width + height * height));
-  const cols = Math.ceil(diag / tileSpacingX) + 2;
-  const rows = Math.ceil(diag / tileSpacingY) + 2;
+  const cols = Math.ceil(diag / tileSpacingX) + 4;
+  const rows = Math.ceil(diag / tileSpacingY) + 4;
 
   let tiles = "";
   for (let r = -rows; r < rows; r++) {
@@ -110,9 +114,22 @@ export async function applyWatermark(imageBuffer: Buffer): Promise<Buffer> {
     }
   }
 
+  // Center stamp — larger and bolder than the tile pattern, sits over the
+  // pet's face area where any meaningful crop would have to keep it. Acts
+  // as a secondary lock: even if someone removes the diagonal grid, the
+  // central stamp covers the part of the image with the most ownership
+  // value (the pet itself).
+  const centerPixel = pixel * 2;
+  const centerWord = renderWord("PREVIEW", centerPixel, "#ffffff", 0.65);
+  const centerShadow = renderWord("PREVIEW", centerPixel, "#000000", 0.5);
+  const centerX = (width - centerWord.width) / 2;
+  const centerY = (height - centerWord.height) / 2;
+
   const svgOverlay = Buffer.from(
     `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">` +
       `<g transform="rotate(-30, ${width / 2}, ${height / 2})">${tiles}</g>` +
+      `<g transform="translate(${centerX + centerPixel},${centerY + centerPixel})">${centerShadow.svg}</g>` +
+      `<g transform="translate(${centerX},${centerY})">${centerWord.svg}</g>` +
     `</svg>`
   );
 

@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next"
 import { allProgrammaticUrls } from "@/lib/seo-data"
 import { GIFT_OCCASIONS } from "@/lib/gift-occasions"
 import { BLOG_POSTS } from "@/lib/blog-posts"
+import { COMPARISONS } from "@/lib/comparisons"
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || "https://pawmasterpiece.com"
@@ -15,11 +16,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/reviews`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${BASE_URL}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${BASE_URL}/products`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${BASE_URL}/how-it-works`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/free-photo-guide`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE_URL}/free-wallpaper`, lastModified: now, changeFrequency: "monthly", priority: 0.85 },
     { url: `${BASE_URL}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
     { url: `${BASE_URL}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.3 },
   ]
+
+  // Competitor comparison pages — capture "[us] vs [them]" search intent.
+  const vsEntries: MetadataRoute.Sitemap = COMPARISONS.map((c) => ({
+    url: `${BASE_URL}/vs/${c.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.75,
+  }))
 
   // Gift-occasion landing pages — campaign anchors + evergreen gift-search SEO
   const giftEntries: MetadataRoute.Sitemap = GIFT_OCCASIONS.map((o) => ({
@@ -51,5 +61,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }))
 
-  return [...staticEntries, ...giftEntries, ...blogEntries, ...programmatic]
+  return [...staticEntries, ...vsEntries, ...giftEntries, ...blogEntries, ...programmatic]
 }

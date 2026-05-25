@@ -111,7 +111,7 @@ export default function ReviewsPage() {
         <div className="max-w-5xl mx-auto px-4">
           {WALL_REVIEWS.length === 0 ? (
             <div className="text-center text-gray-500">
-              No reviews yet — check back after our Mother&apos;s Day launch.
+              Reviews from our earliest customers are coming soon — check back shortly.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

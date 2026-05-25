@@ -5,6 +5,7 @@ import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { logEvent } from "@/lib/events";
+import { trackPreviewGeneratedServer, extractUserContext } from "@/lib/server-pixels";
 
 export const maxDuration = 60;
 
@@ -119,6 +120,17 @@ export async function POST(req: NextRequest) {
     // Apply watermark for preview
     const watermarkedBuffer = await applyWatermark(fullResBuffer);
     const watermarkedBase64 = `data:image/png;base64,${watermarkedBuffer.toString("base64")}`;
+
+    // Fire a soft-conversion signal to Meta + TikTok server-side. This is
+    // the highest-quality lookalike-audience training event we have before
+    // payment — a real upload from a real browser. Email isn't available
+    // here, so match keys are limited to IP + UA + ad-click cookies.
+    trackPreviewGeneratedServer({
+      imageId,
+      style: style as string,
+      user: extractUserContext(req),
+      sourceUrl: req.headers.get("referer") || undefined,
+    }).catch(() => {});
 
     return NextResponse.json({ watermarkedImage: watermarkedBase64, imageId });
   } catch (error) {

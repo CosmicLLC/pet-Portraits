@@ -1134,6 +1134,29 @@ export default function Home() {
                 </tbody>
               </table>
             </div>
+            <div className="text-center mt-6">
+              <p className="text-sm text-gray-500 mb-3">Comparing specific competitors?</p>
+              <div className="flex flex-wrap justify-center gap-2">
+                <Link
+                  href="/vs/crown-and-paw"
+                  className="text-sm text-brand-green hover:bg-brand-green/5 px-4 py-2 rounded-full border border-brand-green/20 transition-colors"
+                >
+                  vs Crown &amp; Paw
+                </Link>
+                <Link
+                  href="/vs/west-and-willow"
+                  className="text-sm text-brand-green hover:bg-brand-green/5 px-4 py-2 rounded-full border border-brand-green/20 transition-colors"
+                >
+                  vs West &amp; Willow
+                </Link>
+                <Link
+                  href="/how-it-works"
+                  className="text-sm text-brand-green hover:bg-brand-green/5 px-4 py-2 rounded-full border border-brand-green/20 transition-colors"
+                >
+                  How it works
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
       )}
@@ -1252,6 +1275,9 @@ export default function Home() {
                 <li><Link href="/memorial" className="text-gray-500 hover:text-brand-green transition-colors">Memorial Portraits</Link></li>
                 <li><Link href="/reviews" className="text-gray-500 hover:text-brand-green transition-colors">Wall of Love</Link></li>
                 <li><Link href="/blog" className="text-gray-500 hover:text-brand-green transition-colors">Blog</Link></li>
+                <li><Link href="/how-it-works" className="text-gray-500 hover:text-brand-green transition-colors">How It Works</Link></li>
+                <li><Link href="/vs/crown-and-paw" className="text-gray-500 hover:text-brand-green transition-colors">vs Crown &amp; Paw</Link></li>
+                <li><Link href="/vs/west-and-willow" className="text-gray-500 hover:text-brand-green transition-colors">vs West &amp; Willow</Link></li>
                 <li><Link href="/free-photo-guide" className="text-gray-500 hover:text-brand-green transition-colors">Free Photo Guide</Link></li>
                 <li><Link href="/free-wallpaper" className="text-gray-500 hover:text-brand-green transition-colors">Free Phone Wallpaper</Link></li>
               </ul>

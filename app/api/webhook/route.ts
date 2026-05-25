@@ -18,6 +18,7 @@ import {
 import { isPhysicalProduct } from "@/lib/products";
 import { shouldApplyFreeBonus } from "@/lib/campaigns";
 import { upscaleForPrint, isUpscalerConfigured } from "@/lib/upscale";
+import { trackPurchaseServer } from "@/lib/server-pixels";
 
 // Upscaling + Prodigi can take 15-30s on a physical order.
 export const maxDuration = 60;
@@ -289,6 +290,27 @@ export async function POST(req: NextRequest) {
         await sendPhysicalConfirmationEmail(email, productType);
         console.log(`Bundle fulfillment for ${email}`);
       }
+
+      // ── Server-side conversion API for Meta + TikTok ─────────────────
+      // Webhook fires AFTER Stripe takes payment, so this is the most
+      // authoritative purchase signal we can send the ad platforms. The
+      // session.id is reused as event_id so Meta/TikTok dedupe against the
+      // client-side pixel Purchase event fired on the success page (when
+      // one is added). Failure here never blocks fulfillment.
+      const dollars = session.amount_total ? session.amount_total / 100 : 0;
+      await trackPurchaseServer({
+        email,
+        value: dollars,
+        currency: (session.currency || "usd").toUpperCase(),
+        orderId: session.id,
+        productType,
+        user: {
+          email,
+          ip: null,
+          userAgent: null,
+        },
+        sourceUrl: `${baseUrl}/success?session_id=${session.id}`,
+      }).catch((err) => console.warn("[server-pixels] purchase tracking failed:", err));
 
       // Physical fulfillment via Prodigi. Isolated from email failures above.
       // Never throws upward — we always want to 200 the Stripe webhook so it

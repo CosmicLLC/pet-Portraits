@@ -16,10 +16,22 @@ export default function LandingHeader() {
         </Link>
         <div className="flex items-center gap-4">
           <Link
+            href="/how-it-works"
+            className="hidden md:inline-block text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
+          >
+            How It Works
+          </Link>
+          <Link
             href="/products"
             className="hidden sm:inline-block text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
           >
             Products
+          </Link>
+          <Link
+            href="/reviews"
+            className="hidden lg:inline-block text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
+          >
+            Reviews
           </Link>
           <Link
             href="/"

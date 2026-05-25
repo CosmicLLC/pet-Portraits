@@ -82,3 +82,30 @@ export const AGGREGATE_RATING = {
   bestRating: "5",
   worstRating: "1",
 } as const;
+
+// Filter WALL_REVIEWS by style for per-page Review schema embedding. Returns
+// reviews where the customer chose that style — these are the most relevant
+// for a style landing page and the most credible for Google's review-markup
+// requirements (the review must be specifically about the thing on the page).
+export function reviewsByStyle(style: Review["style"]): Review[] {
+  return WALL_REVIEWS.filter((r) => r.style === style);
+}
+
+// Build the Review JSON-LD for a Product schema. Returns undefined when
+// there are no reviews to embed — caller should skip the property entirely
+// in that case (empty Review array is structured-data spam).
+export function reviewJsonLd(reviews: Review[]): object[] | undefined {
+  if (!reviews.length) return undefined;
+  return reviews.map((r) => ({
+    "@type": "Review",
+    author: { "@type": "Person", name: r.name },
+    datePublished: r.datePublished,
+    reviewRating: {
+      "@type": "Rating",
+      ratingValue: String(r.stars),
+      bestRating: "5",
+      worstRating: "1",
+    },
+    reviewBody: r.review,
+  }));
+}

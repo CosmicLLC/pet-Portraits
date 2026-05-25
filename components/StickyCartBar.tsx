@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { track, productValue } from "@/lib/analytics";
+import ShippingProgressBar from "./ShippingProgressBar";
 
 interface StickyCartBarProps {
   watermarkedImage: string;
@@ -12,6 +13,11 @@ interface StickyCartBarProps {
 
 export default function StickyCartBar({ watermarkedImage, imageId, onError, wallpaperSelected }: StickyCartBarProps) {
   const [loading, setLoading] = useState(false);
+
+  // Bundle is $79 + optional $5 wallpaper add-on. ShippingProgressBar is
+  // env-gated on NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD_USD — renders nothing
+  // until that's set, so this mount is inert by default.
+  const subtotalCents = 7900 + (wallpaperSelected ? 500 : 0);
 
   const handleBuy = async () => {
     setLoading(true);
@@ -33,8 +39,9 @@ export default function StickyCartBar({ watermarkedImage, imageId, onError, wall
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] px-4 py-3 animate-fade-in-up">
-      <div className="max-w-2xl mx-auto flex items-center gap-3">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] animate-fade-in-up">
+      <ShippingProgressBar subtotalCents={subtotalCents} variant="thin" />
+      <div className="max-w-2xl mx-auto flex items-center gap-3 px-4 py-3">
         {/* Thumbnail */}
         <div className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
           <img

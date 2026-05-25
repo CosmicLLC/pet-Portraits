@@ -148,6 +148,7 @@ export default async function AdminPage() {
           <QuickLink href="/admin/campaigns" label="Email campaigns" primary />
           <QuickLink href="/admin/ad-studio" label="🎨 Ad Studio" />
           <QuickLink href="/admin/mug-print" label="☕ Mug Print Tool" />
+          <QuickLink href="/admin/pinterest-pins" label="📌 Pinterest Pins" />
           <QuickLink href="/admin/events" label={`Event log${errorCount > 0 ? ` · ${errorCount} errors` : ""}`} danger={errorCount > 0} />
           <QuickLink href="/admin/portraits" label="Portraits gallery" />
           <QuickLink href="/admin/blocked" label="Blocked emails" />
