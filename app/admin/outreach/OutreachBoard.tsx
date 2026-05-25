@@ -2,6 +2,50 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 
+// Detects Instagram / TikTok / YouTube profile URLs and pulls out the
+// handle + canonical channel. Keeps the bulk-add modal and the manual
+// form in sync — paste any of these formats and we figure out the rest.
+function parseProfileUrl(raw: string): {
+  channel: "instagram" | "tiktok" | "youtube" | "other"
+  handle: string
+  url: string
+} | null {
+  const trimmed = raw.trim()
+  if (!trimmed) return null
+  // Tolerate users pasting without https://
+  const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+  let u: URL
+  try {
+    u = new URL(withProto)
+  } catch {
+    return null
+  }
+  const host = u.hostname.replace(/^www\./, "").toLowerCase()
+  const segments = u.pathname.split("/").filter(Boolean)
+  if (host === "instagram.com" || host.endsWith(".instagram.com")) {
+    const handle = segments[0] || ""
+    if (!handle || ["p", "reel", "tv", "explore"].includes(handle)) return null
+    return { channel: "instagram", handle: `@${handle}`, url: `https://instagram.com/${handle}` }
+  }
+  if (host === "tiktok.com" || host.endsWith(".tiktok.com")) {
+    const seg = segments[0] || ""
+    if (!seg.startsWith("@")) return null
+    return { channel: "tiktok", handle: seg, url: `https://tiktok.com/${seg}` }
+  }
+  if (host === "youtube.com" || host === "m.youtube.com" || host === "youtu.be") {
+    const seg = segments[0] || ""
+    if (seg.startsWith("@")) {
+      return { channel: "youtube", handle: seg, url: `https://youtube.com/${seg}` }
+    }
+    if (seg === "c" || seg === "channel" || seg === "user") {
+      const id = segments[1] || ""
+      if (id) return { channel: "youtube", handle: id, url: u.toString() }
+    }
+    return null
+  }
+  return null
+}
+
 interface Contact {
   id: string
   name: string
@@ -56,6 +100,7 @@ export default function OutreachBoard() {
   const [loading, setLoading] = useState(false)
   const [selected, setSelected] = useState<Contact | null>(null)
   const [showAdd, setShowAdd] = useState(false)
+  const [showBulk, setShowBulk] = useState(false)
   const [seedMsg, setSeedMsg] = useState<string | null>(null)
 
   const load = useCallback(async () => {
@@ -129,7 +174,13 @@ export default function OutreachBoard() {
               + Seed 9 pet blogger drafts
             </button>
             <button
-              onClick={() => setShowAdd((v) => !v)}
+              onClick={() => { setShowBulk(true); setShowAdd(false); }}
+              className="text-xs bg-white border border-brand-green/40 text-brand-green px-3 py-1.5 rounded-full font-semibold hover:bg-brand-green/5"
+            >
+              ⊞ Bulk add by URL
+            </button>
+            <button
+              onClick={() => { setShowAdd((v) => !v); setShowBulk(false); }}
               className="text-xs bg-brand-green text-cream px-3 py-1.5 rounded-full font-semibold hover:bg-brand-green/90"
             >
               + Add influencer
@@ -159,6 +210,17 @@ export default function OutreachBoard() {
             load()
           }}
           onCancel={() => setShowAdd(false)}
+        />
+      )}
+
+      {/* Bulk-add by URL */}
+      {showBulk && (
+        <BulkAddByUrl
+          onAdded={() => {
+            setShowBulk(false)
+            load()
+          }}
+          onCancel={() => setShowBulk(false)}
         />
       )}
 
@@ -272,6 +334,21 @@ function AddInfluencerForm({
   const [recentPost, setRecentPost] = useState("")
   const [busy, setBusy] = useState(false)
 
+  // Paste a profile URL into the handle field and we auto-detect channel,
+  // extract the handle, and fill the URL field. Saves typing on every add.
+  const handleHandleChange = (raw: string) => {
+    const parsed = parseProfileUrl(raw)
+    if (parsed) {
+      setHandle(parsed.handle)
+      setUrl(parsed.url)
+      if (parsed.channel === "instagram" || parsed.channel === "tiktok" || parsed.channel === "youtube") {
+        setChannel(parsed.channel)
+      }
+    } else {
+      setHandle(raw)
+    }
+  }
+
   // Auto-generate DM body when channel is IG/TikTok using the plan's template
   const dmBody = useMemo(() => {
     if (channel !== "instagram" && channel !== "tiktok") return ""
@@ -323,7 +400,7 @@ Erinc`
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="First name (e.g. Sarah)" className="text-sm px-3 py-2 rounded-lg border border-gray-200" />
-        <input value={handle} onChange={(e) => setHandle(e.target.value)} placeholder="Handle (e.g. @bertiethedog)" className="text-sm px-3 py-2 rounded-lg border border-gray-200" />
+        <input value={handle} onChange={(e) => handleHandleChange(e.target.value)} placeholder="Handle or paste profile URL" className="text-sm px-3 py-2 rounded-lg border border-gray-200" />
         <select value={channel} onChange={(e) => setChannel(e.target.value as never)} className="text-sm px-3 py-2 rounded-lg border border-gray-200 bg-white">
           <option value="instagram">Instagram</option>
           <option value="tiktok">TikTok</option>
@@ -349,6 +426,154 @@ Erinc`
         <button onClick={onCancel} className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5">Cancel</button>
         <button onClick={submit} disabled={!name || !handle || busy} className="text-xs bg-brand-green text-cream px-4 py-2 rounded-full font-semibold hover:bg-brand-green/90 disabled:opacity-50">
           {busy ? "Saving…" : "Add contact"}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Bulk-add modal. Paste a list of IG / TikTok / YouTube profile URLs
+// (one per line), preview the parsed contacts, then bulk-create them.
+// Each new contact starts with the canonical handle + URL + channel,
+// then the user opens each one later to add follower count + DM.
+function BulkAddByUrl({
+  onAdded,
+  onCancel,
+}: {
+  onAdded: () => void
+  onCancel: () => void
+}) {
+  const [raw, setRaw] = useState("")
+  const [busy, setBusy] = useState(false)
+  const [results, setResults] = useState<{ created: number; skipped: string[] } | null>(null)
+
+  const parsed = useMemo(() => {
+    const out: Array<{
+      line: string
+      ok: boolean
+      channel?: string
+      handle?: string
+      url?: string
+      reason?: string
+    }> = []
+    const seen = new Set<string>()
+    for (const line of raw.split("\n")) {
+      const t = line.trim()
+      if (!t) continue
+      const p = parseProfileUrl(t)
+      if (!p) {
+        out.push({ line: t, ok: false, reason: "couldn't parse" })
+        continue
+      }
+      const key = `${p.channel}:${p.handle.toLowerCase()}`
+      if (seen.has(key)) {
+        out.push({ line: t, ok: false, reason: "duplicate in this batch" })
+        continue
+      }
+      seen.add(key)
+      out.push({ line: t, ok: true, channel: p.channel, handle: p.handle, url: p.url })
+    }
+    return out
+  }, [raw])
+
+  const validCount = parsed.filter((p) => p.ok).length
+
+  const submit = useCallback(async () => {
+    setBusy(true)
+    let created = 0
+    const skipped: string[] = []
+    for (const p of parsed) {
+      if (!p.ok) continue
+      try {
+        const res = await fetch("/api/admin/outreach", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: p.handle?.replace(/^@/, "") || "Unknown",
+            handle: p.handle,
+            channel: p.channel,
+            url: p.url,
+            priority: 2,
+          }),
+        })
+        if (res.ok) created++
+        else skipped.push(p.handle || p.line)
+      } catch {
+        skipped.push(p.handle || p.line)
+      }
+    }
+    setResults({ created, skipped })
+    setBusy(false)
+    if (skipped.length === 0) {
+      // All clean — close after a brief success message
+      setTimeout(onAdded, 1200)
+    }
+  }, [parsed, onAdded])
+
+  return (
+    <div className="bg-white rounded-2xl border border-brand-green/30 p-5 mb-4">
+      <p className="text-xs font-display font-semibold uppercase tracking-wider text-brand-green mb-2">
+        Bulk add by URL
+      </p>
+      <p className="text-xs text-gray-500 mb-3 leading-relaxed">
+        Paste Instagram, TikTok, or YouTube profile URLs — one per line. We extract the handle and
+        channel automatically. You&apos;ll add follower counts, pet names, and personalized DMs by
+        opening each contact individually after.
+      </p>
+      <textarea
+        value={raw}
+        onChange={(e) => setRaw(e.target.value)}
+        rows={6}
+        placeholder={"instagram.com/cosmiccompanyllc\ntiktok.com/@bertiethedog\nyoutube.com/@dailycorgi"}
+        className="w-full text-sm font-mono px-3 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-brand-green/40 mb-3"
+      />
+
+      {parsed.length > 0 && !results && (
+        <div className="bg-cream rounded-lg p-3 mb-3 max-h-48 overflow-y-auto">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            {validCount} valid · {parsed.length - validCount} skipped
+          </p>
+          <ul className="space-y-1">
+            {parsed.map((p, i) => (
+              <li key={i} className="text-xs flex items-center gap-2">
+                {p.ok ? (
+                  <>
+                    <span className="text-brand-green">✓</span>
+                    <span className="text-gray-400 capitalize w-16">{p.channel}</span>
+                    <span className="font-semibold text-gray-800">{p.handle}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-red-400">×</span>
+                    <span className="text-gray-400 truncate flex-1">{p.line}</span>
+                    <span className="text-red-400 text-[10px]">{p.reason}</span>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {results && (
+        <div className="bg-brand-green/5 border border-brand-green/20 rounded-lg p-3 mb-3">
+          <p className="text-sm text-brand-green font-semibold">
+            Created {results.created} contacts
+            {results.skipped.length > 0 ? ` · ${results.skipped.length} skipped (already exist or errored)` : ""}.
+          </p>
+        </div>
+      )}
+
+      <div className="flex gap-2 justify-end">
+        <button onClick={onCancel} className="text-xs text-gray-500 hover:text-gray-700 px-3 py-1.5">
+          Close
+        </button>
+        <button
+          onClick={submit}
+          disabled={validCount === 0 || busy}
+          className="text-xs bg-brand-green text-cream px-4 py-2 rounded-full font-semibold hover:bg-brand-green/90 disabled:opacity-50"
+        >
+          {busy ? "Adding…" : `Add ${validCount} contact${validCount === 1 ? "" : "s"}`}
         </button>
       </div>
     </div>
