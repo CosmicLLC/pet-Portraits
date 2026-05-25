@@ -378,7 +378,6 @@ function ContactDetail({
     }
   }
 
-  const status = STATUS_OPTIONS.find((s) => s.v === contact.status)
   const sendUrl = contact.email
     ? `mailto:${contact.email}?subject=${encodeURIComponent(contact.subject || "")}&body=${encodeURIComponent(contact.body || "")}`
     : contact.url
