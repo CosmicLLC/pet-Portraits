@@ -94,10 +94,13 @@ export async function POST(req: NextRequest) {
     // signed download endpoint. We store the already-composed phone image
     // (not the source square) so post-purchase fulfillment is just a copy.
     const imageId = uuidv4();
+    // Store as private — the unwatermarked HD wallpaper. Served only via
+    // the signed /api/download/[orderId]?type=wallpaper endpoint after
+    // purchase. Matches the pattern used for portrait blobs.
     const blob = await put(
       `wallpapers/${imageId}.jpg`,
       phoneAspect,
-      { access: "public", addRandomSuffix: true, contentType: "image/jpeg" }
+      { access: "private", addRandomSuffix: true, contentType: "image/jpeg" }
     );
 
     // 4) Watermark the phone-aspect copy for the preview the user sees.
