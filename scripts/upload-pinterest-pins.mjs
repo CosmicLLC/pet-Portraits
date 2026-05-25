@@ -164,27 +164,82 @@ function parseCsv(text) {
 }
 
 // ─── Board management ─────────────────────────────────────────────────────
-async function listAllBoards() {
-  const boards = [];
-  let bookmark = null;
-  do {
-    const qs = bookmark ? `?bookmark=${encodeURIComponent(bookmark)}&page_size=100` : "?page_size=100";
-    const res = await pinterest(`/boards${qs}`);
-    boards.push(...(res.items || []));
-    bookmark = res.bookmark;
-  } while (bookmark);
-  return boards;
+// Pinterest's sandbox API has a bug where GET /boards returns an empty list
+// even when boards exist (we verified by creating a board, getting back a
+// valid ID, then immediately listing → empty). So we cache board IDs to a
+// local JSON file and trust the cache across runs. On first run, attempt
+// creation; if Pinterest rejects with "already have a board" (meaning a
+// hidden-to-API board exists), retry with a non-colliding suffix.
+
+const BOARDS_CACHE = path.join(PINS_DIR, "_board-ids.json");
+
+async function loadBoardCache() {
+  try {
+    const text = await fs.readFile(BOARDS_CACHE, "utf-8");
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
 }
 
-async function createBoard(name) {
-  return pinterest("/boards", {
-    method: "POST",
-    body: JSON.stringify({
-      name,
-      description: `Custom AI pet portraits by Paw Masterpiece. ${name}.`,
-      privacy: "PUBLIC",
-    }),
-  });
+async function saveBoardCache(cache) {
+  await fs.writeFile(BOARDS_CACHE, JSON.stringify(cache, null, 2));
+}
+
+async function tryCreateBoard(name) {
+  try {
+    const created = await pinterest("/boards", {
+      method: "POST",
+      body: JSON.stringify({
+        name,
+        description: `Custom pet portrait art from Paw Masterpiece. ${name}.`,
+        privacy: "PUBLIC",
+      }),
+    });
+    return { ok: true, board: created, finalName: name };
+  } catch (err) {
+    const msg = String(err.message);
+    if (/already have a board/i.test(msg)) {
+      return { ok: false, conflict: true, error: msg };
+    }
+    return { ok: false, conflict: false, error: msg };
+  }
+}
+
+// Names that don't collide with the user's pre-existing boards.
+function suffixCandidates(name) {
+  return [
+    name,
+    `${name} — Studio`,
+    `${name} | Paw Masterpiece`,
+    `${name} 2026`,
+    `${name} Gallery`,
+  ];
+}
+
+// Ensures a board exists for `name`, using the cache when possible. If the
+// canonical name collides with a hidden pre-existing board, walks down a
+// list of suffixed candidates until one creates successfully.
+async function ensureBoard(name, cache) {
+  if (cache[name]) {
+    console.log(`  ✓ ${name} → cached ${cache[name].id} (${cache[name].finalName})`);
+    return cache[name];
+  }
+  for (const candidate of suffixCandidates(name)) {
+    const result = await tryCreateBoard(candidate);
+    if (result.ok) {
+      console.log(`  + Created board: "${candidate}" → ${result.board.id}`);
+      cache[name] = { id: result.board.id, finalName: candidate };
+      await saveBoardCache(cache);
+      return cache[name];
+    }
+    if (result.conflict) {
+      console.log(`    ⏭  "${candidate}" already exists, trying next variant…`);
+      continue;
+    }
+    throw new Error(`Failed to create board "${candidate}": ${result.error}`);
+  }
+  throw new Error(`Could not create any variant of "${name}"`);
 }
 
 // Normalize for fuzzy matching — handle ampersand, capitalization, "the"
@@ -263,34 +318,23 @@ async function main() {
     process.exit(1);
   }
 
-  // Find or create the 8 boards
+  // Find or create the 8 boards. Pinterest sandbox doesn't reliably list
+  // boards via the API (we proved this empirically), so we rely on a local
+  // cache. First run creates everything; subsequent runs reuse from cache.
   console.log("\n📂 Loading boards…");
-  const existing = await listAllBoards();
-  console.log(`  Found ${existing.length} existing boards`);
-  const byKey = new Map(existing.map((b) => [boardKey(b.name), b]));
+  const cache = await loadBoardCache();
+  console.log(`  Loaded ${Object.keys(cache).length} cached board IDs`);
 
   const uniqueBoards = [...new Set(pins.map((p) => p[col.board]))];
-  const boardMap = new Map(); // pin board name → Pinterest board ID
+  const boardMap = new Map();
   for (const name of uniqueBoards) {
-    const existing = byKey.get(boardKey(name));
-    if (existing) {
-      boardMap.set(name, existing.id);
-      console.log(`  ✓ ${name} → existing board ${existing.id}`);
-      continue;
-    }
-    if (NO_CREATE_BOARDS) {
-      console.error(`  ❌ Board "${name}" missing and --no-create-boards set. Aborting.`);
-      process.exit(1);
-    }
     if (DRY_RUN) {
-      console.log(`  [dry-run] would create board: ${name}`);
+      console.log(`  [dry-run] would ensure board: ${name}`);
       boardMap.set(name, "DRY-RUN-BOARD-ID");
       continue;
     }
-    console.log(`  + Creating board: ${name}`);
-    const created = await createBoard(name);
-    boardMap.set(name, created.id);
-    console.log(`  ✓ Created ${created.id}`);
+    const board = await ensureBoard(name, cache);
+    boardMap.set(name, board.id);
   }
 
   // Upload pins
