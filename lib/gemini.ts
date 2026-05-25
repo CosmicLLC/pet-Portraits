@@ -56,37 +56,43 @@ export function isValidWallpaperHex(hex: string): hex is WallpaperColorHex {
 }
 
 function wallpaperPrompt(colorName: string, hex: string): string {
-  return `The image is a pet photo. Transform the pet into a clean modern flat-illustration portrait on a completely solid ${colorName} (${hex}) background.
+  return `The image is a pet photo. Transform the pet into a polished digital illustration phone wallpaper on a completely solid ${colorName} (${hex}) background.
 
 LIKENESS — preserve exactly:
 - The pet's specific face shape, fur color pattern, ear shape and angle, eye color, nose color, muzzle markings, and breed character must be unmistakable
 - Anyone who knows this pet must instantly recognize THIS specific individual — not a generic example of its breed
 - Do NOT "average" toward typical breed appearance; preserve the individual's quirks
+- Preserve any accessory the pet is wearing (collar, bandana, bowtie, harness, name tag) and render it in the same illustration style
 
-STYLE — minimalist editorial flat illustration:
-- Clean rounded forms with simplified shapes
-- Soft shading and gentle tonal gradients WITHIN the pet's body only, for dimension
-- Subtle highlights suggesting top-left light direction
-- Slightly painterly edges — not vector-sharp, not photoreal
-- Modern editorial poster art / contemporary children's-book illustration sensibility
-- NOT photorealistic, NOT a painting, NOT 3D-rendered, NO line art outlines
+STYLE — polished flat digital illustration (think Procreate / vector portrait, the look used in premium Etsy pet wallpaper listings):
+- Smooth flat color fills with cel-shading: defined shadow shapes (not soft blurry gradients) showing where light falls on fur
+- Light direction: subtle, from upper-left
+- Eyes are the focal point — render them with full detail, catchlight highlights, defined iris pattern, expressive
+- Nose: painterly with a single highlight reflection, dimensional
+- Fur rendered as flat blocks of color with darker shadow blocks suggesting volume — not photoreal hair-by-hair, but more refined than basic flat shapes
+- Whiskers (on cats) drawn as fine lines
+- Tongues (if mouth is open) painterly with highlight
+- Clean digital illustration edges — slightly soft, not vector-sharp, not photoreal
+- NOT photorealistic, NOT an oil painting, NOT 3D-rendered, NO black line art outlines around the pet
 
 BACKGROUND — strict, no exceptions:
 - 100% solid uniform ${colorName} (hex ${hex}) field, edge to edge, every single pixel
 - NO texture, NO gradient, NO pattern, NO border, NO frame
 - NO shadow under or behind or around the pet
 - NO other elements, no text, no logos, no decorative shapes
-- The background color must extend cleanly to all four edges so the image can be padded into a phone aspect ratio with seamless extension
+- The background color must extend cleanly to all four edges
 
-COMPOSITION — follow these constraints exactly (this image will become a phone wallpaper, so the pet must dominate the lower half of the screen):
-- Pet's head and chest are the subject — no full body, no legs
-- The pet's chest crop sits FLUSH WITH THE BOTTOM EDGE of the canvas — the pet's body extends ALL THE WAY to the bottom edge with NO empty background below the pet
-- Pet's NOSE aligned with the horizontal center axis (perfectly centered left-to-right)
+COMPOSITION — this is the most important section, follow precisely (the image becomes a phone wallpaper where the pet must DOMINATE the screen, much larger than a centered portrait):
+- Subject: pet's head, neck, and upper chest fill the frame — render as if zoomed in close, pet appearing to emerge from below the bottom edge of the screen
+- The pet's body extends OFF THE BOTTOM EDGE of the canvas — chest/shoulders bleed past the bottom edge so the viewer cannot see where the body ends
+- The pet's silhouette occupies 65-75% of the canvas WIDTH — the pet is LARGE, filling most of the frame from edge to edge (the rendering pipeline upscales and center-crops, so this becomes ~80% of the final phone wallpaper width)
+- The pet's head + visible body fills 80-90% of the canvas vertically
+- Top of the pet's head sits approximately 12-18% down from the top edge of the canvas — head is high, close to the top
+- Pet's EYES sit roughly 35-45% down from the top edge (just above the vertical midline)
+- Pet's NOSE aligned with the horizontal center axis — perfectly centered left-to-right
 - Pet faces the camera directly, head straight forward or with at most a 10-15° tilt
-- The pet's silhouette occupies 60-75% of the canvas width — the pet should be LARGE, dominating the frame, not small or floating
-- Pet's head and chest fill the lower 70-80% of the canvas vertically
-- Top of the pet's head sits approximately 20-30% down from the top edge
-- The top 20-30% of the canvas (above the pet's head) is solid empty background — this is where the phone wallpaper's negative space lives
+- ONLY 12-18% of the canvas (top strip, above the pet's head) is empty background — this is the only background showing
+- NO empty background below the pet — the body extends to and past the bottom edge
 - Equal background margins on the LEFT and RIGHT of the pet's silhouette
 - Symmetrical breathing room left and right
 
