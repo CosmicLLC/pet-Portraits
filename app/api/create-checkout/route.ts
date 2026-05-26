@@ -9,6 +9,10 @@ import {
   REFERRAL_DISCOUNT_CENTS,
   lookupReferrer,
 } from "@/lib/referrals";
+import {
+  multiPetSurchargeCents,
+  parsePetCountFromImageId,
+} from "@/lib/gemini-multi";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -46,6 +50,39 @@ export async function POST(req: NextRequest) {
     // Add phone wallpaper as an optional add-on line item
     if (addWallpaper && PRICE_IDS.wallpaper) {
       lineItems.push({ price: PRICE_IDS.wallpaper, quantity: 1 });
+    }
+
+    // Multi-pet surcharge — only triggers when the imageId was minted by
+    // /api/generate-multi (which prefixes the UUID with "multi<N>_").
+    // Single-pet imageIds skip this branch entirely, so the legacy flow
+    // is byte-identical to before. Uses an inline price_data line item
+    // rather than a separate Stripe Price so we don't need to provision
+    // new price IDs per pet count.
+    const petCount = parsePetCountFromImageId(imageId);
+    type LineItemsParam = NonNullable<
+      Stripe.Checkout.SessionCreateParams["line_items"]
+    >;
+    const lineItemsMulti: LineItemsParam = lineItems.map((li) => ({
+      price: li.price,
+      quantity: li.quantity,
+    }));
+    if (petCount > 1) {
+      const surchargeCents = multiPetSurchargeCents(petCount);
+      if (surchargeCents > 0) {
+        lineItemsMulti.push({
+          quantity: 1,
+          price_data: {
+            currency: "usd",
+            unit_amount: surchargeCents,
+            product_data: {
+              name: `Multi-pet portrait surcharge (${petCount} pets)`,
+              description: `+$15 per additional pet beyond the first. ${petCount - 1} extra ${
+                petCount - 1 === 1 ? "pet" : "pets"
+              } in this portrait.`,
+            },
+          },
+        });
+      }
     }
 
     // Any physical product (display/mounted/canvas/bundle) ships via Prodigi
@@ -105,12 +142,13 @@ export async function POST(req: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: lineItems,
+      line_items: lineItemsMulti,
       discounts: discounts.length > 0 ? discounts : undefined,
       metadata: {
         imageId,
         productType,
         addWallpaper: addWallpaper ? "true" : "false",
+        ...(petCount > 1 ? { petCount: String(petCount) } : {}),
         // Standalone wallpaper SKU only — bgHex is the user's picked color.
         // Presence of this field in webhook is how we dispatch the standalone
         // fulfillment path vs the existing portrait-add-on flow.

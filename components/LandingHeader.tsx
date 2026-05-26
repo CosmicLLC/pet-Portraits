@@ -21,9 +21,9 @@ type NavItem = {
   blurb: string
 }
 
-// Custom Pet Portraits → the 4 SEO style pages. Slugs verified against
-// lib/seo-data.ts STYLE_SEO. Each /styles/<slug> page is pre-rendered
-// at build time with 1,200+ words of style-specific content.
+// Custom Pet Portraits → the 4 SEO style pages + multi-pet entry.
+// Style slugs verified against lib/seo-data.ts STYLE_SEO. The Multi-Pet
+// item routes to /start/multi where the 2–4 pet flow lives.
 const PORTRAIT_LINKS: NavItem[] = [
   {
     label: "Watercolor",
@@ -52,6 +52,13 @@ const PORTRAIT_LINKS: NavItem[] = [
     image: "/examples/lineart.png",
     alt: "Line art pet portrait example",
     blurb: "Clean, modern, minimalist",
+  },
+  {
+    label: "Multi-Pet Portrait",
+    href: "/start/multi",
+    image: "/examples/renaissance.png",
+    alt: "Multi-pet portrait — 2 to 4 pets composed together",
+    blurb: "Up to 4 pets in one piece · +$15/extra",
   },
 ]
 

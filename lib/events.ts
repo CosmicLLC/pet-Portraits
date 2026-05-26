@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 type EventType = "error" | "warning" | "info"
 type EventSource =
   | "generate"
+  | "generate-multi"
   | "webhook"
   | "auth"
   | "email"

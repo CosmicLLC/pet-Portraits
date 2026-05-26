@@ -8,6 +8,34 @@ interface ProductSelectorProps {
   imageId: string;
   onError: (msg: string) => void;
   wallpaperSelected?: boolean;
+  /** Number of pets in the portrait (1 by default → identical behavior
+   * to the existing single-pet flow). When 2-4, each tier's displayed
+   * price is bumped by $15 × (petCount - 1). The corresponding
+   * surcharge is applied at checkout via /api/create-checkout, which
+   * detects multi-pet by the imageId's "multi<N>_" prefix. */
+  petCount?: number;
+}
+
+const MULTIPET_SURCHARGE_PER_EXTRA = 15;
+
+// Bump a tier's displayed dollar amount by the multi-pet surcharge.
+// Single-pet (petCount = 1 or undefined) returns the price unchanged.
+function applyMultiPetSurcharge(
+  priceText: string | undefined,
+  petCount: number | undefined
+): string | undefined {
+  if (!priceText) return priceText;
+  const extras = Math.max(0, (petCount ?? 1) - 1);
+  if (extras === 0) return priceText;
+  const match = priceText.match(/^\$(\d+(?:\.\d{1,2})?)$/);
+  if (!match) return priceText;
+  const dollars = parseFloat(match[1]);
+  const newAmount = dollars + extras * MULTIPET_SURCHARGE_PER_EXTRA;
+  // Keep decimal precision only when the source had decimals.
+  const formatted = priceText.includes(".")
+    ? newAmount.toFixed(2)
+    : Math.round(newAmount).toString();
+  return `$${formatted}`;
 }
 
 type Tier = {
@@ -163,7 +191,7 @@ function getSessionPortraitCount(): number {
   }
 }
 
-export default function ProductSelector({ imageId, onError, wallpaperSelected }: ProductSelectorProps) {
+export default function ProductSelector({ imageId, onError, wallpaperSelected, petCount }: ProductSelectorProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [portraitCount] = useState<number>(() => getSessionPortraitCount());
   // Which products have their Stripe price ID configured. Tiers missing
@@ -263,9 +291,13 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected }:
 
                 <div className="mb-5">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="font-display text-3xl font-bold text-brand-green">{tier.price}</span>
+                    <span className="font-display text-3xl font-bold text-brand-green">
+                      {applyMultiPetSurcharge(tier.price, petCount)}
+                    </span>
                     {tier.originalPrice && (
-                      <span className="text-sm text-gray-400 line-through">{tier.originalPrice}</span>
+                      <span className="text-sm text-gray-400 line-through">
+                        {applyMultiPetSurcharge(tier.originalPrice, petCount)}
+                      </span>
                     )}
                   </div>
                 </div>
