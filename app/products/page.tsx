@@ -3,7 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import LandingHeader from "@/components/LandingHeader";
 import LandingFooterCTA from "@/components/LandingFooterCTA";
-import { PRODUCTS, type ProductType } from "@/lib/products";
+import { PRODUCTS } from "@/lib/products";
+import {
+  PRODUCT_PRESENTATION,
+  CATEGORY_ORDER,
+} from "@/lib/product-presentation";
 
 const PAGE_TITLE = "All Products — Custom Pet Portraits";
 const PAGE_DESCRIPTION =
@@ -22,174 +26,14 @@ export const metadata: Metadata = {
   },
 };
 
-// Product presentation data — maps each key in lib/products.ts to a hero
-// image, long-form description, and highlights for the products page.
-// When the owner adds real product photos, update the `image` field
-// here and remove `isPlaceholder: true`.
-interface Presentation {
-  key: ProductType;
-  image: string;
-  isPlaceholder: boolean;
-  longDescription: string;
-  highlights: string[];
-  category: "Digital" | "Prints & Canvas" | "Home & Lifestyle" | "Gifts" | "Add-ons";
-}
-
-const PRESENTATION: Presentation[] = [
-  // ── Digital ───────────────────────────────────────────────────────
-  {
-    key: "digital",
-    image: "/examples/watercolor.png",
-    isPlaceholder: false,
-    category: "Digital",
-    longDescription:
-      "Full-resolution PNG emailed to you in 30 seconds. Print at any size, at any shop. Yours forever.",
-    highlights: ["Instant email delivery", "Lifetime access", "Print-ready 300 DPI"],
-  },
-  {
-    key: "wallpaper",
-    image: "/examples/oil.png",
-    isPlaceholder: true,
-    category: "Digital",
-    longDescription: "1290×2796 px — sized for iPhone lock screens. Download and long-press to set as wallpaper.",
-    highlights: ["iPhone-optimized", "Instant download", "Gradient-ready for lock screen UI"],
-  },
-  // ── Prints & Canvas ───────────────────────────────────────────────
-  {
-    key: "display",
-    image: "/examples/renaissance.png",
-    isPlaceholder: true,
-    category: "Prints & Canvas",
-    longDescription:
-      "11×14 fine-art print on cotton paper, backed with rigid board, shipped in a protective sleeve. Ready to slide into any standard 11×14 frame.",
-    highlights: ["Fine art paper", "Rigid backing board", "US shipping 3–5 days"],
-  },
-  {
-    key: "mounted",
-    image: "/examples/lineart.png",
-    isPlaceholder: true,
-    category: "Prints & Canvas",
-    longDescription:
-      "11×14 print with a window-matted gallery mount — no frame needed, ready to display or drop into any standard frame for a layered look.",
-    highlights: ["Gallery-matted finish", "Fine art paper", "Rigid backing"],
-  },
-  {
-    key: "canvas",
-    image: "/examples/watercolor.png",
-    isPlaceholder: true,
-    category: "Prints & Canvas",
-    longDescription:
-      "8×12 framed canvas print. Gallery-quality canvas wrapped on a solid wood stretcher, finished in a premium black frame. Ready to hang.",
-    highlights: ["Premium black frame", "8×12 framed canvas", "Ships in 3–5 days"],
-  },
-  {
-    key: "canvas_16x20",
-    image: "/examples/oil.png",
-    isPlaceholder: true,
-    category: "Prints & Canvas",
-    longDescription:
-      "The statement piece. 16×20 framed canvas, proportioned for above-the-mantel display. Gallery-quality print, premium frame, ships fully assembled.",
-    highlights: ["Statement size", "16×20 framed canvas", "Above-the-mantel ready"],
-  },
-  {
-    key: "acrylic",
-    image: "/examples/renaissance.png",
-    isPlaceholder: true,
-    category: "Prints & Canvas",
-    longDescription:
-      "11×14 photographic acrylic print — vibrant colors pop through the clear acrylic face, with a premium gallery finish. Minimalist, modern, durable.",
-    highlights: ["Crystal-clear acrylic", "Deep color saturation", "Gallery finish"],
-  },
-  {
-    key: "metal",
-    image: "/examples/lineart.png",
-    isPlaceholder: true,
-    category: "Prints & Canvas",
-    longDescription:
-      "11×14 aluminum metal print. Modern aesthetic, durable finish, indoor or covered-outdoor safe. Feels premium, weighs almost nothing.",
-    highlights: ["Aluminum metal", "Indoor/outdoor safe", "Modern finish"],
-  },
-  // ── Home & Lifestyle ──────────────────────────────────────────────
-  {
-    key: "prism",
-    image: "/examples/watercolor.png",
-    isPlaceholder: true,
-    category: "Home & Lifestyle",
-    longDescription:
-      "Standalone acrylic photo block — desk-sized, free-standing, catches light beautifully. Great for a nightstand, bookshelf, or office desk.",
-    highlights: ["Free-standing", "Desk-sized", "Premium acrylic"],
-  },
-  {
-    key: "phone_case",
-    image: "/examples/oil.png",
-    isPlaceholder: true,
-    category: "Home & Lifestyle",
-    longDescription:
-      "Custom iPhone case — your portrait printed on the back, slim snap-fit body, protective but not bulky. Compatible with most recent iPhone models.",
-    highlights: ["Printed back", "Slim & protective", "Multiple iPhone sizes"],
-  },
-  {
-    key: "pillow",
-    image: "/examples/renaissance.png",
-    isPlaceholder: true,
-    category: "Home & Lifestyle",
-    longDescription:
-      "18×18 square throw pillow with your portrait printed on a durable cover. Insert included. Zip-off washable cover for cleanup after pet cuddles.",
-    highlights: ["18×18 square", "Insert included", "Washable cover"],
-  },
-  {
-    key: "mug",
-    image: "/examples/lineart.png",
-    isPlaceholder: true,
-    category: "Home & Lifestyle",
-    longDescription:
-      "11oz ceramic mug with your pet's portrait wrapped around it. Dishwasher and microwave safe. Sturdy, glossy, and ready for daily use.",
-    highlights: ["11oz ceramic", "Dishwasher safe", "Full-wrap print"],
-  },
-  // ── Gifts ─────────────────────────────────────────────────────────
-  {
-    key: "cards",
-    image: "/examples/watercolor.png",
-    isPlaceholder: true,
-    category: "Gifts",
-    longDescription:
-      "10-pack of premium greeting cards featuring your pet's portrait on the front. Blank inside. Envelopes included. Perfect for holiday card season.",
-    highlights: ["10 cards + envelopes", "Premium cardstock", "Blank inside"],
-  },
-  {
-    key: "bundle",
-    image: "/examples/oil.png",
-    isPlaceholder: false,
-    category: "Gifts",
-    longDescription:
-      "8×12 framed canvas plus the full-resolution digital file — same price as canvas alone, the digital comes free. Most customers' choice.",
-    highlights: ["Canvas + digital", "Best value", "Digital included FREE"],
-  },
-  // ── Add-ons ───────────────────────────────────────────────────────
-  {
-    key: "multipet",
-    image: "/examples/renaissance.png",
-    isPlaceholder: true,
-    category: "Add-ons",
-    longDescription:
-      "Include 2+ pets composed together in a single portrait. Works across all styles and products. Upload a separate photo of each pet.",
-    highlights: ["2+ pets in one piece", "Compatible with any style", "Family portrait ready"],
-  },
-];
-
-const CATEGORY_ORDER: Presentation["category"][] = [
-  "Digital",
-  "Prints & Canvas",
-  "Home & Lifestyle",
-  "Gifts",
-  "Add-ons",
-];
+// Product presentation data moved to lib/product-presentation.ts so the
+// detail pages at /products/[slug] can render from the same source.
 
 export default function ProductsPage() {
   // Group by category so the grid reads as a catalog, not a soup of tiles.
   const byCategory = CATEGORY_ORDER.map((cat) => ({
     category: cat,
-    items: PRESENTATION.filter((p) => p.category === cat),
+    items: PRODUCT_PRESENTATION.filter((p) => p.category === cat),
   })).filter((group) => group.items.length > 0);
 
   return (
@@ -212,7 +56,7 @@ export default function ProductsPage() {
           </p>
           <div className="mt-8">
             <Link
-              href="/"
+              href="/start"
               className="inline-flex items-center gap-3 bg-brand-green text-cream px-8 py-4 rounded-full text-base font-display font-semibold hover:bg-brand-green/90 transition-colors"
             >
               Start a Portrait
@@ -282,10 +126,10 @@ export default function ProductsPage() {
                         ))}
                       </ul>
                       <Link
-                        href="/"
+                        href={`/products/${p.key}`}
                         className="w-full text-center bg-gray-100 text-brand-green py-2.5 rounded-xl font-display font-semibold text-sm hover:bg-brand-green hover:text-cream transition-colors"
                       >
-                        Start a portrait
+                        View details
                       </Link>
                     </div>
                   </article>
