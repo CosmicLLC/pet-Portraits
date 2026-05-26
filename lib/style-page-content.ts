@@ -1,0 +1,236 @@
+// Expanded SEO content for the 4 portrait style pages.
+// Consumed by app/styles/[slug]/page.tsx and rendered into the
+// long-form body section via dangerouslySetInnerHTML. The FAQ array
+// is also fed into FAQPage JSON-LD on the same template.
+//
+// Voice: confident art-director. No marketing fluff, no emojis,
+// no exclamation points outside the rare natural use. Every section
+// keeps its claims grounded — art-history references are to real
+// artists and movements.
+
+export interface StylePageContent {
+  hook: string;
+  visualLanguage: string;
+  bestPets: string;        // includes <ul>
+  homeDecor: string;
+  process: string;
+  faqs: { q: string; a: string }[];
+  closing: string;
+}
+
+export const STYLE_CONTENT: Record<string, StylePageContent> = {
+  // ── Watercolor ─────────────────────────────────────────────────────────
+  watercolor: {
+    hook: `<p>A watercolor pet portrait is the gentlest way to put your dog or cat on a wall. Loose washes, soft edges, white paper showing through the lighter passages — the whole tradition is built around restraint, which suits pets surprisingly well. Where an oil portrait pins the animal down in dramatic light, watercolor lets the subject breathe. It reads as a moment rather than a monument. That makes it the right choice for owners who want a portrait that feels personal and current rather than ceremonial: a piece you can hang in a kitchen, a nursery, or a hallway without it feeling like it belongs in someone else's living room.</p>`,
+
+    visualLanguage: `<h2>The visual language</h2>
+<p>Watercolor portraits work because of what they leave out. The medium thrives on suggestion: a wet wash that fades into the paper, a fine ink contour that disappears and reappears, the negative space of the page treated as part of the image. Our watercolor style leans on a tradition that runs from the English watercolorists — Turner, Sargent in his looser travel work — through modern illustrators like Marie-Cecile Thijs. Edges are deliberately broken. Color blooms outward from the center of the subject and feathers softly at the perimeter.</p>
+<p>The palette stays in the middle register — dusty rose, sage, ochre, slate blue, warm sepia for shadows — rather than reaching for primary saturation. Light is diffuse and overhead, modeled mostly through the difference between a saturated wet area and the dry paper around it. Composition tends toward a head-and-shoulders portrait floating in a soft halo of pigment, with no rendered background. The pet does not stand against a wall. It exists on the page. That airiness is the medium's gift and what makes a watercolor pet portrait feel less like decoration and more like a keepsake.</p>`,
+
+    bestPets: `<h2>Best pets for this style</h2>
+<p>Watercolor is the most forgiving style we offer. It rewards softness, texture, and patterning over sharp contrast, which makes it ideal for long-haired and mid-coat pets whose fur already has a painterly quality. Cats with subtle color points and dogs with tricolor or merle markings are particular standouts — the washes echo the irregular boundaries of their natural coats. Senior pets photograph beautifully in watercolor because the medium softens age without hiding it.</p>
+<ul>
+  <li>Golden retrievers and other long-coated dogs whose wavy fur reads as ready-made brushwork</li>
+  <li>Australian shepherds and Catahoulas with merle coats that watercolor renders like wet-on-wet pigment bleeds</li>
+  <li>Beagles, Bernese mountain dogs, and other tricolor breeds — the soft edges keep the patterns from feeling clinical</li>
+  <li>Bengals and tabby cats, where rosettes and stripes become flowing brushwork rather than rigid pattern</li>
+  <li>Ragdolls, Birmans, and color-point Siamese, whose pale-to-dark gradients are built for soft washes</li>
+  <li>Persians, British shorthairs, and other plush-coated cats that thrive in atmospheric, low-contrast treatments</li>
+  <li>Mixed-breed rescue dogs whose coats defy any single description — watercolor flatters what photographs can flatten</li>
+</ul>`,
+
+    homeDecor: `<h2>Where watercolor hangs best in a home</h2>
+<p>A watercolor portrait wants light walls around it. White, cream, soft greige, or a pale botanical wallpaper give the wash room to read. The style sits naturally inside a gallery wall — pair it with pressed-flower botanicals, line drawings, family photos in matte black or natural-wood frames, and the portrait becomes part of an arrangement rather than a focal demand. Kitchens, breakfast nooks, nursery walls, and stair landings all suit watercolor better than a formal living room. Frame it in light oak, white, or a thin gold leaf with a generous off-white mat. Avoid heavy ornate frames; they fight the airiness. If you only own one piece of pet art and you want it to feel current rather than ceremonial, watercolor on a pale wall in a slim frame is the move.</p>`,
+
+    process: `<h2>How we make it</h2>
+<p>Each watercolor portrait is generated by an AI model we have tuned specifically for the medium — trained on classical and modern watercolor portraiture, then constrained by a prompt system that protects your pet's likeness through the stylization step. The model is instructed to treat your photograph as the structural ground truth: head shape, eye position, coat patterning, and any distinguishing markings are preserved. The watercolor language is applied on top, not in place of, the subject. Outputs that drift from the source photo on any of those landmarks are caught by an automated likeness check and flagged for human review before they reach you. Around one in twelve portraits gets a manual second pass.</p>
+<p>You upload a photo, the preview lands in roughly thirty seconds, and you only pay if it looks like your pet. Digital download is $6, a fine-art print starts at $19, and the framed canvas is $79 shipped. We describe the work as AI-assisted, human-curated styles — not because the phrase tests well, but because that is the actual workflow.</p>`,
+
+    faqs: [
+      {
+        q: "Why does my photo have to be in good light?",
+        a: "Watercolor is a low-contrast medium that relies on the model accurately reading the subtleties of your pet's coat. If the source photo is backlit, in heavy shadow, or shot with a flash that flattens the fur, the AI loses the tonal information it needs to render a believable wash. Natural daylight, ideally from the side or slightly above, gives the cleanest result. Indoor light near a window in the morning or late afternoon works just as well as outdoor light. The photo does not need to be sharp or professionally composed — just lit clearly enough that the coat color, eye color, and facial markings are visible.",
+      },
+      {
+        q: "Will the white background look strange in a frame?",
+        a: "The watercolor style intentionally leaves the paper showing around the subject — that negative space is part of the composition, not an absence. In a frame, it reads as a generous off-white mat extending the image. Most customers either let the natural paper border serve as the mat or add a thin physical mat in the same off-white tone for a deeper window effect. Avoid colored mats; they will pull color out of the washes and weaken the portrait.",
+      },
+      {
+        q: "Can a watercolor portrait include more than one pet?",
+        a: "Yes. We support multi-pet portraits in watercolor, and the medium is actually well suited to it because the soft edges let two animals share a composition without competing for visual weight. The cleanest results come from a single photo that already includes both pets, since the spatial relationship is preserved. We can also composite from two separate photos, but the lighting and angle differences sometimes require a manual review pass before the portrait ships.",
+      },
+      {
+        q: "How is this different from buying a real watercolor on Etsy?",
+        a: "A commissioned watercolor from an independent artist typically runs $150 to $600 and takes two to six weeks. The result is one-of-one, painted by hand, and signed. Our watercolor portrait is generated in about thirty seconds for $6 digital or $79 framed, and it is not a hand-painted original — it is a digital piece in the watercolor visual language, printed on archival cotton-blend paper or canvas. Both have a place. If you want the artist's hand and you have the budget and the time, commission. If you want a striking, gift-ready piece this week, this is built for that.",
+      },
+      {
+        q: "Does watercolor work for black cats and black dogs?",
+        a: "It works, but the choice is intentional. Watercolor renders dark coats as deep wet washes rather than literal black, which gives black cats and dogs a softer, more atmospheric reading than oil painting would. If the goal is to capture the personality and softness of a black pet, watercolor is excellent. If the goal is to capture sheen, structure, and dramatic presence, oil painting is the stronger pick for very dark coats.",
+      },
+    ],
+
+    closing: `<p>If you have a clear photo and thirty seconds, you can see what your pet looks like in this style before you spend anything. The <a href="/">free preview</a> generates a full watercolor portrait so you can decide whether it captures them. Most people know within five seconds of seeing it.</p>`,
+  },
+
+  // ── Oil Painting ───────────────────────────────────────────────────────
+  oil: {
+    hook: `<p>A custom oil painting of your dog or cat is the most traditional way to commit a pet to canvas. Oil portraiture has been the language of formal likeness for five hundred years — the medium that painted nobility, statesmen, and the family dogs that sat at their feet. Used for a pet today, it carries that same weight without irony. The depth of color, the way light pools on a forehead or a chest, the substance of brushwork that you can almost feel from across the room: these are qualities a photograph cannot replicate. An oil pet portrait is for owners who want their animal treated as a serious subject, rendered in a medium that has earned its seriousness.</p>`,
+
+    visualLanguage: `<h2>The visual language</h2>
+<p>Our oil painting style sits in the Flemish-and-Dutch portrait tradition — think of the chiaroscuro of Rembrandt, the warm honey tones of Vermeer's interiors, the assured wet-on-wet brushwork of John Singer Sargent in his American portrait period. Lighting is single-source and dramatic, almost always coming from the upper left, modeling the subject with a strong falloff into shadow on the opposite side. Backgrounds are deep — burgundy, forest green, umber, occasionally a near-black — and rendered as soft atmospheric gradients rather than literal walls or rooms.</p>
+<p>Brushwork is varied and visible. Fur is built up in directional strokes that follow the actual growth of the coat. Highlights on the eye, nose, and whisker pads use thicker impasto-style paint that catches light differently from the surrounding canvas. Edges range from sharp at the focal points of the face to softer at the periphery, pulling the viewer's eye exactly where a trained portraitist would put it. The palette favors warm earth tones — raw sienna, burnt umber, ivory black, lead white, rose madder — over modern bright pigments. Color saturation is rich but never neon, and the canvas texture is preserved so the finished portrait reads as paint on a surface rather than a digital image of paint.</p>`,
+
+    bestPets: `<h2>Best pets for this style</h2>
+<p>Oil painting is the right style for pets with presence. The dramatic lighting and rich palette reward animals whose coats have depth, structure, or contrast — long fur layered with light, dark coats with sheen, faces with strong features. Short-haired dogs with sculptural musculature also do beautifully in oil because the lighting models their form like a figure study. The style is less forgiving than watercolor on very small, very young, or unusually featureless subjects, where the drama can read as overdressed.</p>
+<ul>
+  <li>Golden retrievers, where the long honey coat picks up the warm side-lighting like a Sargent portrait</li>
+  <li>Black Labradors, Rottweilers, and Doberman Pinschers — dark coats become luminous against deep backgrounds</li>
+  <li>German shepherds and Belgian Malinois, whose alert profile and tonal coats suit single-source lighting</li>
+  <li>Great Danes, Mastiffs, and other large breeds whose scale matches the formality of the medium</li>
+  <li>Bulldogs and Bullmastiffs — every wrinkle and jowl renders with sculptural depth</li>
+  <li>Maine Coons and Persian cats, whose long dense coats read as layered impasto</li>
+  <li>British shorthairs and Russian Blues, where the plush solid coat takes the warm portrait light beautifully</li>
+  <li>Older, gray-muzzled dogs whose dignity the oil style honors without softening</li>
+</ul>`,
+
+    homeDecor: `<h2>Where oil painting hangs best in a home</h2>
+<p>An oil portrait wants a wall with some commitment. Deep paint colors — forest green, oxblood, navy, charcoal — flatter it; so do wood-paneled studies, libraries, dining rooms, and the wall above a fireplace. The dark background of the painting echoes the dark walls and lets the subject pop forward. In a lighter room, the portrait still works but benefits from a heavier frame to give it weight: an ornate gilt frame for a traditional reading, a deep walnut or ebonized wood frame for a more restrained one. Hang it alone, slightly above eye level, with breathing room on either side. The oil style does not want to be one of nine pieces in a gallery wall. It wants to be the piece you look at. Pair it with leather furniture, an antique rug, hardback books, or a brass picture light. The portrait will set the tone for the whole room.</p>`,
+
+    process: `<h2>How we make it</h2>
+<p>Each oil painting portrait is generated by an AI model trained on the classical portrait canon — Flemish masters, Dutch Golden Age, the British and American grand-portrait traditions — then narrowed by prompt engineering tuned specifically to preserve pet anatomy. Likeness is the bottleneck, so it is the first thing we lock down. The model receives your photograph and is instructed to treat the head shape, eye spacing, coat color, and any white-on-chest or facial markings as fixed. The oil painting language — brushwork, lighting, palette, background — is applied around those locked features rather than over them. Outputs that fail an automated likeness check are sent for human curation before they ship. Around one in ten portraits gets a manual review.</p>
+<p>Upload a clear photo, get a preview in roughly thirty seconds, and only pay if the portrait holds up. Digital download is $6, museum-grade fine-art prints start at $19, and a framed canvas in a deep wood frame ships for $79 inside the United States. The work is AI-assisted, human-curated styles. That is the honest description.</p>`,
+
+    faqs: [
+      {
+        q: "How is this different from a real oil painting commission?",
+        a: "A commissioned oil portrait from a working pet portraitist runs $400 to $3,000 depending on size, canvas count, and the artist's reputation, with a wait of one to four months. The artist sits with reference photos, often a video call, and paints the portrait by hand on stretched linen. Our oil painting portrait is not that. It is a digitally generated portrait in the oil painting visual language, printed on archival canvas with the texture of the medium preserved. The aesthetic is the same family; the object is different. We are upfront about that. If you want a one-of-one signed oil with the artist's hand visible at close range, commission an artist. If you want a striking, framed, museum-grade piece in your home this week for the cost of dinner, our format was built for that.",
+      },
+      {
+        q: "Does oil painting work for white dogs and white cats?",
+        a: "Yes — and arguably better than watercolor does. The dark backgrounds of the oil style throw white coats into high contrast, and the warm side-lighting models them with shadow tones in cream, ivory, and rose rather than letting them go flat. Great Pyrenees, Samoyeds, white shepherds, Persian cats, and Turkish Angoras all photograph beautifully in oil. The key, as always, is a source photo that lights the white coat without blowing it out — diffused window light or open shade outdoors is ideal.",
+      },
+      {
+        q: "Can I choose the background color?",
+        a: "We do not offer per-order background selection at the preview stage — the model picks the background tone that complements your pet's coat using a palette logic built into the prompt system. Most warm-coated pets land on burgundy, oxblood, or warm umber. Dark-coated pets often land on forest green or deep teal. Light-coated pets tend toward charcoal or muted navy. If you generate a preview and want a different background tone, you can request a revision before purchase and we will regenerate with a directed palette shift.",
+      },
+      {
+        q: "What does the canvas print actually look and feel like?",
+        a: "The framed canvas is printed on a cotton-poly blend with a matte finish, stretched over a kiln-dried solid wood bar frame, and hand-framed in a deep walnut or black wood moulding depending on the portrait's tonal balance. It arrives ready to hang with hardware attached. The texture of the canvas weave is visible at close range, which matters for the oil style — it reads as paint on a surface rather than a glossy photograph. The standard size is 11x14, with 16x20 and 24x36 available at additional cost.",
+      },
+      {
+        q: "Will the brushwork look real up close?",
+        a: "Up close, the portrait reads as a high-resolution rendering of oil paint rather than literal physical paint. Brushstroke direction, edge softness, and highlight thickness are all rendered into the image, and on canvas at the printed scale they hold up to normal viewing distance — a foot or two away. If you press your nose to the canvas you will see that it is a print, not a hand-painted original. We do not claim otherwise. Across a room, in a frame, the distinction disappears. That is what most people want from a pet portrait.",
+      },
+    ],
+
+    closing: `<p>If you have a clear, well-lit photo, you can see what your pet looks like in the oil painting style in about thirty seconds. The <a href="/">free preview</a> generates a full portrait before you commit to anything. Most owners know immediately whether the painting captures their dog or cat — and if it does not, you walk away owing nothing.</p>`,
+  },
+
+  // ── Renaissance ────────────────────────────────────────────────────────
+  renaissance: {
+    hook: `<p>A Renaissance pet portrait puts your dog or cat in the costume and posture of sixteenth-century European court portraiture — velvet doublet, ruff collar, gold-thread embroidery, a heraldic backdrop. It is one part art-history reference and one part comedy, and the joke works precisely because the painting itself is taken seriously. The lighting is real Holbein-and-Bronzino lighting. The fabric rendering follows the conventions of Northern European panel painting. The pet is treated with the same gravitas the original painters gave to dukes and princes. That tension — the regalia and the dog face inside it — is why the style breaks Instagram and why it works just as well on a wall above a real fireplace.</p>`,
+
+    visualLanguage: `<h2>The visual language</h2>
+<p>Renaissance portraiture in our style draws from a specific period and region — roughly 1500 to 1580, Northern European and Italian court painters working in oil on panel. Hans Holbein the Younger is the anchor reference for the way faces are lit and how textiles are described. Bronzino contributes the saturated palette and the slightly unreal smoothness of skin and fabric. Titian shows up in the richness of the reds and the way light moves across velvet. The composition is almost always three-quarter view, head and shoulders or head-and-upper-torso, eyes turned slightly toward the viewer, against a dark architectural or drapery background.</p>
+<p>Costume is rendered with serious attention. Ruff collars, jeweled chains, brocade, ermine trim, gold embroidery — each fabric has its own brush logic. Light is single-source from the upper left, soft on the face, sharp on the edge of a collar or the facet of a jewel. The palette is deep and slightly cool: crimson, burgundy, midnight blue, forest green, warm gold, ivory, deep blacks. Backgrounds are flat and atmospheric — never landscape — and frequently include a small heraldic emblem or a Latin scroll worked into the upper corner. The pet's expression is left intact; we do not human-ify the face. The animal stays the animal, dressed for a different century.</p>`,
+
+    bestPets: `<h2>Best pets for this style</h2>
+<p>The Renaissance style works on almost any pet because the contrast between the formal regalia and the animal subject is the whole joke. That said, certain breeds carry the costume better than others. Pets with serious, watchful, or naturally stoic expressions land the portrait with the most weight — they look like they belong in court. Pets with goofy or grinning faces produce the funniest results, which is also legitimate and often what the owner wants. Renaissance portraits make excellent gifts precisely because they walk that line.</p>
+<ul>
+  <li>French bulldogs and pugs — the comic contrast of the costume and the squashed face is unbeatable</li>
+  <li>Great Danes, Bernese mountain dogs, and other large noble breeds whose scale suits the formality</li>
+  <li>Greyhounds and whippets, whose long elegant necks look genuinely period-correct in a ruff collar</li>
+  <li>Welsh corgis — the Queen's own dog, with the obvious royal in-joke that doesn't need explaining</li>
+  <li>German shepherds, Rottweilers, and Dobermans whose alert profile reads as actually noble</li>
+  <li>Persian cats and Maine Coons, where the long coat and the velvet drapery have a shared lushness</li>
+  <li>British shorthairs in jeweled collars — built for this, frankly</li>
+  <li>Senior pets of any breed; the gray muzzle adds genuine dignity to the costume rather than fighting it</li>
+</ul>`,
+
+    homeDecor: `<h2>Where Renaissance hangs best in a home</h2>
+<p>A Renaissance portrait is happiest in a room with some theatrical commitment. Wood-paneled studies, libraries, dining rooms with deep wall colors, and the wall above a working fireplace all suit the style. The portrait pairs naturally with antique or vintage furniture, dark leather, brass fixtures, and decor that already plays in the same historical register — old books, a brass lamp, a Persian rug, oil-rubbed bronze hardware. The frame matters: an ornate gilt or carved wood frame leans fully into the period; a thinner dark wood frame plays it slightly drier and lets the painting do the period work alone. Both readings are valid. Renaissance portraits also do unexpectedly well in modern apartments as a deliberate contrast piece — a single regal portrait on a white wall above a mid-century sofa is a stronger move than ten frames of vacation photos. The style invites a little drama. Lean into it.</p>`,
+
+    process: `<h2>How we make it</h2>
+<p>Each Renaissance portrait is generated by an AI model trained on a curated corpus of 1500s-1580s European court portraiture, with prompt engineering that selects period-appropriate costume, palette, and background detail based on your pet's coat color and head shape. The model treats the source photo as the fixed structural input — head shape, eye position, ear set, nose color, distinguishing markings — and applies the regalia and lighting around those preserved features. Fabric choice, collar style, jewel color, and heraldic backdrop are selected algorithmically to complement the animal rather than overwhelm it. A small heraldic emblem or Latin scroll is added in roughly one in three portraits where the composition supports it.</p>
+<p>Outputs that drift from the source photo on likeness, or that produce costume distortions inconsistent with the period reference set, are flagged by our automated review and sent for human curation. Around one in eight Renaissance portraits gets a manual pass — the highest review rate of any style we offer, because the costume layer is unforgiving. Upload a photo, see a preview in thirty seconds, pay $6 for digital or $79 for the framed canvas only if you love the result. AI-assisted, human-curated styles. That is the actual workflow, not a slogan.</p>`,
+
+    faqs: [
+      {
+        q: "Can I get my pet in a specific Renaissance painting style?",
+        a: "We do not currently offer per-order selection of a specific painter's style — every Renaissance portrait blends elements from the broader Northern European and Italian court portrait tradition rather than imitating a single artist. The reason is practical: targeting a specific painter like Holbein or Bronzino at the prompt level produces less consistent results than blending their conventions into a unified house style. If you have a strong preference for a particular reference painting, you can mention it in the order notes and we will direct the regeneration prompt accordingly. The result will not be a literal pastiche of that painting but will draw from its palette and composition logic.",
+      },
+      {
+        q: "Will my pet be wearing a crown, or just regal clothes?",
+        a: "By default, the model selects costume appropriate to the pet's perceived bearing — a serious-looking large breed often lands in a ducal mantle and chain; a smaller comic breed often lands in a ruff collar and gold-embroidered doublet without a crown. Crowns are used sparingly because they tend to obscure the face, and the face is the point of the portrait. If you specifically want a crown, you can request it in the order notes before regeneration. The same is true for any specific element — jeweled collar, ermine trim, scepter, ornate background drapery.",
+      },
+      {
+        q: "Is the Renaissance style appropriate for a memorial portrait?",
+        a: "It can be, but most owners pick a softer style for a memorial — watercolor most commonly, or a more restrained oil painting. The Renaissance style carries a comic edge that some grieving owners find inappropriate and others find perfectly fitting for a pet who, in life, had a big personality and would have enjoyed the joke. There is no universal right answer here. We have shipped Renaissance memorials at the explicit request of owners who wanted to remember their pet at full theater, and we have steered owners toward watercolor when they were uncertain. Both responses are common.",
+      },
+      {
+        q: "What size and resolution will I get?",
+        a: "The digital download is delivered at 4096 by 5120 pixels — large enough to print at 16x20 inches at 300 DPI without quality loss, and at 24x30 inches at acceptable resolution. The framed canvas standard size is 11x14 in a deep wood frame; 16x20 and 24x36 are available at additional cost. The Renaissance style holds up especially well at larger sizes because the costume detail rewards close looking, so if you have the wall for it, the bigger canvas is the better gift.",
+      },
+      {
+        q: "Will the portrait look the same as the example image on this page?",
+        a: "The example image shows the style language — palette, lighting, composition, costume vocabulary — but your portrait will be different. Your pet's coat color, head shape, and expression drive the specific costume choices and background palette the model selects. Two French bulldogs uploaded by two different owners will get noticeably different portraits: one might land in a deep burgundy doublet with a gold chain, the other in a forest-green mantle with a ruff collar. The style is the constant; the specific portrait is yours.",
+      },
+    ],
+
+    closing: `<p>The Renaissance style is the easiest to under-imagine and the easiest to under-sell. A photo and thirty seconds is enough to see what your pet looks like crowned, robed, and rendered like a Holbein. The <a href="/">free preview</a> is free — there is no reason not to see it before you decide anything.</p>`,
+  },
+
+  // ── Line Art ───────────────────────────────────────────────────────────
+  lineart: {
+    hook: `<p>A line art pet portrait is the most restrained way to put your dog or cat on a wall. Pure black ink on white paper, sometimes a single continuous contour, sometimes a layered set of confident strokes that describes the head and shoulders in as few marks as possible. The whole appeal of the style is that there is nowhere to hide — every line has to be earned. When it works, the portrait holds the personality of the animal in something that looks almost like a signature. It is the style for owners who want their pet on the wall without the wall becoming about the pet, and the style that ages most gracefully across changes in decor.</p>`,
+
+    visualLanguage: `<h2>The visual language</h2>
+<p>The line art style we offer draws from a specific lineage. The single-line continuous-contour drawings of Picasso from the late 1920s — the famous dachshund Lump sketches, the dove drawings — are the closest touchstone for our minimalist single-line outputs. For the more rendered drawings with directional hatching and weight variation, the reference is closer to traditional graphite portraiture and the studio drawings of Sargent and Whistler. Egon Schiele's economy of mark also lives somewhere in the family tree. The medium is reduced to its essentials: line, weight, and negative space.</p>
+<p>Strokes are deliberate. A confident heavier line describes the jawline and the back of the head; lighter, more tentative lines model the inside of the ear, the underside of the muzzle, the soft transition from face to chest. There is no color, no gradient, no shading except what the lines themselves create through density and direction. The background is pure white — never gray, never tinted — and the subject floats on the page with generous breathing room above and around. Composition is almost always head-and-shoulders, three-quarter or full-profile, with the eye as the focal point rendered just slightly more carefully than anything else on the face. The style is built on what is left out, which is also what makes it surprisingly hard to do well and surprisingly satisfying when it lands.</p>`,
+
+    bestPets: `<h2>Best pets for this style</h2>
+<p>Line art rewards pets with clean silhouettes and strong facial structure. Short-haired and smooth-coated breeds whose form is legible without a lot of fur to interpret tend to look the best. Long-haired breeds work, but the style has to abstract the coat into directional strokes rather than rendering every hair, which can soften the breed-specific shape. Pets with distinctive ears, profiles, or breed-defining silhouettes are the strongest subjects because line art lives on contour.</p>
+<ul>
+  <li>Greyhounds, whippets, and Italian greyhounds — the long, elegant line was made for this style</li>
+  <li>Dachshunds, whose elongated silhouette is instantly recognizable in three strokes</li>
+  <li>Boxers, Dobermans, Weimaraners, and other short-coated dogs with sculptural musculature</li>
+  <li>French bulldogs and Boston terriers — the bat ears and wide-set eyes carry a portrait alone</li>
+  <li>German shepherds, huskies, and other dogs with strong upright ear set and angled profile</li>
+  <li>Siamese, Oriental shorthairs, and Cornish Rex cats, whose angular faces are line-art-ready</li>
+  <li>Sphynx cats — almost no rendering needed; the silhouette is the portrait</li>
+  <li>Senior pets whose facial structure has settled into something distinctive over the years</li>
+</ul>`,
+
+    homeDecor: `<h2>Where line art hangs best in a home</h2>
+<p>Line art is the most flexible style we offer when it comes to where it hangs. Modern apartments, Scandinavian interiors, mid-century homes, and minimalist white-on-white spaces are its natural home — the style was built for clean walls and uncluttered rooms. Frame it in a thin black or natural-oak frame with a generous white mat, hung on a white or warm-greige wall, and the portrait reads as deliberate restraint rather than absence. It pairs beautifully with other line drawings, black-and-white photography, simple geometric prints, and quiet ceramics. In a gallery wall, line art is the anchor piece that lets the busier pieces breathe. It also works unexpectedly well in transitional and traditional rooms as a counterweight to heavier decor — a single elegant line drawing of the family dog above a console table softens a formal entryway in a way a colorful piece would not. The style is hard to put in the wrong room.</p>`,
+
+    process: `<h2>How we make it</h2>
+<p>Each line art portrait is generated by an AI model trained on a tight corpus of minimalist portrait drawing — Picasso's single-line work, Matisse line drawings, contemporary tattoo flash, classical graphite studies — and constrained to produce clean vector-style output on pure white. The model receives your photograph and is instructed to abstract the form into the smallest number of lines that still preserves the pet's identifying features: ear set, eye shape and spacing, snout length, distinctive markings if present. Line weight varies deliberately — heavier on structural contours, lighter on internal modeling — and the output is rendered at high resolution so it prints crisply at any size from a 5x7 card to a 24x36 canvas.</p>
+<p>Likeness in line art is harder to verify than in painted styles because the medium itself is so reductive, so we run a tighter human review on this style. Around one in six line art portraits gets a manual curation pass to confirm the breed silhouette and facial proportions are unmistakable. Upload a photo, see a preview in roughly thirty seconds, pay $6 for the digital file or $79 framed only if it captures your pet. AI-assisted, human-curated styles. That is the honest description of the work.</p>`,
+
+    faqs: [
+      {
+        q: "Will the line art look clean if my pet has long fur?",
+        a: "The style handles long fur by abstracting it into directional strokes rather than rendering every individual hair, so the result is clean but slightly less breed-specific than it would be on a short-haired dog or cat. A long-haired golden retriever in line art reads as an elegant dog with flowing form; a labrador in the same style reads more obviously as a labrador because the silhouette is more legible. Both are valid portraits. If your pet's long coat is the thing you love most about them visually, watercolor or oil painting will capture that texture more faithfully than line art can. If you love their face and personality more than their coat, line art is excellent.",
+      },
+      {
+        q: "Can I get a single continuous line drawing — the Picasso style?",
+        a: "Yes. The line art style includes both a continuous single-contour mode and a more rendered mode with multiple lines and directional weight variation. The preview engine selects the mode that best fits your pet's silhouette and the model's confidence on the source photo. Pets with very clean, recognizable profiles — greyhounds, dachshunds, French bulldogs, Siamese cats — frequently land on a single-line continuous drawing. Pets with more complex coat patterning or facial structure tend toward the multi-line rendered output. If you specifically want the single-line treatment, mention it in the order notes before regeneration and we will direct the prompt accordingly.",
+      },
+      {
+        q: "Does line art print well at large sizes?",
+        a: "Yes — better than any other style we offer. Because the file is essentially black ink on white with high-resolution vector-style edges, line art holds up at sizes up to 36x48 inches without any pixelation. The minimalist composition also rewards larger scale: a six-foot-tall single-line drawing of a greyhound above a sofa is a genuine statement piece. We can print this style at sizes the painted styles cannot match. Contact us for sizes above the standard 24x36 if you have a specific wall in mind.",
+      },
+      {
+        q: "Will it look like my pet, or just like a generic dog?",
+        a: "This is the question that line art lives or dies on. The model is specifically tuned to preserve identifying features — ear set, eye spacing, snout length, breed-specific silhouette markers, distinguishing markings translated into line breaks or weight changes. The preview will show you immediately whether it reads as your pet or as a generic version of the breed. If it lands on generic, you can either regenerate for free or request a manual curation pass before purchase. Around one in six line art portraits gets manual curation precisely to catch this. You do not pay if it does not look like your pet.",
+      },
+      {
+        q: "Can a line art portrait include collars, name tags, or background elements?",
+        a: "By default, line art portraits omit collars, tags, and background elements because the style works on subtraction — adding decorative elements often weakens the composition. If you specifically want a collar included because it is part of how your pet looks every day, mention it in the order notes and we will include it in the regeneration. Name tags rendered legibly at small scale are harder; we can include the shape of a tag but cannot reliably render readable text on it. Background elements — a chair, a window, a leash — are not part of the line art style and would push the portrait into a different visual category.",
+      },
+    ],
+
+    closing: `<p>Line art is the style that is hardest to imagine from a description and easiest to recognize when you see it on your own pet. The <a href="/">free preview</a> takes about thirty seconds and costs nothing. If it captures them in a few strokes, you will know.</p>`,
+  },
+};

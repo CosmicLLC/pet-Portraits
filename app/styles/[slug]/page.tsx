@@ -7,6 +7,7 @@ import LandingHeader from "@/components/LandingHeader"
 import LandingHero from "@/components/LandingHero"
 import LandingFooterCTA from "@/components/LandingFooterCTA"
 import { reviewsByStyle, reviewJsonLd } from "@/lib/reviews"
+import { STYLE_CONTENT } from "@/lib/style-page-content"
 
 // Map style slug → review tag key. The style slugs are SEO-prefixed
 // ("watercolor-pet-portrait") while reviews use the short key ("watercolor").
@@ -92,6 +93,25 @@ export default function StyleLandingPage({ params }: Props) {
 
   const otherStyles = Object.values(STYLE_SEO).filter((s) => s.slug !== style.slug)
 
+  // Deep style copy + FAQs (1,200+ words per style for E-E-A-T)
+  const contentKey = STYLE_SLUG_TO_REVIEW_KEY[style.slug]
+  const content = contentKey ? STYLE_CONTENT[contentKey] : null
+
+  // FAQPage schema sourced from the style-specific FAQ block. Stripped of
+  // any inline HTML before serialization — Google's FAQPage spec requires
+  // plain-text answers.
+  const faqLd = content
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: content.faqs.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a.replace(/<[^>]+>/g, "") },
+        })),
+      }
+    : null
+
   return (
     <main className="min-h-screen bg-cream">
       <script
@@ -104,6 +124,13 @@ export default function StyleLandingPage({ params }: Props) {
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
+      {faqLd ? (
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+        />
+      ) : null}
 
       <LandingHeader />
 
@@ -115,7 +142,57 @@ export default function StyleLandingPage({ params }: Props) {
         previewAlt={`${style.fullName} example — custom ${style.shortName.toLowerCase()} dog portrait from photo`}
       />
 
-      {/* Deep content — why this style, what makes a good input, use cases */}
+      {/* Expanded SEO copy — 1,200+ words covering visual language, breed
+          pairings, home decor, process. Renders only when STYLE_CONTENT
+          has a block for this style (all 4 styles do). Sits at the top of
+          the body so Google sees the substantive content first. */}
+      {content && (
+        <section className="py-12 sm:py-16 bg-white border-y border-gray-100">
+          <article className="max-w-3xl mx-auto px-4 prose prose-lg max-w-none prose-headings:font-display prose-headings:text-brand-green prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-3 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-brand-green prose-a:underline prose-a:underline-offset-2 prose-strong:text-brand-green">
+            <div
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: content.hook }}
+            />
+            <h2>The visual language</h2>
+            <div
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: content.visualLanguage }}
+            />
+            <h2>Best pets for this style</h2>
+            <div
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: content.bestPets }}
+            />
+            <h2>Where this style hangs best</h2>
+            <div
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: content.homeDecor }}
+            />
+            <h2>How we make it</h2>
+            <div
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: content.process }}
+            />
+            <h2>Common questions</h2>
+            <div className="space-y-5 not-prose">
+              {content.faqs.map((f, i) => (
+                <div key={i}>
+                  <h3 className="font-display text-base font-semibold text-gray-800 mb-1.5">{f.q}</h3>
+                  <p className="text-gray-600 text-[15px] leading-relaxed">{f.a}</p>
+                </div>
+              ))}
+            </div>
+            <div
+              className="mt-10"
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: content.closing }}
+            />
+          </article>
+        </section>
+      )}
+
+      {/* Original short-copy section — kept as the "summary" block below the
+          deep content for users who already scrolled past the main article. */}
       <section className="py-16 sm:py-20 bg-white border-y border-gray-100">
         <div className="max-w-3xl mx-auto px-4 space-y-8">
           <div>
