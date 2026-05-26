@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
+import { useSession, signOut } from "next-auth/react"
 
 // Sitewide landing header. Modeled on Crown & Paw's nav structure but
 // keeps Paw Masterpiece's brand language (cream / brand-green / brand-gold,
@@ -255,6 +256,7 @@ function HeaderNav() {
           >
             Start Now
           </Link>
+          <AuthMenu />
         </nav>
 
         {/* Mobile hamburger */}
@@ -331,6 +333,7 @@ function HeaderNav() {
             >
               Start Now — Free Preview
             </Link>
+            <MobileAuthSection onClose={() => setMobileOpen(false)} />
           </nav>
         </div>
       )}
@@ -419,6 +422,186 @@ function MegaMenu({
 // ── Mobile accordion section ───────────────────────────────────────
 // Thumbnail next to each label instead of emoji — matches the desktop
 // mega-menu visual treatment.
+
+// ── Auth menu (desktop) ─────────────────────────────────────────────
+// Avatar dropdown when signed in (My Account / Admin Dashboard / Sign
+// Out); plain Sign In link when not. Lives inside the desktop nav so
+// every public page has the same auth affordance, not just the home
+// page. Self-contained — uses its own outside-click handler scoped via
+// data-auth-menu so it doesn't fight the parent nav's outside-click
+// logic (which targets the nav ref, not arbitrary buttons).
+
+function AuthMenu() {
+  const { data: session } = useSession()
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest("[data-auth-menu]")) setOpen(false)
+    }
+    document.addEventListener("mousedown", handler)
+    return () => document.removeEventListener("mousedown", handler)
+  }, [open])
+
+  if (!session) {
+    return (
+      <Link
+        href="/auth/signin"
+        className="ml-1 text-sm text-gray-600 hover:text-brand-green hover:bg-gray-50 px-3 py-2 rounded-full transition-colors font-medium"
+      >
+        Sign In
+      </Link>
+    )
+  }
+
+  const user = session.user
+  const isAdmin = (user as { role?: string })?.role === "admin"
+  const initial = (user?.name ?? user?.email ?? "U")[0]?.toUpperCase() ?? "U"
+
+  return (
+    <div className="relative ml-1" data-auth-menu>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-gray-200 hover:border-brand-green/40 transition-all"
+        aria-label="Account menu"
+        aria-expanded={open}
+      >
+        {user?.image ? (
+          <Image
+            src={user.image}
+            alt={user.name ?? "Avatar"}
+            width={30}
+            height={30}
+            className="rounded-full"
+          />
+        ) : (
+          <span className="w-[30px] h-[30px] rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green text-xs font-bold">
+            {initial}
+          </span>
+        )}
+        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-lg border border-gray-100 py-1.5 z-50">
+          <div className="px-4 py-2.5 border-b border-gray-100">
+            <p className="text-sm font-medium text-gray-800 truncate">
+              {user?.name ?? "My Account"}
+            </p>
+            <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+          </div>
+          <Link
+            href="/account/orders"
+            onClick={() => setOpen(false)}
+            className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+              />
+            </svg>
+            My Account
+          </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-brand-green hover:bg-brand-green/5 transition-colors font-medium"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+              Admin Dashboard
+            </Link>
+          )}
+          <button
+            onClick={() => {
+              setOpen(false)
+              signOut({ callbackUrl: "/" })
+            }}
+            className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+            Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Auth section (mobile) ──────────────────────────────────────────
+// Rendered inside the mobile accordion. Same affordances as the
+// desktop avatar dropdown but vertical-list shaped to match the
+// surrounding accordion sections.
+
+function MobileAuthSection({ onClose }: { onClose: () => void }) {
+  const { data: session } = useSession()
+  const isAdmin = (session?.user as { role?: string } | undefined)?.role === "admin"
+
+  return (
+    <div className="mt-3 border-t border-gray-100 pt-3">
+      {session ? (
+        <>
+          <div className="px-3 py-1 text-xs text-gray-400 truncate">
+            {session.user?.email}
+          </div>
+          <Link
+            href="/account/orders"
+            onClick={onClose}
+            className="block w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-700 hover:bg-gray-50 font-medium"
+          >
+            My Account
+          </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              onClick={onClose}
+              className="block w-full text-left py-2.5 px-3 rounded-lg text-sm text-brand-green hover:bg-brand-green/5 font-medium"
+            >
+              Admin Dashboard
+            </Link>
+          )}
+          <button
+            onClick={() => {
+              onClose()
+              signOut({ callbackUrl: "/" })
+            }}
+            className="w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+          >
+            Sign Out
+          </button>
+        </>
+      ) : (
+        <Link
+          href="/auth/signin"
+          onClick={onClose}
+          className="block w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-700 hover:bg-gray-50 font-medium"
+        >
+          Sign In
+        </Link>
+      )}
+    </div>
+  )
+}
 
 function MobileSection({
   label,

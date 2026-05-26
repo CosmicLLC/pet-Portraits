@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import LandingHeader from "@/components/LandingHeader";
 import UploadStep from "@/components/UploadStep";
 import StylePicker from "@/components/StylePicker";
 import GenerateButton from "@/components/GenerateButton";
@@ -17,7 +18,7 @@ import NewsletterInline from "@/components/NewsletterInline";
 import ClaimFreePrint from "@/components/ClaimFreePrint";
 import Image from "next/image";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import PhoneWallpaperPreview from "@/components/PhoneWallpaperPreview";
 import type { StyleKey } from "@/lib/gemini";
 import { track, productValue } from "@/lib/analytics";
@@ -45,8 +46,6 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [showAbandonmentCapture, setShowAbandonmentCapture] = useState(false);
   const [portraitEmailCaptured, setPortraitEmailCaptured] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [avatarOpen, setAvatarOpen] = useState(false);
   const { data: session } = useSession();
 
   // Countdown timer for preview step
@@ -116,24 +115,6 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [step, portraitEmailCaptured]);
 
-  // Close mobile menu on resize to desktop
-  useEffect(() => {
-    const onResize = () => { if (window.innerWidth >= 768) setMobileMenuOpen(false); };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // Close avatar dropdown on outside click
-  useEffect(() => {
-    if (!avatarOpen) return;
-    const handler = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest("[data-avatar-menu]")) setAvatarOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [avatarOpen]);
-
   // Wire wizard step state into browser history so the phone back button
   // (and Android system back / iOS swipe-back) walks back through steps
   // instead of exiting the page. Each forward step transition pushState's
@@ -178,26 +159,10 @@ export default function Home() {
     setError(null);
     setShowAbandonmentCapture(false);
     setPortraitEmailCaptured(false);
-    setMobileMenuOpen(false);
-    setAvatarOpen(false);
     requestAnimationFrame(() => {
       document.getElementById("create")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }, []);
-
-  const scrollToSection = useCallback((id: string) => {
-    setMobileMenuOpen(false);
-    const doScroll = () => {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-    };
-    if (step !== "style") {
-      setStep("style");
-      setError(null);
-      setTimeout(doScroll, 100);
-    } else {
-      doScroll();
-    }
-  }, [step]);
 
   // Route in-app back through history.back() so the phone back button and
   // the on-page back arrow stay synchronized — both pop the same entry.
@@ -326,12 +291,6 @@ export default function Home() {
     }
   }, [successImageId]);
 
-  const navLinks = [
-    { label: "How It Works", id: "how-it-works" },
-    { label: "Styles", id: "styles" },
-    { label: "Reviews", id: "reviews" },
-  ];
-
   // ─── Success page ────────────────────────────────────────────────────
   if (isSuccess) {
     return (
@@ -445,196 +404,14 @@ export default function Home() {
       {isBrowsing && <HomeJsonLd />}
       {isBrowsing && <ExitIntentPopup />}
 
-      {/* Header */}
-      <header className="border-b border-gray-200 bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button
-            onClick={resetState}
-            className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
-            aria-label="Paw Masterpiece — go to home"
-          >
-            <Image src="/logo.jpg" alt="" width={36} height={36} className="flex-shrink-0" />
-            <span className="font-display text-2xl text-brand-green tracking-tight">Paw Masterpiece</span>
-          </button>
-
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => scrollToSection(link.id)}
-                className="text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
-              >
-                {link.label}
-              </button>
-            ))}
-            <Link
-              href="/products"
-              className="text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
-            >
-              Products
-            </Link>
-            <button
-              onClick={resetState}
-              className="bg-brand-green text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-brand-green/90 transition-all hover:shadow-md"
-            >
-              Create Portrait
-            </button>
-
-            {/* Auth — desktop */}
-            {session ? (
-              <div className="relative" data-avatar-menu>
-                <button
-                  onClick={() => setAvatarOpen((o) => !o)}
-                  className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-gray-200 hover:border-brand-green/40 transition-all"
-                  aria-label="Account menu"
-                >
-                  {session.user?.image ? (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name ?? "Avatar"}
-                      width={30}
-                      height={30}
-                      className="rounded-full"
-                    />
-                  ) : (
-                    <span className="w-[30px] h-[30px] rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green text-xs font-bold">
-                      {(session.user?.name ?? session.user?.email ?? "U")[0].toUpperCase()}
-                    </span>
-                  )}
-                  <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
-                {avatarOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-lg border border-gray-100 py-1.5 z-50">
-                    <div className="px-4 py-2.5 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-800 truncate">{session.user?.name ?? "My Account"}</p>
-                      <p className="text-xs text-gray-400 truncate">{session.user?.email}</p>
-                    </div>
-                    <Link
-                      href="/account/orders"
-                      onClick={() => setAvatarOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors font-medium"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                      </svg>
-                      My Account
-                    </Link>
-                    {(session.user as { role?: string })?.role === "admin" && (
-                      <Link
-                        href="/admin"
-                        onClick={() => setAvatarOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-brand-green hover:bg-brand-green/5 transition-colors font-medium"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        Admin Dashboard
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => { setAvatarOpen(false); signOut({ callbackUrl: "/" }); }}
-                      className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                      </svg>
-                      Sign Out
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                href="/auth/signin"
-                className="text-sm text-gray-600 hover:text-brand-green transition-colors font-medium"
-              >
-                Sign In
-              </Link>
-            )}
-          </nav>
-
-          {/* Mobile hamburger */}
-          <button
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-brand-green hover:bg-gray-100 transition-colors"
-            onClick={() => setMobileMenuOpen((o) => !o)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
-        </div>
-
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <button
-                key={link.id}
-                onClick={() => scrollToSection(link.id)}
-                className="w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-700 hover:text-brand-green hover:bg-gray-50 transition-colors font-medium"
-              >
-                {link.label}
-              </button>
-            ))}
-            <Link
-              href="/products"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-700 hover:text-brand-green hover:bg-gray-50 transition-colors font-medium"
-            >
-              Products
-            </Link>
-            <button
-              onClick={resetState}
-              className="mt-1 w-full bg-brand-green text-white py-2.5 px-3 rounded-lg text-sm font-semibold hover:bg-brand-green/90 transition-all text-center"
-            >
-              Create Portrait
-            </button>
-
-            {/* Auth — mobile */}
-            <div className="mt-1 border-t border-gray-100 pt-2">
-              {session ? (
-                <>
-                  <div className="px-3 py-2 text-xs text-gray-400 truncate">{session.user?.email}</div>
-                  {(session.user as { role?: string })?.role === "admin" && (
-                    <Link
-                      href="/admin"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full text-left py-2.5 px-3 rounded-lg text-sm text-brand-green hover:bg-brand-green/5 transition-colors font-medium"
-                    >
-                      Admin Dashboard
-                    </Link>
-                  )}
-                  <button
-                    onClick={() => { setMobileMenuOpen(false); signOut({ callbackUrl: "/" }); }}
-                    className="w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <Link
-                  href="/auth/signin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-left py-2.5 px-3 rounded-lg text-sm text-gray-700 hover:text-brand-green hover:bg-gray-50 transition-colors font-medium"
-                >
-                  Sign In
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
-      </header>
+      {/* Shared sitewide header — same nav as every other public page so
+          the mega-menu, promo bar, and auth menu show up here too. The
+          old bespoke header had three anchor-scroll nav links and a
+          reset-state Logo button; both are gone in favor of consistent
+          navigation. Anchor scroll users can still reach the in-page
+          sections by scrolling, and the "Reviews" link now points to
+          the /reviews page (richer + cacheable). */}
+      <LandingHeader />
 
       {/* Hero — pre-generation only. The product photo is a full-bleed atmospheric
           background that dissolves into the cream on the text side, rather than
@@ -1075,7 +852,7 @@ export default function Home() {
               ))}
             </div>
             <button
-              onClick={() => scrollToSection("create")}
+              onClick={() => document.getElementById("create")?.scrollIntoView({ behavior: "smooth" })}
               className="mt-10 bg-brand-green text-white px-8 py-3.5 rounded-full font-display font-semibold hover:bg-brand-green/90 transition-all hover:shadow-lg"
             >
               Try It Free
@@ -1209,7 +986,7 @@ export default function Home() {
             </div>
             <div className="text-center mt-8">
               <button
-                onClick={() => scrollToSection("create")}
+                onClick={() => document.getElementById("create")?.scrollIntoView({ behavior: "smooth" })}
                 className="bg-brand-green text-white px-8 py-3.5 rounded-full font-display font-semibold hover:bg-brand-green/90 transition-all hover:shadow-lg"
               >
                 Create Your Portrait
