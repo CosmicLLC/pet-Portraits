@@ -4,38 +4,193 @@ import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
-// Sitewide landing header. Every clickable destination routes to a page
-// where the user can immediately start creating — no marketing scroll
-// between landing and generation. Styles + Gifts are dropdowns that
-// deep-link into /start?style={key} so the upload widget renders with
-// the matching style pre-selected. Wallpaper is a prominent standalone
-// button because it's the highest-velocity tripwire ($0.99).
+// Sitewide landing header. Modeled on Crown & Paw's nav structure but
+// keeps Paw Masterpiece's brand language (cream / brand-green / brand-gold,
+// Cormorant display font). Two mega-menu dropdowns — "Custom Pet Portraits"
+// and "Gifts" — show image thumbnails instead of emoji and each item
+// links to a dedicated content page (no /start?style=X shortcuts in the
+// menu). Tools migrated to the footer. A Father's Day promo bar sits
+// above the header to drive seasonal traffic to /gifts/fathers-day.
 
-const STYLE_LINKS = [
-  { label: "Watercolor", href: "/start?style=watercolor", emoji: "🎨", blurb: "Soft, dreamy, gift-friendly" },
-  { label: "Oil Painting", href: "/start?style=oil", emoji: "🖼️", blurb: "Rich, classical, museum-style" },
-  { label: "Renaissance", href: "/start?style=renaissance", emoji: "👑", blurb: "Royal robes, regal humor" },
-  { label: "Line Art", href: "/start?style=lineart", emoji: "✒️", blurb: "Clean, modern, minimalist" },
+type NavItem = {
+  label: string
+  href: string
+  image: string
+  alt: string
+  blurb: string
+}
+
+// Custom Pet Portraits → the 4 SEO style pages. Slugs verified against
+// lib/seo-data.ts STYLE_SEO. Each /styles/<slug> page is pre-rendered
+// at build time with 1,200+ words of style-specific content.
+const PORTRAIT_LINKS: NavItem[] = [
+  {
+    label: "Watercolor",
+    href: "/styles/watercolor-pet-portrait",
+    image: "/examples/watercolor.png",
+    alt: "Watercolor pet portrait example",
+    blurb: "Soft, dreamy, gift-friendly",
+  },
+  {
+    label: "Oil Painting",
+    href: "/styles/oil-painting-pet-portrait",
+    image: "/examples/oil.png",
+    alt: "Oil painting pet portrait example",
+    blurb: "Rich, classical, museum-style",
+  },
+  {
+    label: "Renaissance",
+    href: "/styles/renaissance-pet-portrait",
+    image: "/examples/renaissance.png",
+    alt: "Renaissance pet portrait example",
+    blurb: "Royal robes, regal humor",
+  },
+  {
+    label: "Line Art",
+    href: "/styles/line-art-pet-portrait",
+    image: "/examples/lineart.png",
+    alt: "Line art pet portrait example",
+    blurb: "Clean, modern, minimalist",
+  },
 ]
 
-const GIFT_LINKS = [
-  { label: "For Dog Moms", href: "/start?style=watercolor", emoji: "🌸", blurb: "Soft watercolor is the top-gifted style" },
-  { label: "Mother's Day", href: "/start?style=watercolor", emoji: "💐", blurb: "Quick + framed + lands on time" },
-  { label: "Father's Day", href: "/start?style=oil", emoji: "🍺", blurb: "Oil painting belongs in a man cave" },
-  { label: "Christmas", href: "/start?style=renaissance", emoji: "🎄", blurb: "Renaissance — the conversation piece" },
-  { label: "Birthday", href: "/start?style=lineart", emoji: "🎂", blurb: "Minimalist line art, fast turnaround" },
-  { label: "Memorial Portrait", href: "/memorial", emoji: "🤍", blurb: "Gentle, painterly, no rush" },
-]
-
-const TOOL_LINKS = [
-  { label: "Phone Wallpaper", href: "/wallpaper", emoji: "📱", blurb: "$0.99 — your pet on your home screen" },
-  { label: "Free Breed Identifier", href: "/tools/breed-identifier", emoji: "🔍", blurb: "Upload a photo, AI tells you the breed" },
-  { label: "Free Phone Wallpaper", href: "/free-wallpaper", emoji: "✨", blurb: "Watermarked wallpaper, free with email" },
-  { label: "Free Photo Guide", href: "/free-photo-guide", emoji: "📸", blurb: "How to take the perfect pet photo" },
+// Gifts → dedicated occasion pages (lib/gift-occasions.ts). heroImage
+// values mirrored here so the dropdown thumbnail matches the destination
+// page's hero. Memorial uses /memorial (its own standalone page).
+const GIFT_LINKS: NavItem[] = [
+  {
+    label: "For Dog Moms",
+    href: "/gifts/dog-mom-gift",
+    image: "/examples/watercolor.png",
+    alt: "Dog mom gift — watercolor portrait",
+    blurb: "Watercolor is the top-gifted style",
+  },
+  {
+    label: "Mother's Day",
+    href: "/gifts/mothers-day",
+    image: "/ads/mothers-day-renaissance-reveal-v1.png",
+    alt: "Mother's Day pet portrait gift reveal",
+    blurb: "Quick + framed + lands on time",
+  },
+  {
+    label: "Father's Day",
+    href: "/gifts/fathers-day",
+    image: "/examples/oil.png",
+    alt: "Father's Day pet portrait gift — oil painting",
+    blurb: "Oil painting belongs in a man cave",
+  },
+  {
+    label: "Christmas",
+    href: "/gifts/christmas",
+    image: "/examples/renaissance.png",
+    alt: "Christmas pet portrait gift — renaissance painting",
+    blurb: "Renaissance — the conversation piece",
+  },
+  {
+    label: "Birthday",
+    href: "/gifts/birthday",
+    image: "/examples/lineart.png",
+    alt: "Birthday pet portrait gift — line art",
+    blurb: "Minimalist line art, fast turnaround",
+  },
+  {
+    label: "Memorial Portrait",
+    href: "/memorial",
+    image: "/examples/watercolor.png",
+    alt: "Memorial pet portrait — gentle watercolor",
+    blurb: "Gentle, painterly, no rush",
+  },
 ]
 
 export default function LandingHeader() {
-  const [open, setOpen] = useState<"styles" | "gifts" | "tools" | null>(null)
+  return (
+    <>
+      <FathersDayPromoBar />
+      <HeaderNav />
+    </>
+  )
+}
+
+// ── Promo bar ───────────────────────────────────────────────────────
+// Brand-green strip above the nav. Dismissible (localStorage), and
+// auto-hides client-side past the Father's Day order-by cutoff so the
+// bar doesn't go stale if we forget to remove it. The dismiss key is
+// scoped to "fathers_day_2026" so future promo bars don't inherit it.
+
+const PROMO_DISMISS_KEY = "promo_dismissed_fathers_day_2026"
+const PROMO_CUTOFF = new Date("2026-06-17T00:00:00Z") // hide after Jun 16
+
+function FathersDayPromoBar() {
+  // Default to visible so the SSR + first paint matches the marketing
+  // intent. Client effect hides it if dismissed OR past the cutoff.
+  const [visible, setVisible] = useState(true)
+
+  useEffect(() => {
+    if (Date.now() >= PROMO_CUTOFF.getTime()) {
+      setVisible(false)
+      return
+    }
+    try {
+      if (localStorage.getItem(PROMO_DISMISS_KEY) === "1") {
+        setVisible(false)
+      }
+    } catch {
+      // localStorage can throw in private mode — fail open (show).
+    }
+  }, [])
+
+  if (!visible) return null
+
+  return (
+    <div className="bg-brand-green text-cream text-xs sm:text-sm relative z-40">
+      <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-center gap-3 text-center">
+        <span aria-hidden="true">🐾</span>
+        <span>
+          Order by{" "}
+          <span className="font-semibold text-brand-gold">June 16</span> for
+          Father&apos;s Day delivery —{" "}
+          <Link
+            href="/gifts/fathers-day"
+            className="underline underline-offset-2 hover:text-brand-gold font-semibold"
+          >
+            Shop dog dad gifts →
+          </Link>
+        </span>
+        <button
+          onClick={() => {
+            try {
+              localStorage.setItem(PROMO_DISMISS_KEY, "1")
+            } catch {
+              // localStorage blocked — still hide for this session.
+            }
+            setVisible(false)
+          }}
+          aria-label="Dismiss promotion"
+          className="ml-2 flex-shrink-0 text-cream/70 hover:text-cream transition-colors"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Header nav ──────────────────────────────────────────────────────
+
+function HeaderNav() {
+  const [open, setOpen] = useState<"portraits" | "gifts" | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const navRef = useRef<HTMLElement | null>(null)
 
@@ -73,25 +228,20 @@ export default function LandingHeader() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
           <DropdownTrigger
-            label="Styles"
-            isOpen={open === "styles"}
-            onToggle={() => setOpen(open === "styles" ? null : "styles")}
+            label="Custom Pet Portraits"
+            isOpen={open === "portraits"}
+            onToggle={() => setOpen(open === "portraits" ? null : "portraits")}
           />
           <DropdownTrigger
             label="Gifts"
             isOpen={open === "gifts"}
             onToggle={() => setOpen(open === "gifts" ? null : "gifts")}
           />
-          <DropdownTrigger
-            label="Tools"
-            isOpen={open === "tools"}
-            onToggle={() => setOpen(open === "tools" ? null : "tools")}
-          />
           <Link
             href="/wallpaper"
             className="ml-1 flex items-center gap-1.5 text-sm text-brand-gold font-display font-semibold hover:bg-brand-gold/10 px-3 py-2 rounded-full border border-brand-gold/30 transition-colors"
           >
-            📱 Wallpaper · $0.99
+            📱 Wallpapers · $0.99
           </Link>
           <Link
             href="/reviews"
@@ -121,30 +271,50 @@ export default function LandingHeader() {
         </button>
       </div>
 
-      {/* Desktop dropdown panels — full-width strip below the header bar */}
+      {/* Desktop mega-menu — full-width strip below the header bar */}
       {open && (
         <div className="hidden md:block absolute top-full inset-x-0 bg-white border-b border-gray-100 shadow-lg animate-fade-in-up">
-          <div className="max-w-6xl mx-auto px-4 py-6">
-            {open === "styles" && <DropdownPanel items={STYLE_LINKS} onClick={() => setOpen(null)} />}
-            {open === "gifts" && <DropdownPanel items={GIFT_LINKS} onClick={() => setOpen(null)} />}
-            {open === "tools" && <DropdownPanel items={TOOL_LINKS} onClick={() => setOpen(null)} />}
+          <div className="max-w-6xl mx-auto px-4 py-7">
+            {open === "portraits" && (
+              <MegaMenu
+                items={PORTRAIT_LINKS}
+                gridCols="grid-cols-2 md:grid-cols-4"
+                aspect="aspect-[4/5]"
+                onClick={() => setOpen(null)}
+              />
+            )}
+            {open === "gifts" && (
+              <MegaMenu
+                items={GIFT_LINKS}
+                gridCols="grid-cols-2 md:grid-cols-3"
+                aspect="aspect-[4/3]"
+                onClick={() => setOpen(null)}
+              />
+            )}
           </div>
         </div>
       )}
 
-      {/* Mobile menu — vertical accordion takes over the viewport */}
+      {/* Mobile menu — vertical accordion */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white">
           <nav className="px-4 py-4 space-y-1">
-            <MobileSection label="Styles" items={STYLE_LINKS} onClick={() => setMobileOpen(false)} />
-            <MobileSection label="Gifts" items={GIFT_LINKS} onClick={() => setMobileOpen(false)} />
-            <MobileSection label="Tools" items={TOOL_LINKS} onClick={() => setMobileOpen(false)} />
+            <MobileSection
+              label="Custom Pet Portraits"
+              items={PORTRAIT_LINKS}
+              onClick={() => setMobileOpen(false)}
+            />
+            <MobileSection
+              label="Gifts"
+              items={GIFT_LINKS}
+              onClick={() => setMobileOpen(false)}
+            />
             <Link
               href="/wallpaper"
               onClick={() => setMobileOpen(false)}
               className="flex items-center justify-between px-3 py-3 rounded-xl bg-brand-gold/10 text-brand-gold font-display font-semibold"
             >
-              <span>📱 Phone Wallpaper</span>
+              <span>📱 Phone Wallpapers</span>
               <span className="text-xs opacity-70">$0.99</span>
             </Link>
             <Link
@@ -200,36 +370,55 @@ function DropdownTrigger({
   )
 }
 
-function DropdownPanel({
+// ── Mega-menu panel ─────────────────────────────────────────────────
+// Image-on-top card grid. Image aspect varies per dropdown (4:5 for
+// portraits feels gallery-poster-like, 4:3 for gifts reads more like
+// a product card). next/image keeps the thumbnails lazy + responsive.
+
+function MegaMenu({
   items,
+  gridCols,
+  aspect,
   onClick,
 }: {
-  items: Array<{ label: string; href: string; emoji: string; blurb: string }>
+  items: NavItem[]
+  gridCols: string
+  aspect: string
   onClick: () => void
 }) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+    <div className={`grid ${gridCols} gap-4 sm:gap-5`}>
       {items.map((item) => (
         <Link
           key={item.href + item.label}
           href={item.href}
           onClick={onClick}
-          className="group flex items-start gap-3 p-3 rounded-xl hover:bg-cream transition-colors"
+          className="group block"
         >
-          <div className="w-10 h-10 rounded-lg bg-cream group-hover:bg-white flex items-center justify-center text-xl flex-shrink-0 transition-colors">
-            {item.emoji}
+          <div
+            className={`${aspect} rounded-xl overflow-hidden bg-cream mb-2 border border-gray-100 group-hover:border-brand-green/40 transition-colors`}
+          >
+            <Image
+              src={item.image}
+              alt={item.alt}
+              width={240}
+              height={300}
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-display text-sm font-semibold text-brand-green leading-tight mb-0.5">
-              {item.label}
-            </p>
-            <p className="text-xs text-gray-500 leading-snug">{item.blurb}</p>
-          </div>
+          <p className="font-display text-sm font-semibold text-brand-green leading-tight">
+            {item.label}
+          </p>
+          <p className="text-xs text-gray-500 leading-snug mt-0.5">{item.blurb}</p>
         </Link>
       ))}
     </div>
   )
 }
+
+// ── Mobile accordion section ───────────────────────────────────────
+// Thumbnail next to each label instead of emoji — matches the desktop
+// mega-menu visual treatment.
 
 function MobileSection({
   label,
@@ -237,7 +426,7 @@ function MobileSection({
   onClick,
 }: {
   label: string
-  items: Array<{ label: string; href: string; emoji: string; blurb: string }>
+  items: NavItem[]
   onClick: () => void
 }) {
   const [expanded, setExpanded] = useState(false)
@@ -264,10 +453,23 @@ function MobileSection({
               key={item.href + item.label}
               href={item.href}
               onClick={onClick}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-cream text-gray-600 text-sm"
+              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-cream text-gray-700 text-sm"
             >
-              <span className="text-base">{item.emoji}</span>
-              <span>{item.label}</span>
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-cream flex-shrink-0 border border-gray-100">
+                <Image
+                  src={item.image}
+                  alt=""
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-display text-sm font-semibold text-brand-green leading-tight">
+                  {item.label}
+                </p>
+                <p className="text-[11px] text-gray-500 leading-snug truncate">{item.blurb}</p>
+              </div>
             </Link>
           ))}
         </div>

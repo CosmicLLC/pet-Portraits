@@ -54,7 +54,26 @@ export default function LandingFooterCTA({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
-          <p className="text-cream/60 text-xs mt-6">
+
+          {/* Free tools row — migrated from the old "Tools" header dropdown
+              so the breed-identifier / photo-guide / free-wallpaper magnets
+              are still discoverable site-wide without crowding the nav. */}
+          <p className="text-cream/70 text-xs mt-7 flex items-center justify-center gap-2.5 flex-wrap">
+            <span className="text-cream/50">Free tools:</span>
+            <Link href="/tools/breed-identifier" className="hover:text-cream underline-offset-2 hover:underline">
+              Breed Identifier
+            </Link>
+            <span className="text-cream/30" aria-hidden="true">·</span>
+            <Link href="/free-photo-guide" className="hover:text-cream underline-offset-2 hover:underline">
+              Pet Photo Guide
+            </Link>
+            <span className="text-cream/30" aria-hidden="true">·</span>
+            <Link href="/free-wallpaper" className="hover:text-cream underline-offset-2 hover:underline">
+              Free Wallpaper (with email)
+            </Link>
+          </p>
+
+          <p className="text-cream/60 text-xs mt-4">
             Loved by 40,000+ pet parents · 100% satisfaction guarantee · Ships to the United States
           </p>
         </div>
