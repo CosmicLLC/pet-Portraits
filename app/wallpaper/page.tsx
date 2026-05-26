@@ -102,6 +102,42 @@ export default function WallpaperPage() {
     ],
   };
 
+  // HowTo schema — surfaces in AI search (ChatGPT, Gemini, Perplexity) as
+  // a structured "step-by-step" answer when users ask "how do I make a
+  // pet phone wallpaper?". Total time is the realistic upper bound of
+  // upload + preview + checkout.
+  const howToLd = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to make a custom phone wallpaper of your pet",
+    description: "Three steps to a custom phone wallpaper of your pet — upload a photo, pick a background color, download in HD for $0.99.",
+    totalTime: "PT2M",
+    estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "0.99" },
+    image: `${BASE_URL}/og-image.jpg`,
+    supply: [{ "@type": "HowToSupply", name: "A clear photo of your pet" }],
+    tool: [{ "@type": "HowToTool", name: "A web browser" }],
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Upload your pet's photo",
+        text: "Upload any clear photo of your pet's face. Phone snapshots work — the AI handles cropping and background removal for you.",
+        url: `${BASE_URL}/wallpaper#step-1`,
+      },
+      {
+        "@type": "HowToStep",
+        name: "Pick a background color",
+        text: "Choose from 10 hand-picked aesthetic backgrounds — sage, dusty rose, deep navy, terracotta, and more. All curated to look right on a phone.",
+        url: `${BASE_URL}/wallpaper#step-2`,
+      },
+      {
+        "@type": "HowToStep",
+        name: "Download for $0.99",
+        text: "Preview is free and watermarked. Pay $0.99 once and get the full-resolution 1290×2796 phone wallpaper emailed to you within minutes.",
+        url: `${BASE_URL}/wallpaper#step-3`,
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-cream">
       <script
@@ -113,6 +149,11 @@ export default function WallpaperPage() {
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }}
       />
 
       <LandingHeader />

@@ -105,6 +105,41 @@ export default function BreedIdentifierPage() {
     ],
   };
 
+  // HowTo schema — gets cited in AI search ("how do I identify my dog's
+  // breed?") as a structured 3-step procedure with our free tool as the
+  // top result.
+  const howToLd = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to identify your dog's or cat's breed from a photo",
+    description: "Three steps to identify your pet's breed using our free AI-powered tool — no signup required.",
+    totalTime: "PT30S",
+    estimatedCost: { "@type": "MonetaryAmount", currency: "USD", value: "0" },
+    image: `${BASE_URL}/og-image.jpg`,
+    supply: [{ "@type": "HowToSupply", name: "A clear photo of your pet's face" }],
+    tool: [{ "@type": "HowToTool", name: "A web browser" }],
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Upload a photo",
+        text: "Upload any clear photo of your pet's face. Phone snapshots work great. Front-facing or profile, indoor or outdoor — all fine.",
+        url: `${BASE_URL}/tools/breed-identifier#step-1`,
+      },
+      {
+        "@type": "HowToStep",
+        name: "AI identifies the breed",
+        text: "Our vision model checks the photo against AKC and TICA breed databases and returns the most likely match with a confidence score.",
+        url: `${BASE_URL}/tools/breed-identifier#step-2`,
+      },
+      {
+        "@type": "HowToStep",
+        name: "See style recommendations",
+        text: "Get breed-specific portrait style suggestions, then preview what your pet would look like as a watercolor, oil, Renaissance, or line art piece.",
+        url: `${BASE_URL}/tools/breed-identifier#step-3`,
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-cream">
       <script
@@ -116,6 +151,11 @@ export default function BreedIdentifierPage() {
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+      />
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToLd) }}
       />
 
       <LandingHeader />
