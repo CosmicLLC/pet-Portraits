@@ -5,12 +5,22 @@ import { useState, useCallback } from "react"
 type SegmentCount = { segment: string; count: number }
 type Props = { activeSubscribers: number; segmentCounts?: SegmentCount[] }
 
+// Source enum mirrored from app/api/subscribe/route.ts. Each subscriber
+// is tagged with one source on capture; the segments dropdown filters
+// active subscribers by these tags before sending. Add new ones here
+// in lockstep with the subscribe API + CampaignSegment type.
 const SEGMENT_LABELS: Record<string, string> = {
   all: "Everyone (active subscribers)",
-  footer: "Footer signups",
+  footer: "Footer signups (home page)",
+  landing_footer: "Landing page newsletter",
   exit_intent: "Exit-intent leads",
+  popup: "Sitewide popup leads",
   abandonment: "Browse-abandonment leads",
   portrait: "Portrait-page signups",
+  blog_post: "Blog readers",
+  success_page: "Post-purchase opt-ins",
+  wallpaper: "Free wallpaper lead magnet",
+  photo_guide: "Free photo guide lead magnet",
   purchase: "Past customers",
 }
 

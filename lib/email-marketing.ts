@@ -81,7 +81,21 @@ function wrapMarketingText(innerText: string, email: string): string {
   )
 }
 
-export type CampaignSegment = "all" | "footer" | "exit_intent" | "abandonment" | "portrait" | "purchase"
+// Mirror of the ALLOWED_SOURCES enum in app/api/subscribe/route.ts.
+// Any new subscriber source added there should be appended here too.
+export type CampaignSegment =
+  | "all"
+  | "footer"
+  | "landing_footer"
+  | "exit_intent"
+  | "popup"
+  | "abandonment"
+  | "portrait"
+  | "blog_post"
+  | "success_page"
+  | "wallpaper"
+  | "photo_guide"
+  | "purchase"
 
 export type CampaignInput = {
   subject: string

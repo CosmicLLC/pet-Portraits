@@ -44,7 +44,23 @@ export async function POST(req: NextRequest) {
   const subject = (body.subject || "").trim()
   const htmlBody = (body.htmlBody || "").trim()
   const textBody = body.textBody?.trim() || undefined
-  const allowedSegments = ["all", "footer", "exit_intent", "abandonment", "portrait", "purchase"] as const
+  // Match the source enum from /api/subscribe/route.ts so any captured
+  // subscriber can be targeted. "all" sends to every active subscriber
+  // regardless of source. New sources added there should be mirrored here.
+  const allowedSegments = [
+    "all",
+    "footer",
+    "landing_footer",
+    "exit_intent",
+    "popup",
+    "abandonment",
+    "portrait",
+    "blog_post",
+    "success_page",
+    "wallpaper",
+    "photo_guide",
+    "purchase",
+  ] as const
   type Segment = typeof allowedSegments[number]
   const segment: Segment = (allowedSegments as readonly string[]).includes(body.segment || "")
     ? (body.segment as Segment)
