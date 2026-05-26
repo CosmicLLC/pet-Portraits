@@ -194,6 +194,49 @@ model Referral {
   @@index([status])
 }
 
+// Pinterest pin queue + audit log. Replaces the JSON files at
+// docs/marketing/pinterest/queue.json + published.json so the daily
+// Vercel Cron function can read/write state from a serverless context
+// (the function bundle is read-only on disk).
+//
+// Status lifecycle: queued → published (or failed). Each cron run pulls
+// the oldest N queued rows, renders + uploads them, and stamps either
+// pinId+publishedAt or error+failedAt.
+model PinterestPin {
+  id            String    @id @default(cuid())
+  // Pin number from the original brief (1-30 starters, 31-60 second batch).
+  // Useful for traceability and matching back to docs/marketing/pinterest/.
+  briefNumber   Int       @unique
+  board         String
+  seoTitle      String
+  description   String
+  altText       String
+  // Destination URL on pawmasterpiece.com (e.g. /start?style=oil).
+  link          String
+  // Style key used for image generation (matches a file in public/examples/).
+  style         String
+  // On-pin overlay components rendered into the PNG at upload time.
+  eyebrow       String
+  titleA        String
+  titleB        String
+  tagline       String
+  // "queued" | "published" | "failed"
+  status        String    @default("queued")
+  // Pinterest's pin ID after successful upload, used to verify status later.
+  pinId         String?
+  // Board ID the pin was actually posted to (matches our 8 created boards).
+  boardId       String?
+  publishedAt   DateTime?
+  failedAt      DateTime?
+  // Last error message if status=failed. Null on success.
+  error         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}
+
 // Outreach pipeline — pet bloggers, influencers, podcasters, etc.
 // Tracks the status of every cold pitch we send so we don't double-send and
 // can see at a glance who's pending a follow-up. Seeded with the 9 pet
