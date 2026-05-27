@@ -12,7 +12,11 @@ import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { logEvent } from "@/lib/events";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// 180s ceiling — measured end-to-end on a real photo: ~117s in dev
+// (Gemini image generation + Sharp upscale/crop/extend/watermark +
+// private Blob put). 60s was killing prod requests with HTTP 504.
+// Pro plan caps at 300s.
+export const maxDuration = 180;
 
 const MAX_BYTES = 15 * 1024 * 1024;
 

@@ -7,7 +7,10 @@ import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { logEvent } from "@/lib/events";
 import { trackPreviewGeneratedServer, extractUserContext } from "@/lib/server-pixels";
 
-export const maxDuration = 60;
+// Bumped 60 → 120 after wallpaper-preview 504 audit: Gemini portrait
+// generation + Sharp watermark + private Blob put can exceed 60s on
+// cold serverless instances. Pro plan caps at 300s.
+export const maxDuration = 120;
 
 // Known bot / scripting client User-Agent signatures. Won't stop a motivated
 // attacker (they can spoof the header) but filters out the 90% of drive-by

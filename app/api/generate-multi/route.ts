@@ -14,7 +14,10 @@ import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { logEvent } from "@/lib/events";
 import { trackPreviewGeneratedServer, extractUserContext } from "@/lib/server-pixels";
 
-export const maxDuration = 60;
+// Multi-pet sends 2-4 input images + style ref + long prompt, so Gemini
+// takes longer than single-pet. Mirror the wallpaper ceiling (180s) to
+// leave headroom for 4-pet calls.
+export const maxDuration = 180;
 
 // Multi-pet generation endpoint. Fully PARALLEL to /api/generate so that
 // the single-pet code path stays byte-identical to today. Accepts 2–4
