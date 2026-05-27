@@ -12,11 +12,12 @@ import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { logEvent } from "@/lib/events";
 
 export const runtime = "nodejs";
-// 180s ceiling — measured end-to-end on a real photo: ~117s in dev
-// (Gemini image generation + Sharp upscale/crop/extend/watermark +
-// private Blob put). 60s was killing prod requests with HTTP 504.
-// Pro plan caps at 300s.
-export const maxDuration = 180;
+// 300s ceiling (Pro plan max — same as admin/campaigns). Measured
+// pipeline: ~117s on dev; prod cold starts + iad1↔Gemini latency
+// pushed past 180s, hitting FUNCTION_INVOCATION_TIMEOUT. Gemini
+// image-generation latency is the dominant + variable factor.
+// If we still see timeouts, refactor to async fire-and-poll.
+export const maxDuration = 300;
 
 const MAX_BYTES = 15 * 1024 * 1024;
 

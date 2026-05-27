@@ -15,9 +15,9 @@ import { logEvent } from "@/lib/events";
 import { trackPreviewGeneratedServer, extractUserContext } from "@/lib/server-pixels";
 
 // Multi-pet sends 2-4 input images + style ref + long prompt, so Gemini
-// takes longer than single-pet. Mirror the wallpaper ceiling (180s) to
-// leave headroom for 4-pet calls.
-export const maxDuration = 180;
+// takes longer than single-pet. 300s ceiling (Pro plan max) — needed
+// because cold-start + iad1↔Gemini latency was pushing past 180s.
+export const maxDuration = 300;
 
 // Multi-pet generation endpoint. Fully PARALLEL to /api/generate so that
 // the single-pet code path stays byte-identical to today. Accepts 2–4

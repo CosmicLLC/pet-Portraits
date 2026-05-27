@@ -7,10 +7,10 @@ import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { logEvent } from "@/lib/events";
 import { trackPreviewGeneratedServer, extractUserContext } from "@/lib/server-pixels";
 
-// Bumped 60 → 120 after wallpaper-preview 504 audit: Gemini portrait
-// generation + Sharp watermark + private Blob put can exceed 60s on
-// cold serverless instances. Pro plan caps at 300s.
-export const maxDuration = 120;
+// 300s ceiling (Pro plan max). Bumped from 60 after seeing
+// FUNCTION_INVOCATION_TIMEOUT in prod — cold-start + iad1↔Gemini
+// latency makes 60s and even 120s too tight for image generation.
+export const maxDuration = 300;
 
 // Known bot / scripting client User-Agent signatures. Won't stop a motivated
 // attacker (they can spoof the header) but filters out the 90% of drive-by
