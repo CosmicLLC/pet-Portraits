@@ -21,6 +21,7 @@ const ALLOWED_SOURCES = new Set([
   "wallpaper",         // /free-wallpaper lead magnet (formerly "other")
   "photo_guide",       // /free-photo-guide lead magnet (formerly "other")
   "purchase",          // silent auto-enroll from Stripe webhook
+  "post_generation",   // PostGenerationEmailCapture modal — fires after first successful preview in any studio (portrait / multi-pet / wallpaper). Explicit GDPR-style opt-in.
   "other",
 ])
 

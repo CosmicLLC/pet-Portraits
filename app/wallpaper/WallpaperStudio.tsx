@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import { track } from "@/lib/analytics";
 
 interface PaletteColor {
@@ -190,6 +191,7 @@ export default function WallpaperStudio({ palette }: Props) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6 lg:gap-10 items-start">
+      <PostGenerationEmailCapture trigger={status === "ready" && !!result} imageType="wallpaper" />
       {/* Phone-shaped preview pane */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 sm:p-8 flex flex-col items-center">
         <PhoneFrame bgHex={bgHex} preview={result?.preview} loading={status === "generating"} />

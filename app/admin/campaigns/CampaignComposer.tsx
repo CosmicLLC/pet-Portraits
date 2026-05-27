@@ -22,6 +22,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   wallpaper: "Free wallpaper lead magnet",
   photo_guide: "Free photo guide lead magnet",
   purchase: "Past customers",
+  post_generation: "Post-preview opt-ins (hot leads — just generated)",
 }
 
 export default function CampaignComposer({ activeSubscribers, segmentCounts = [] }: Props) {

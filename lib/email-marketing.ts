@@ -96,6 +96,7 @@ export type CampaignSegment =
   | "wallpaper"
   | "photo_guide"
   | "purchase"
+  | "post_generation"
 
 export type CampaignInput = {
   subject: string

@@ -6,6 +6,7 @@ import Link from "next/link";
 import UploadStep from "@/components/UploadStep";
 import PortraitPreview from "@/components/PortraitPreview";
 import ProductSelector from "@/components/ProductSelector";
+import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import { track } from "@/lib/analytics";
 
 // Inlined here (instead of importing from lib/gemini) because the gemini
@@ -89,6 +90,7 @@ export default function QuickStudio() {
   if (step === "preview" && watermarkedImage && imageId && style) {
     return (
       <main className="min-h-screen bg-cream">
+        <PostGenerationEmailCapture trigger imageType="portrait" />
         <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
           <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import UploadStep from "@/components/UploadStep";
 import PortraitPreview from "@/components/PortraitPreview";
 import ProductSelector from "@/components/ProductSelector";
+import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import { track } from "@/lib/analytics";
 
 // Multi-pet portrait flow. Parallel to QuickStudio.tsx — they don't
@@ -141,6 +142,7 @@ export default function MultiPetStudio() {
   if (step === "preview" && watermarkedImage && imageId) {
     return (
       <section className="py-8 sm:py-12">
+        <PostGenerationEmailCapture trigger imageType="multipet" />
         <div className="max-w-2xl mx-auto px-4">
           <div className="flex items-center justify-between mb-5">
             <p className="text-xs text-gray-500">

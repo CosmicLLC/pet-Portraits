@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import LandingHeader from "@/components/LandingHeader";
+import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import UploadStep from "@/components/UploadStep";
 import StylePicker from "@/components/StylePicker";
 import GenerateButton from "@/components/GenerateButton";
@@ -403,6 +404,10 @@ export default function Home() {
     <main className="min-h-screen bg-cream">
       {isBrowsing && <HomeJsonLd />}
       {isBrowsing && <ExitIntentPopup />}
+      <PostGenerationEmailCapture
+        trigger={step === "preview" && !!watermarkedImage}
+        imageType="portrait"
+      />
 
       {/* Shared sitewide header — same nav as every other public page so
           the mega-menu, promo bar, and auth menu show up here too. The
