@@ -15,7 +15,7 @@ export const PRODUCTS = {
   },
   wallpaper: {
     label: "Phone Wallpaper",
-    price: "$5",
+    price: "$0.99",
     description: "Optimized for mobile screens",
   },
   display: {

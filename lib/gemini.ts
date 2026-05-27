@@ -75,6 +75,13 @@ STYLE — polished flat digital illustration (think Procreate / vector portrait,
 - Clean digital illustration edges — slightly soft, not vector-sharp, not photoreal
 - NOT photorealistic, NOT an oil painting, NOT 3D-rendered, NO black line art outlines around the pet
 
+PET EDGE — critical, this is failing in current output:
+- The pet's silhouette must blend DIRECTLY into the background color with NO visible boundary line
+- NO outline, NO stroke, NO border, NO halo, NO edge highlight, NO drop shadow, NO contrasting rim of any color around the pet
+- NO "sticker" or "cut-out" effect — the pet must NOT look like a separate object pasted onto the background
+- The pet's outer edge pixels should be the same color as the background pixels immediately outside them, with only a soft 1-2 pixel anti-alias transition — never a distinct contrasting line
+- If you would normally add a thin outline for definition, DO NOT — let the shading inside the pet's silhouette carry the form
+
 BACKGROUND — strict, no exceptions:
 - 100% solid uniform ${colorName} (hex ${hex}) field, edge to edge, every single pixel
 - NO texture, NO gradient, NO pattern, NO border, NO frame
