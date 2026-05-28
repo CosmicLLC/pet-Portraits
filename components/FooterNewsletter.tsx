@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { track } from "@/lib/analytics";
 
 export default function FooterNewsletter() {
@@ -66,6 +67,24 @@ export default function FooterNewsletter() {
             {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
           </>
         )}
+
+        {/* Free tools row — matches the row in LandingFooterCTA so the
+            home page (which uses this footer) doesn't lose tool
+            discoverability after Tools was migrated out of the nav. */}
+        <p className="text-[11px] text-gray-500 mt-6 pt-5 border-t border-gray-200 flex items-center justify-center gap-2 flex-wrap">
+          <span className="text-gray-400">Free tools:</span>
+          <Link href="/tools/breed-identifier" className="text-brand-green hover:underline">
+            Breed Identifier
+          </Link>
+          <span className="text-gray-300" aria-hidden="true">·</span>
+          <Link href="/free-photo-guide" className="text-brand-green hover:underline">
+            Pet Photo Guide
+          </Link>
+          <span className="text-gray-300" aria-hidden="true">·</span>
+          <Link href="/free-wallpaper" className="text-brand-green hover:underline">
+            Free Wallpaper (with email)
+          </Link>
+        </p>
       </div>
     </div>
   );
