@@ -108,10 +108,23 @@ model Order {
   bonusShippingName     String?
   bonusShippingAddress  Json?
 
+  // Wallpaper → canvas ladder attribution. When a wallpaper buyer
+  // upgrades to canvas (via success-page modal or one of the email
+  // touches), the resulting Order carries:
+  //   - upsellSource:    which touch converted them
+  //                      ("wallpaper_success_modal" | "email_1h" |
+  //                       "email_24h" | "email_72h")
+  //   - originalOrderId: the wallpaper Order.id they upgraded from
+  // Lets us measure modal vs email conversion rates cleanly and cut
+  // off email reminders the moment they convert.
+  upsellSource     String?
+  originalOrderId  String?
+
   @@index([email])
   @@index([imageId])
   @@index([createdAt])
   @@index([prodigiStatus])
+  @@index([originalOrderId])
 }
 
 model RateLimit {

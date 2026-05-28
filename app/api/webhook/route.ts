@@ -258,6 +258,13 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      // Capture wallpaper → canvas ladder attribution if this order
+      // was created via /api/create-upsell-checkout. Lets us measure
+      // ladder conversion rates and link the canvas order back to the
+      // wallpaper order it was upsold from.
+      const upsellSource = session.metadata?.upsellSource || null;
+      const originalOrderId = session.metadata?.originalOrderId || null;
+
       const order = await prisma.order.create({
         data: {
           stripeSessionId: session.id,
@@ -273,6 +280,8 @@ export async function POST(req: NextRequest) {
           shippingAddress: shippingAddress
             ? (shippingAddress as unknown as object)
             : undefined,
+          upsellSource,
+          originalOrderId: originalOrderId || null,
         },
       });
 

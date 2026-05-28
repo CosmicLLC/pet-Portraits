@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
+import WallpaperUpsellModal from "@/components/WallpaperUpsellModal";
 import { track } from "@/lib/analytics";
 
 interface PaletteColor {
@@ -30,6 +31,15 @@ export default function WallpaperStudio({ palette }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PreviewResult | null>(null);
   const [purchaseSuccess, setPurchaseSuccess] = useState(false);
+  // Upsell modal state. Populated when we detect a successful wallpaper
+  // purchase return — values come from the URL params Stripe redirected
+  // back with + a localStorage stash of the watermarked preview the
+  // user saw on the previous step.
+  const [upsell, setUpsell] = useState<{
+    originalSessionId: string;
+    portraitDataUrl: string | null;
+    expiresAt: string;
+  } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
 
@@ -37,12 +47,75 @@ export default function WallpaperStudio({ palette }: Props) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("success") === "true") {
-      setPurchaseSuccess(true);
-      track({ name: "purchase", value: 0.99, productType: "wallpaper" });
-      // Clean the URL so refreshes don't re-fire the purchase event
-      window.history.replaceState({}, "", "/wallpaper");
+    if (params.get("success") !== "true") return;
+
+    setPurchaseSuccess(true);
+    track({ name: "purchase", value: 0.99, productType: "wallpaper" });
+
+    // Pull the session_id Stripe sent us back with — it's the proof
+    // we hand to /api/create-upsell-checkout to mint the canvas
+    // session. Without it the modal can't open.
+    const sessionId = params.get("session_id");
+    if (sessionId) {
+      // 24h discount window. We anchor it to the first time we render
+      // the success state (which is within seconds of Stripe.session.created),
+      // and stash it in localStorage so if the buyer returns later the
+      // pill / modal still shows the correct remaining time. The server
+      // validates against the authoritative Stripe.session.created on
+      // every upsell-checkout call, so a small client/server drift is
+      // bounded to ~few seconds.
+      const stashKey = `wp_upsell_${sessionId}`;
+      let expiresAt: string;
+      try {
+        const cached = localStorage.getItem(stashKey);
+        if (cached) {
+          expiresAt = cached;
+        } else {
+          expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+          localStorage.setItem(stashKey, expiresAt);
+        }
+      } catch {
+        expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      }
+
+      // Recover the watermarked preview data URL that we stashed
+      // before redirecting to Stripe. Stash was keyed by imageId
+      // (the only ID we had pre-Stripe); now we re-key by sessionId
+      // (the ID we have post-Stripe) so the modal can fetch it later
+      // even if the user closes + reopens the page within the 24h
+      // window. Falls back to null in private mode.
+      let portraitDataUrl: string | null = null;
+      const imageId = params.get("imageId");
+      try {
+        if (imageId) {
+          const pendingKey = `wp_preview_pending_${imageId}`;
+          const pending = localStorage.getItem(pendingKey);
+          if (pending) {
+            localStorage.setItem(`wp_preview_${sessionId}`, pending);
+            localStorage.removeItem(pendingKey);
+            portraitDataUrl = pending;
+          } else {
+            portraitDataUrl = localStorage.getItem(`wp_preview_${sessionId}`);
+          }
+        } else {
+          portraitDataUrl = localStorage.getItem(`wp_preview_${sessionId}`);
+        }
+      } catch {
+        /* ignore */
+      }
+
+      setUpsell({ originalSessionId: sessionId, portraitDataUrl, expiresAt });
     }
+
+    // Clean the success/imageId/session_id params off the URL so a
+    // refresh doesn't re-fire the purchase event. Preserve any other
+    // query strings.
+    const url = new URL(window.location.href);
+    url.searchParams.delete("success");
+    url.searchParams.delete("imageId");
+    url.searchParams.delete("session_id");
+    url.searchParams.delete("upsell");
+    window.history.replaceState({}, "", url.pathname + (url.search || ""));
   }, []);
 
   // Cleanup photo blob URL on unmount or replacement
@@ -116,6 +189,16 @@ export default function WallpaperStudio({ palette }: Props) {
       value: 0.99,
       imageId: result.imageId,
     });
+    // Stash the watermarked preview under the imageId so the success
+    // state can recover it for the canvas upsell mockup (the page
+    // remounts after the Stripe redirect, so component state is lost).
+    // We can't key by sessionId yet because Stripe hasn't minted one;
+    // we re-key on return inside the success effect.
+    try {
+      localStorage.setItem(`wp_preview_pending_${result.imageId}`, result.preview);
+    } catch {
+      /* private mode — modal will fall back to a 🐾 placeholder */
+    }
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
@@ -161,7 +244,15 @@ export default function WallpaperStudio({ palette }: Props) {
 
   if (purchaseSuccess) {
     return (
-      <div className="bg-white rounded-3xl shadow-sm border-2 border-brand-green/20 p-8 sm:p-12 text-center max-w-xl mx-auto animate-fade-in-up">
+      <>
+        {upsell && (
+          <WallpaperUpsellModal
+            originalSessionId={upsell.originalSessionId}
+            portraitDataUrl={upsell.portraitDataUrl}
+            expiresAt={upsell.expiresAt}
+          />
+        )}
+        <div className="bg-white rounded-3xl shadow-sm border-2 border-brand-green/20 p-8 sm:p-12 text-center max-w-xl mx-auto animate-fade-in-up">
         <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-brand-green/10 flex items-center justify-center">
           <svg className="w-9 h-9 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -186,6 +277,7 @@ export default function WallpaperStudio({ palette }: Props) {
           Make another wallpaper
         </button>
       </div>
+      </>
     );
   }
 
