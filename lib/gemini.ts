@@ -55,80 +55,22 @@ export function isValidWallpaperHex(hex: string): hex is WallpaperColorHex {
   return WALLPAPER_PALETTE.some((c) => c.hex.toLowerCase() === hex.toLowerCase());
 }
 
-function wallpaperPrompt(colorName: string, hex: string): string {
-  // Trimmed from a ~100-line spec down to ~25 lines after measuring
-  // that the long prompt was a major contributor to Gemini's 100-300s
-  // response times. Distilled to the constraints that actually drive
-  // output quality:
-  //   - Pet recognizability (face/markings/eyes)
-  //   - Polished cel-shaded illustration style (not photoreal/oil)
-  //   - NO outline / halo / edge ring around pet (was a real bug)
-  //   - Solid background, edge-to-edge, no decorations
-  //   - Pet head high, body crops at bottom edge, fills 80%+ of frame
-  // The Sharp pipeline downstream upscales and center-crops, so the
-  // exact percentages don't have to be obsessively precise here.
-  return `Transform the pet in the photo into a polished cel-shaded digital illustration on a solid ${colorName} (${hex}) background, for use as a phone wallpaper.
-
-PET: preserve exact likeness — face shape, fur pattern, eye/nose color, ear shape, markings, any worn accessory (collar/bandana). Anyone who knows this pet must instantly recognize them as this individual, not a generic breed example.
-
-STYLE: smooth flat-color fills with cel-shaded shadow blocks (not blurry gradients, not photoreal hair). Eyes detailed and expressive with catchlight. Subtle light from upper-left. NOT photorealistic, NOT oil painting, NOT 3D.
-
-PET EDGE: silhouette blends directly into the background — NO outline, NO stroke, NO halo, NO edge ring, NO drop shadow. The pet's outer pixels should be the same color as the background. No "sticker" effect.
-
-BACKGROUND: 100% solid ${colorName} (hex ${hex}), edge to edge, every pixel. No texture, gradient, pattern, border, frame, or decoration. No shadows.
-
-COMPOSITION: pet's head + chest fill the frame. Head sits 12–18% from the top. Body extends OFF the bottom edge (cropped — don't show where it ends). Pet's silhouette is 65–75% of canvas width, centered horizontally, facing camera. Only a thin strip of background above the head; equal margins left and right; nothing below.
-
-OUTPUT: square 1:1. No text, logos, watermarks, or signature anywhere in the image.`;
-}
-
+// Wallpaper generation is delegated to fal.ai (Flux Dev img2img).
+// Reason: Gemini 2.5 Flash Image had 25-300s+ latency with 5-15%
+// failure rate on prod. fal.ai responds in 1.5-3s with 99%+
+// reliability. Single-pet and multi-pet stay on Gemini below —
+// different aesthetic, different model, working fine.
+//
+// Diagnostic instrumentation lives inside lib/fal-wallpaper.ts —
+// each step writes to EventLog so we can pinpoint where any hang
+// originates without needing Vercel function logs.
 export async function generateWallpaperPortrait(
   petPhotoBuffer: Buffer,
   colorName: string,
   hex: string
 ): Promise<Buffer> {
-  const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
-    { text: wallpaperPrompt(colorName, hex) },
-    {
-      inlineData: {
-        mimeType: "image/png",
-        data: petPhotoBuffer.toString("base64"),
-      },
-    },
-  ];
-
-  // Optional style reference image — included if references/wallpaper.jpg
-  // exists. Anchors the aesthetic more reliably than text alone. Falls
-  // through to text-only if the reference isn't shipped yet.
-  const refPath = path.join(process.cwd(), "references", "wallpaper.jpg");
-  if (fs.existsSync(refPath)) {
-    const refBuffer = fs.readFileSync(refPath);
-    parts.push({
-      inlineData: {
-        mimeType: "image/jpeg",
-        data: refBuffer.toString("base64"),
-      },
-    });
-  }
-
-  const response = await getAI().models.generateContent({
-    model: "gemini-2.5-flash-image",
-    contents: [{ role: "user", parts }],
-    config: {
-      responseModalities: ["IMAGE", "TEXT"],
-    },
-  });
-
-  const responseParts = response.candidates?.[0]?.content?.parts;
-  if (!responseParts) throw new Error("No response from Gemini");
-
-  for (const part of responseParts) {
-    if (part.inlineData?.data) {
-      return Buffer.from(part.inlineData.data, "base64");
-    }
-  }
-
-  throw new Error("No image data in Gemini response");
+  const { generateWallpaperViaFalAi } = await import("./fal-wallpaper");
+  return generateWallpaperViaFalAi(petPhotoBuffer, colorName, hex);
 }
 
 export async function generatePortrait(

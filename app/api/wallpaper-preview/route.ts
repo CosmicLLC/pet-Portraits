@@ -43,7 +43,27 @@ function sameOrigin(req: NextRequest): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  // Diagnostic trace — writes each step + elapsed-ms to EventLog so we
+  // can see EXACTLY where the prod pipeline hangs without needing
+  // Vercel function logs (which the CLI has been returning empty).
+  // Each step's "info" entry is a tombstone: if the last EventLog row
+  // for this traceId says "step X complete", the function died at
+  // step X+1. fire-and-forget so logging itself doesn't block the
+  // request flow.
+  const traceId = Math.random().toString(36).slice(2, 10);
+  const t0 = Date.now();
+  const trace = (step: string, extra?: Record<string, unknown>) => {
+    const elapsed = Date.now() - t0;
+    logEvent("info", "wallpaper-preview", `[${traceId}] ${step}`, {
+      traceId,
+      step,
+      elapsedMs: elapsed,
+      ...extra,
+    }).catch(() => {});
+  };
+
   try {
+    trace("0_start");
     const ua = req.headers.get("user-agent") || "";
     if (BOT_UA.test(ua)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -60,6 +80,7 @@ export async function POST(req: NextRequest) {
         { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
       );
     }
+    trace("1_rate_limit_passed");
 
     const formData = await req.formData();
     const file = formData.get("photo");
@@ -80,9 +101,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const color = WALLPAPER_PALETTE.find((c) => c.hex.toLowerCase() === bgHex)!;
+    trace("2_formdata_parsed", { fileSize: file.size, bgHex });
 
+    const color = WALLPAPER_PALETTE.find((c) => c.hex.toLowerCase() === bgHex)!;
     const photoBuffer = Buffer.from(await file.arrayBuffer());
+    trace("3_buffer_extracted", { bufferBytes: photoBuffer.length });
 
     // 1) Generate the square minimalist portrait with the chosen bg color
     const squarePortrait = await generateWallpaperPortrait(
@@ -90,27 +113,27 @@ export async function POST(req: NextRequest) {
       color.name,
       color.hex
     );
+    trace("4_generation_complete", { outputBytes: squarePortrait.length });
 
     // 2) Extend to phone aspect (1290 × 2796) with edge-sampled bg
     const phoneAspect = await composePhoneWallpaper(squarePortrait);
+    trace("5_phone_aspect_composed", { phoneAspectBytes: phoneAspect.length });
 
-    // 3) Persist the unwatermarked phone-aspect version to private blob —
-    // the webhook fetches this on successful purchase and serves it via the
-    // signed download endpoint. We store the already-composed phone image
-    // (not the source square) so post-purchase fulfillment is just a copy.
+    // 3) Persist the unwatermarked phone-aspect version to private blob
     const imageId = uuidv4();
-    // Store as private — the unwatermarked HD wallpaper. Served only via
-    // the signed /api/download/[orderId]?type=wallpaper endpoint after
-    // purchase. Matches the pattern used for portrait blobs.
     const blob = await put(
       `wallpapers/${imageId}.jpg`,
       phoneAspect,
       { access: "private", addRandomSuffix: true, contentType: "image/jpeg" }
     );
+    trace("6_blob_put", { imageId });
 
     // 4) Watermark the phone-aspect copy for the preview the user sees.
     const watermarked = await applyWatermark(phoneAspect);
+    trace("7_watermark_applied", { watermarkedBytes: watermarked.length });
+
     const watermarkedDataUrl = `data:image/jpeg;base64,${watermarked.toString("base64")}`;
+    trace("8_response_ready");
 
     return NextResponse.json({
       ok: true,
@@ -122,8 +145,11 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     console.error("Wallpaper preview failed:", err);
-    await logEvent("error", "wallpaper-preview", "Generation failed", {
+    await logEvent("error", "wallpaper-preview", `[${traceId}] FAILED`, {
+      traceId,
+      elapsedMs: Date.now() - t0,
       error: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack?.slice(0, 800) : undefined,
     });
     return NextResponse.json(
       { error: "Wallpaper generation failed — try a clearer photo of your pet." },
