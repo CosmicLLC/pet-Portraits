@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import LandingHeader from "@/components/LandingHeader";
 import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import UploadStep from "@/components/UploadStep";
+import { fetchJson } from "@/lib/fetch-json";
 import StylePicker from "@/components/StylePicker";
 import GenerateButton from "@/components/GenerateButton";
 import PortraitPreview from "@/components/PortraitPreview";
@@ -220,9 +221,10 @@ export default function Home() {
         const formData = new FormData();
         formData.append("image", file);
         formData.append("style", useStyle);
-        const res = await fetch("/api/generate", { method: "POST", body: formData });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
+        const data = await fetchJson<{ watermarkedImage: string; imageId: string }>(
+          "/api/generate",
+          { method: "POST", body: formData }
+        );
         setStyle(useStyle);
         setWatermarkedImage(data.watermarkedImage);
         setImageId(data.imageId);

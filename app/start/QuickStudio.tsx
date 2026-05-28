@@ -8,6 +8,7 @@ import PortraitPreview from "@/components/PortraitPreview";
 import ProductSelector from "@/components/ProductSelector";
 import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import { track } from "@/lib/analytics";
+import { fetchJson } from "@/lib/fetch-json";
 
 // Inlined here (instead of importing from lib/gemini) because the gemini
 // module pulls in node:fs/path which can't run in a Client Component.
@@ -73,15 +74,24 @@ export default function QuickStudio() {
       const formData = new FormData();
       formData.append("image", file);
       formData.append("style", style);
-      const res = await fetch("/api/generate", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed");
+      const data = await fetchJson<{ watermarkedImage: string; imageId: string }>(
+        "/api/generate",
+        { method: "POST", body: formData }
+      );
       setWatermarkedImage(data.watermarkedImage);
       setImageId(data.imageId);
       setStep("preview");
       track({ name: "portrait_generated", style, imageId: data.imageId });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Generation failed — please try again or use a clearer photo.");
+      // fetchJson throws FetchJsonError with isUserFriendly messages
+      // for Vercel HTML error pages + timeouts + rate limits, so we
+      // can show the .message verbatim instead of the cryptic raw
+      // browser error ("Unexpected token A, An error o...").
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Generation failed — please try again with a clearer photo."
+      );
       setStep("pre");
     }
   }, [file, style]);

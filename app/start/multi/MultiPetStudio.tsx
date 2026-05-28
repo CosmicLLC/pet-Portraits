@@ -7,6 +7,7 @@ import PortraitPreview from "@/components/PortraitPreview";
 import ProductSelector from "@/components/ProductSelector";
 import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import { track } from "@/lib/analytics";
+import { fetchJson } from "@/lib/fetch-json";
 
 // Multi-pet portrait flow. Parallel to QuickStudio.tsx — they don't
 // share state. Workflow: pick count → upload N photos (optional names)
@@ -107,12 +108,10 @@ export default function MultiPetStudio() {
         if (slot.file) formData.append(`image${i}`, slot.file);
         formData.append(`name${i}`, slot.name.trim());
       });
-      const res = await fetch("/api/generate-multi", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed");
+      const data = await fetchJson<{ watermarkedImage: string; imageId: string }>(
+        "/api/generate-multi",
+        { method: "POST", body: formData }
+      );
       setWatermarkedImage(data.watermarkedImage);
       setImageId(data.imageId);
       setStep("preview");

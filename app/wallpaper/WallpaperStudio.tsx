@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import WallpaperUpsellModal from "@/components/WallpaperUpsellModal";
 import { track } from "@/lib/analytics";
+import { fetchJson } from "@/lib/fetch-json";
 
 interface PaletteColor {
   name: string;
@@ -160,12 +161,12 @@ export default function WallpaperStudio({ palette }: Props) {
       const fd = new FormData();
       fd.append("photo", file);
       fd.append("bgHex", bgHex);
-      const res = await fetch("/api/wallpaper-preview", {
-        method: "POST",
-        body: fd,
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Generation failed");
+      const data = await fetchJson<{
+        imageId: string;
+        bgHex: string;
+        bgName: string;
+        preview: string;
+      }>("/api/wallpaper-preview", { method: "POST", body: fd });
       setResult({
         imageId: data.imageId,
         bgHex: data.bgHex,
