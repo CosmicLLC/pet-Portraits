@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 
 let _ai: GoogleGenAI | null = null;
-let _wallpaperAI: GoogleGenAI | null = null;
 
 function getAI(): GoogleGenAI {
   if (!_ai) {
@@ -14,28 +13,6 @@ function getAI(): GoogleGenAI {
     _ai = new GoogleGenAI({ apiKey, httpOptions: { timeout: 180000 } });
   }
   return _ai;
-}
-
-// Wallpaper-specific Gemini client with an aggressive 30s per-request
-// timeout. Diagnostic on 2026-05-28 showed Gemini responds in 7-10s
-// when the connection is healthy, but the SDK was waiting the full
-// 180s default on intermittent "fetch failed" connection drops —
-// which caused Vercel to kill the function at its 300s ceiling.
-// Capping per-request at 30s + a single retry below means the
-// worst case is ~60s instead of 300s, and we get a real catch
-// block (instead of a silent function kill) on every failure.
-function getWallpaperAI(): GoogleGenAI {
-  if (!_wallpaperAI) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error("GEMINI_API_KEY environment variable is not set");
-    }
-    _wallpaperAI = new GoogleGenAI({
-      apiKey,
-      httpOptions: { timeout: 30_000 },
-    });
-  }
-  return _wallpaperAI;
 }
 
 export const STYLE_PROMPTS: Record<string, string> = {
@@ -134,60 +111,24 @@ export async function generateWallpaperPortrait(
     });
   }
 
-  // Call Gemini with a per-request 30s timeout + one retry on
-  // transient failure. Diagnosed cause: the SDK was waiting the full
-  // 180s default on dropped connections, then Vercel killed the
-  // function at its 300s ceiling without our catch block ever
-  // running. With 30s + 1 retry, worst case is ~60s and every failure
-  // surfaces as a clean JSON error to the client.
-  const aiClient = getWallpaperAI();
-  const maxAttempts = 2;
-  let lastErr: Error | null = null;
+  const response = await getAI().models.generateContent({
+    model: "gemini-2.5-flash-image",
+    contents: [{ role: "user", parts }],
+    config: {
+      responseModalities: ["IMAGE", "TEXT"],
+    },
+  });
 
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      const response = await aiClient.models.generateContent({
-        model: "gemini-2.5-flash-image",
-        contents: [{ role: "user", parts }],
-        config: {
-          responseModalities: ["IMAGE", "TEXT"],
-        },
-      });
+  const responseParts = response.candidates?.[0]?.content?.parts;
+  if (!responseParts) throw new Error("No response from Gemini");
 
-      const responseParts = response.candidates?.[0]?.content?.parts;
-      if (!responseParts) throw new Error("No response from Gemini");
-
-      for (const part of responseParts) {
-        if (part.inlineData?.data) {
-          return Buffer.from(part.inlineData.data, "base64");
-        }
-      }
-
-      throw new Error("No image data in Gemini response");
-    } catch (err) {
-      lastErr = err instanceof Error ? err : new Error(String(err));
-      // Don't retry on "no image data" / "no response" — those mean
-      // Gemini returned a valid HTTP response but refused to generate
-      // (content policy, safety filter, etc). Retrying won't help.
-      const message = lastErr.message || "";
-      const isTransient =
-        message.toLowerCase().includes("fetch failed") ||
-        message.toLowerCase().includes("timeout") ||
-        message.toLowerCase().includes("network") ||
-        message.toLowerCase().includes("econn") ||
-        message.toLowerCase().includes("etimedout");
-      if (!isTransient || attempt >= maxAttempts) {
-        throw lastErr;
-      }
-      // Short backoff before retry — diagnostic showed the next
-      // attempt often succeeds immediately, so a long backoff would
-      // just waste the customer's time.
-      await new Promise((r) => setTimeout(r, 500));
+  for (const part of responseParts) {
+    if (part.inlineData?.data) {
+      return Buffer.from(part.inlineData.data, "base64");
     }
   }
-  // Unreachable — the loop always throws or returns — but TypeScript
-  // doesn't know that.
-  throw lastErr ?? new Error("Wallpaper generation failed");
+
+  throw new Error("No image data in Gemini response");
 }
 
 export async function generatePortrait(
