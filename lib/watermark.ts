@@ -92,22 +92,24 @@ export async function applyWatermark(imageBuffer: Buffer): Promise<Buffer> {
   const word = renderWord("PREVIEW", pixel, "#ffffff", 0.55);
   const wordShadow = renderWord("PREVIEW", pixel, "#000000", 0.4);
 
-  // Tile the word diagonally across the image. Spacing has TWO floors:
-  //   1) word.width + pixel*8 (and word.height + pixel*10) — guarantees
-  //      tiles don't overlap horizontally / row-spacing doesn't collide.
-  //   2) image-proportional minimums — guarantees the TOTAL tile count
-  //      stays bounded even on tall phone-aspect canvases (1290×2796).
-  // Without floor #2, a 2796-tall wallpaper at pixel=15 would generate
-  // 213k+ SVG <rect> elements (vs ~42k on a 1024×1024 portrait), which
-  // hangs librsvg/Sharp's composite indefinitely on Vercel. Diagnostic
-  // trace on 2026-05-28 caught this as the wallpaper-preview pipeline's
-  // actual failure point — every blame on Gemini/fal/network for the
-  // past 3hrs was misattributed; this function was always the cause.
-  const tileSpacingX = Math.max(word.width + pixel * 8, width * 0.18);
-  const tileSpacingY = Math.max(word.height + pixel * 10, height * 0.12);
+  // Tile the word diagonally across the image, with a HARD CAP on rows
+  // and cols. The hard cap is what protects us — without it, a tall
+  // 1290×2796 wallpaper at pixel=15 generates 200k+ SVG <rect> elements
+  // (vs ~42k on a 1024×1024 portrait), which hangs librsvg/Sharp's
+  // composite indefinitely on Vercel. Diagnostic trace on 2026-05-28
+  // pinpointed this as the wallpaper-preview pipeline's actual failure
+  // point — every blame on Gemini/fal/network for the past 3hrs was
+  // misattributed; this function was always the cause.
+  //
+  // Cap math: MAX_HALF = 5 → loop produces 2*5 × 2*5 = 100 tiles max,
+  // each with ~196 rects × 2 (word + shadow) = ~39k rects total. Sharp/
+  // librsvg renders that in well under 1s.
+  const MAX_HALF = 5;
+  const tileSpacingX = word.width + pixel * 8;
+  const tileSpacingY = word.height + pixel * 10;
   const diag = Math.ceil(Math.sqrt(width * width + height * height));
-  const cols = Math.ceil(diag / tileSpacingX) + 4;
-  const rows = Math.ceil(diag / tileSpacingY) + 4;
+  const cols = Math.min(MAX_HALF, Math.ceil(diag / tileSpacingX) + 4);
+  const rows = Math.min(MAX_HALF, Math.ceil(diag / tileSpacingY) + 4);
 
   let tiles = "";
   for (let r = -rows; r < rows; r++) {
