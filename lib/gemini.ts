@@ -56,56 +56,30 @@ export function isValidWallpaperHex(hex: string): hex is WallpaperColorHex {
 }
 
 function wallpaperPrompt(colorName: string, hex: string): string {
-  return `The image is a pet photo. Transform the pet into a polished digital illustration phone wallpaper on a completely solid ${colorName} (${hex}) background.
+  // Trimmed from a ~100-line spec down to ~25 lines after measuring
+  // that the long prompt was a major contributor to Gemini's 100-300s
+  // response times. Distilled to the constraints that actually drive
+  // output quality:
+  //   - Pet recognizability (face/markings/eyes)
+  //   - Polished cel-shaded illustration style (not photoreal/oil)
+  //   - NO outline / halo / edge ring around pet (was a real bug)
+  //   - Solid background, edge-to-edge, no decorations
+  //   - Pet head high, body crops at bottom edge, fills 80%+ of frame
+  // The Sharp pipeline downstream upscales and center-crops, so the
+  // exact percentages don't have to be obsessively precise here.
+  return `Transform the pet in the photo into a polished cel-shaded digital illustration on a solid ${colorName} (${hex}) background, for use as a phone wallpaper.
 
-LIKENESS — preserve exactly:
-- The pet's specific face shape, fur color pattern, ear shape and angle, eye color, nose color, muzzle markings, and breed character must be unmistakable
-- Anyone who knows this pet must instantly recognize THIS specific individual — not a generic example of its breed
-- Do NOT "average" toward typical breed appearance; preserve the individual's quirks
-- Preserve any accessory the pet is wearing (collar, bandana, bowtie, harness, name tag) and render it in the same illustration style
+PET: preserve exact likeness — face shape, fur pattern, eye/nose color, ear shape, markings, any worn accessory (collar/bandana). Anyone who knows this pet must instantly recognize them as this individual, not a generic breed example.
 
-STYLE — polished flat digital illustration (think Procreate / vector portrait, the look used in premium Etsy pet wallpaper listings):
-- Smooth flat color fills with cel-shading: defined shadow shapes (not soft blurry gradients) showing where light falls on fur
-- Light direction: subtle, from upper-left
-- Eyes are the focal point — render them with full detail, catchlight highlights, defined iris pattern, expressive
-- Nose: painterly with a single highlight reflection, dimensional
-- Fur rendered as flat blocks of color with darker shadow blocks suggesting volume — not photoreal hair-by-hair, but more refined than basic flat shapes
-- Whiskers (on cats) drawn as fine lines
-- Tongues (if mouth is open) painterly with highlight
-- Clean digital illustration edges — slightly soft, not vector-sharp, not photoreal
-- NOT photorealistic, NOT an oil painting, NOT 3D-rendered, NO black line art outlines around the pet
+STYLE: smooth flat-color fills with cel-shaded shadow blocks (not blurry gradients, not photoreal hair). Eyes detailed and expressive with catchlight. Subtle light from upper-left. NOT photorealistic, NOT oil painting, NOT 3D.
 
-PET EDGE — critical, this is failing in current output:
-- The pet's silhouette must blend DIRECTLY into the background color with NO visible boundary line
-- NO outline, NO stroke, NO border, NO halo, NO edge highlight, NO drop shadow, NO contrasting rim of any color around the pet
-- NO "sticker" or "cut-out" effect — the pet must NOT look like a separate object pasted onto the background
-- The pet's outer edge pixels should be the same color as the background pixels immediately outside them, with only a soft 1-2 pixel anti-alias transition — never a distinct contrasting line
-- If you would normally add a thin outline for definition, DO NOT — let the shading inside the pet's silhouette carry the form
+PET EDGE: silhouette blends directly into the background — NO outline, NO stroke, NO halo, NO edge ring, NO drop shadow. The pet's outer pixels should be the same color as the background. No "sticker" effect.
 
-BACKGROUND — strict, no exceptions:
-- 100% solid uniform ${colorName} (hex ${hex}) field, edge to edge, every single pixel
-- NO texture, NO gradient, NO pattern, NO border, NO frame
-- NO shadow under or behind or around the pet
-- NO other elements, no text, no logos, no decorative shapes
-- The background color must extend cleanly to all four edges
+BACKGROUND: 100% solid ${colorName} (hex ${hex}), edge to edge, every pixel. No texture, gradient, pattern, border, frame, or decoration. No shadows.
 
-COMPOSITION — this is the most important section, follow precisely (the image becomes a phone wallpaper where the pet must DOMINATE the screen, much larger than a centered portrait):
-- Subject: pet's head, neck, and upper chest fill the frame — render as if zoomed in close, pet appearing to emerge from below the bottom edge of the screen
-- The pet's body extends OFF THE BOTTOM EDGE of the canvas — chest/shoulders bleed past the bottom edge so the viewer cannot see where the body ends
-- The pet's silhouette occupies 65-75% of the canvas WIDTH — the pet is LARGE, filling most of the frame from edge to edge (the rendering pipeline upscales and center-crops, so this becomes ~80% of the final phone wallpaper width)
-- The pet's head + visible body fills 80-90% of the canvas vertically
-- Top of the pet's head sits approximately 12-18% down from the top edge of the canvas — head is high, close to the top
-- Pet's EYES sit roughly 35-45% down from the top edge (just above the vertical midline)
-- Pet's NOSE aligned with the horizontal center axis — perfectly centered left-to-right
-- Pet faces the camera directly, head straight forward or with at most a 10-15° tilt
-- ONLY 12-18% of the canvas (top strip, above the pet's head) is empty background — this is the only background showing
-- NO empty background below the pet — the body extends to and past the bottom edge
-- Equal background margins on the LEFT and RIGHT of the pet's silhouette
-- Symmetrical breathing room left and right
+COMPOSITION: pet's head + chest fill the frame. Head sits 12–18% from the top. Body extends OFF the bottom edge (cropped — don't show where it ends). Pet's silhouette is 65–75% of canvas width, centered horizontally, facing camera. Only a thin strip of background above the head; equal margins left and right; nothing below.
 
-OUTPUT:
-- Square 1:1 aspect ratio, high resolution
-- No text, no watermarks, no logos, no signature, no border anywhere in the image`;
+OUTPUT: square 1:1. No text, logos, watermarks, or signature anywhere in the image.`;
 }
 
 export async function generateWallpaperPortrait(
