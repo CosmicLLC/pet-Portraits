@@ -92,13 +92,19 @@ export async function applyWatermark(imageBuffer: Buffer): Promise<Buffer> {
   const word = renderWord("PREVIEW", pixel, "#ffffff", 0.55);
   const wordShadow = renderWord("PREVIEW", pixel, "#000000", 0.4);
 
-  // Tile the word diagonally across the image. Spacing tightened (8/10 from
-  // 12/18) so corner-crop attacks can't extract an unwatermarked square —
-  // any 256×256 region of the result image contains at least one "PREVIEW".
-  // +4 rows/cols of overshoot guarantees the rotated tile pattern fills past
-  // the image edges with no exposed corner triangles.
-  const tileSpacingX = word.width + pixel * 8;
-  const tileSpacingY = word.height + pixel * 10;
+  // Tile the word diagonally across the image. Spacing has TWO floors:
+  //   1) word.width + pixel*8 (and word.height + pixel*10) — guarantees
+  //      tiles don't overlap horizontally / row-spacing doesn't collide.
+  //   2) image-proportional minimums — guarantees the TOTAL tile count
+  //      stays bounded even on tall phone-aspect canvases (1290×2796).
+  // Without floor #2, a 2796-tall wallpaper at pixel=15 would generate
+  // 213k+ SVG <rect> elements (vs ~42k on a 1024×1024 portrait), which
+  // hangs librsvg/Sharp's composite indefinitely on Vercel. Diagnostic
+  // trace on 2026-05-28 caught this as the wallpaper-preview pipeline's
+  // actual failure point — every blame on Gemini/fal/network for the
+  // past 3hrs was misattributed; this function was always the cause.
+  const tileSpacingX = Math.max(word.width + pixel * 8, width * 0.18);
+  const tileSpacingY = Math.max(word.height + pixel * 10, height * 0.12);
   const diag = Math.ceil(Math.sqrt(width * width + height * height));
   const cols = Math.ceil(diag / tileSpacingX) + 4;
   const rows = Math.ceil(diag / tileSpacingY) + 4;
