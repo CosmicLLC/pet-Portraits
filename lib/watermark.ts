@@ -93,18 +93,19 @@ export async function applyWatermark(imageBuffer: Buffer): Promise<Buffer> {
   const wordShadow = renderWord("PREVIEW", pixel, "#000000", 0.4);
 
   // Tile the word diagonally across the image, with a HARD CAP on rows
-  // and cols. The hard cap is what protects us — without it, a tall
-  // 1290×2796 wallpaper at pixel=15 generates 200k+ SVG <rect> elements
-  // (vs ~42k on a 1024×1024 portrait), which hangs librsvg/Sharp's
-  // composite indefinitely on Vercel. Diagnostic trace on 2026-05-28
-  // pinpointed this as the wallpaper-preview pipeline's actual failure
-  // point — every blame on Gemini/fal/network for the past 3hrs was
-  // misattributed; this function was always the cause.
+  // and cols. Diagnostic trace on 2026-05-28 pinpointed this function
+  // as the wallpaper-preview pipeline's actual failure point on a
+  // 1290×2796 canvas — Sharp/librsvg rasterization scales with both
+  // rect count AND output canvas area.
   //
-  // Cap math: MAX_HALF = 5 → loop produces 2*5 × 2*5 = 100 tiles max,
-  // each with ~196 rects × 2 (word + shadow) = ~39k rects total. Sharp/
-  // librsvg renders that in well under 1s.
-  const MAX_HALF = 5;
+  // MAX_HALF = 3 → loop produces 2*3 × 2*3 = 36 tiles max, each ~196
+  // rects × 2 (word + shadow) ≈ 14k rects total. Rendering on a
+  // 1290×2796 canvas runs in ~5-10s; on a 1024×1024 portrait it's
+  // sub-second. Watermark density on the wallpaper is reduced
+  // (~430×930 per tile cell) but still defeats casual crop-out
+  // attempts — combined with the larger central stamp below, any
+  // crop containing the pet contains the watermark.
+  const MAX_HALF = 3;
   const tileSpacingX = word.width + pixel * 8;
   const tileSpacingY = word.height + pixel * 10;
   const diag = Math.ceil(Math.sqrt(width * width + height * height));
