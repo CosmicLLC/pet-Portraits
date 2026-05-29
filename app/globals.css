@@ -121,6 +121,22 @@ html {
   transform: translateY(0);
 }
 
+/* Mobile failsafe — show reveal content immediately, no JS required.
+   The scroll-reveal hides everything at opacity:0 until the client-side
+   IntersectionObserver adds .visible. On mobile that JS can lag behind a
+   scroll (slow hydration / observer timing), leaving whole sections — and
+   their lazy <img>s, which won't fetch while trapped in an invisible
+   subtree — permanently blank (observed live: the "Choose Your Style" grid
+   never appeared on a phone). On small screens we skip the hide entirely so
+   content and images load right away; the fade-up stays a desktop nicety. */
+@media (max-width: 767px) {
+  .reveal,
+  .reveal-stagger > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 /* Subtle parallax — element moves at a slower rate than scroll.
    Tied to the --parallax-y custom property set by a tiny JS hook. */
 [data-parallax] {
