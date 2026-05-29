@@ -194,6 +194,16 @@ export async function POST(req: NextRequest) {
       const { blobs } = await list({ prefix: blobPrefix });
       if (!blobs.length) {
         console.error("No blob found for imageId:", imageId, "prefix:", blobPrefix);
+        // Surface to EventLog — a PAID order whose source image is missing needs
+        // manual admin attention (refund or re-generate). console.error alone is
+        // invisible (Vercel function logs have been unreliable here).
+        await logEvent("error", "webhook", "Paid order but source blob not found", {
+          sessionId: session.id,
+          email,
+          imageId,
+          productType,
+          blobPrefix,
+        });
         return NextResponse.json({ error: "Image not found" }, { status: 404 });
       }
       const sourceBlobUrl = blobs[0].url;
@@ -305,16 +315,55 @@ export async function POST(req: NextRequest) {
         ? `${baseUrl}/api/download/${order.id}?token=${token}&exp=${exp}&type=wallpaper`
         : undefined;
 
-      if (productType === "digital" || productType === "wallpaper") {
-        await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl);
-        console.log(`Download email sent to ${email} for ${productType}`);
-      } else if (productType === "display" || productType === "mounted" || productType === "canvas") {
-        await sendPhysicalConfirmationEmail(email, productType);
-        console.log(`Physical order confirmed for ${email}`, { imageId, productType });
-      } else if (productType === "bundle") {
-        await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl);
-        await sendPhysicalConfirmationEmail(email, productType);
-        console.log(`Bundle fulfillment for ${email}`);
+      // Customer-facing fulfillment email. Wrapped so a transient Resend
+      // failure NEVER 500s the webhook: the Order row is already persisted and
+      // idempotency would short-circuit Stripe's retry (so the email would
+      // never be re-sent) — better to 200 and let an admin "Resend" than to
+      // silently drop it on retry. Mirrors the Prodigi block's isolation.
+      try {
+        if (productType === "bundle") {
+          // Bundle = digital download + physical canvas → send both.
+          await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl, {
+            kind: "portrait",
+          });
+          await sendPhysicalConfirmationEmail(email, productType);
+          console.log(`Bundle fulfillment for ${email}`);
+        } else if (productType === "digital" || productType === "wallpaper") {
+          await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl, {
+            kind: productType === "wallpaper" ? "wallpaper" : "portrait",
+          });
+          console.log(`Download email sent to ${email} for ${productType}`);
+        } else if (isPhysicalProduct(productType)) {
+          // ALL physical SKUs — display/mounted/canvas PLUS canvas_16x20,
+          // acrylic, metal, prism, phone_case, mug, pillow, cards, gallery_set.
+          // These previously fell through with NO email (Prodigi order created
+          // but the customer heard nothing). Now every paid physical order
+          // gets a confirmation.
+          await sendPhysicalConfirmationEmail(email, productType);
+          console.log(`Physical order confirmed for ${email}`, { imageId, productType });
+        } else {
+          // Unknown / unhandled productType (e.g. a standalone tier with no
+          // fulfillment path) — never silently swallow a paid order.
+          await logEvent("error", "webhook", "Paid order with no fulfillment branch", {
+            sessionId: session.id,
+            email,
+            productType,
+            imageId,
+          });
+        }
+      } catch (emailErr) {
+        console.error("Fulfillment email failed:", emailErr);
+        await logEvent(
+          "error",
+          "webhook",
+          "Fulfillment email failed (order persisted; admin can resend)",
+          {
+            orderId: order.id,
+            email,
+            productType,
+            error: emailErr instanceof Error ? emailErr.message : String(emailErr),
+          }
+        );
       }
 
       // ── Server-side conversion API for Meta + TikTok ─────────────────

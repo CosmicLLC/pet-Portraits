@@ -3,6 +3,8 @@
 // for signing up") so the new subscriber gets a useful payload
 // immediately. Closes with a soft CTA back to the homepage.
 
+import { unsubUrl } from "../unsub-token";
+
 const SITE_URL =
   process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || "https://pawmasterpiece.com";
 
@@ -11,7 +13,7 @@ interface RenderResult {
   text: string;
 }
 
-export function renderPhotoGuideEmail(): RenderResult {
+export function renderPhotoGuideEmail(email: string): RenderResult {
   const html = `
 <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF7F2;">
   <div style="background:#2D4A3E;padding:28px 32px;text-align:center;border-radius:12px 12px 0 0;">
@@ -72,7 +74,7 @@ export function renderPhotoGuideEmail(): RenderResult {
   </div>
   <div style="border-top:1px solid #E5E0D8;padding:24px 32px;text-align:center;">
     <p style="margin:0;color:#CCC;font-size:11px;">
-      <a href="${SITE_URL}/unsubscribe" style="color:#AAA;text-decoration:underline;">Unsubscribe</a>
+      <a href="${unsubUrl(email)}" style="color:#AAA;text-decoration:underline;">Unsubscribe</a>
       &nbsp;&middot;&nbsp; Paw Masterpiece, Cosmic Company LLC
     </p>
   </div>

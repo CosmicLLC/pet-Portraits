@@ -1,7 +1,6 @@
-import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
 import path from "path";
-import { STYLE_PROMPTS, type StyleKey } from "./gemini";
+import { STYLE_PROMPTS, generateGeminiImage, type StyleKey } from "./gemini";
 
 // Multi-pet portrait generation — a PARALLEL pipeline to lib/gemini.ts
 // `generatePortrait()`. Single-pet generation is untouched; this file
@@ -18,17 +17,6 @@ import { STYLE_PROMPTS, type StyleKey } from "./gemini";
 //  - Send all N pet photos + the style reference to Gemini in a single
 //    multimodal call — Gemini 2.5 Flash Image supports multi-image
 //    inputs natively.
-
-let _ai: GoogleGenAI | null = null;
-
-function getAI(): GoogleGenAI {
-  if (!_ai) {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) throw new Error("GEMINI_API_KEY environment variable is not set");
-    _ai = new GoogleGenAI({ apiKey, httpOptions: { timeout: 180000 } });
-  }
-  return _ai;
-}
 
 export const MIN_PETS = 2;
 export const MAX_PETS = 4;
@@ -163,24 +151,11 @@ export async function generateMultiPetPortrait(
     });
   }
 
-  const response = await getAI().models.generateContent({
-    model: "gemini-2.5-flash-image",
-    contents: [{ role: "user", parts }],
-    config: {
-      responseModalities: ["IMAGE", "TEXT"],
-    },
-  });
-
-  const responseParts = response.candidates?.[0]?.content?.parts;
-  if (!responseParts) throw new Error("No response from Gemini");
-
-  for (const part of responseParts) {
-    if (part.inlineData?.data) {
-      return Buffer.from(part.inlineData.data, "base64");
-    }
-  }
-
-  throw new Error("No image data in Gemini response");
+  // Same shared core as single-pet + wallpaper: bounded 80s/attempt timeout +
+  // 3x retry on stochastic empty generations, terminal on real safety blocks.
+  // Multi-pet sends N photos so a no-image whiff is at least as likely; the
+  // old single unguarded call meant ~1 in 5 multi-pet orders failed outright.
+  return generateGeminiImage(parts, `multi-pet:${style}`);
 }
 
 // ─── ImageId encoding ─────────────────────────────────────────────────

@@ -2,10 +2,12 @@
 // is downloadable on the page and pitches the framed-canvas upgrade — the
 // real revenue product behind the lead magnet.
 
+import { unsubUrl } from "../unsub-token";
+
 const SITE_URL =
   process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, "") || "https://pawmasterpiece.com";
 
-export function renderWallpaperThanksEmail(petName?: string): {
+export function renderWallpaperThanksEmail(email: string, petName?: string): {
   html: string;
   text: string;
   subject: string;
@@ -62,7 +64,7 @@ export function renderWallpaperThanksEmail(petName?: string): {
   </div>
   <div style="border-top:1px solid #E5E0D8;padding:24px 32px;text-align:center;">
     <p style="margin:0;color:#CCC;font-size:11px;">
-      <a href="${SITE_URL}/unsubscribe" style="color:#AAA;text-decoration:underline;">Unsubscribe</a>
+      <a href="${unsubUrl(email)}" style="color:#AAA;text-decoration:underline;">Unsubscribe</a>
       &nbsp;&middot;&nbsp; Paw Masterpiece, Cosmic Company LLC
     </p>
   </div>

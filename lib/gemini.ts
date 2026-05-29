@@ -96,19 +96,98 @@ COMPOSITION: the pet's head + chest fill the frame. Head sits 12-18% from the to
 OUTPUT: square 1:1. No text, logos, watermarks, or signature anywhere.`;
 }
 
-// Wallpaper generation via Gemini, made airtight:
-//   1) Dedicated 75s-timeout client (getWallpaperAI) bounds each call.
-//   2) Promise.race adds a hard 80s ceiling even if the SDK timeout
-//      misbehaves — guarantees this function never runs toward the
-//      300s Vercel ceiling.
-//   3) Single retry on transient (fetch/network/timeout/5xx) errors —
-//      the diagnostic showed the 2nd attempt usually succeeds when the
-//      1st drops a connection.
-//   4) Throws a clean Error on terminal failure so /api/wallpaper-
-//      preview's catch block logs it and returns a friendly message.
-// The watermark hang that plagued this SKU was NEVER Gemini — it was
-// applyWatermark on the 1290×2796 canvas, fixed by watermarking the
-// 1024×1024 square in the route. So Gemini is safe to use here again.
+// ─── Shared image-generation core ──────────────────────────────────────────
+// Used by ALL Gemini image flows: wallpaper, single-pet portrait, multi-pet
+// portrait. gemini-2.5-flash-image is STOCHASTIC — ~1 in 5 calls it returns a
+// text-only/empty response with no image part even for a perfectly valid
+// prompt (measured live 2026-05-28). The old single-shot callers treated that
+// as terminal, so ~22% of PAID-INTENT generations 500'd ("use a clearer photo"
+// on a perfectly good photo). This core:
+//   1) bounds each call with getWallpaperAI()'s 75s client + an 80s race, so
+//      it can never run toward the 300s Vercel ceiling;
+//   2) retries up to 3x on a stochastic empty generation (or a transient
+//      network/5xx error) — driving user-facing failures ~22% -> ~1% (0.22^3);
+//   3) keeps a genuine safety/policy block terminal (re-rolling can't help).
+type GeminiImagePart =
+  | { text: string }
+  | { inlineData: { mimeType: string; data: string } };
+
+export async function generateGeminiImage(
+  parts: GeminiImagePart[],
+  label: string
+): Promise<Buffer> {
+  const aiClient = getWallpaperAI();
+  const MAX_ATTEMPTS = 3;
+  let lastErr: Error | null = null;
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      // Hard 80s ceiling via Promise.race — belt to the SDK timeout's
+      // suspenders. The losing branch's request is abandoned but won't block.
+      const response = await Promise.race([
+        aiClient.models.generateContent({
+          model: "gemini-2.5-flash-image",
+          contents: [{ role: "user", parts }],
+          config: { responseModalities: ["IMAGE", "TEXT"] },
+        }),
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`Gemini ${label} call exceeded 80s`)),
+            80_000
+          )
+        ),
+      ]);
+
+      const candidate = response.candidates?.[0];
+      const responseParts = candidate?.content?.parts;
+      if (responseParts) {
+        for (const part of responseParts) {
+          if (part.inlineData?.data) {
+            return Buffer.from(part.inlineData.data, "base64");
+          }
+        }
+      }
+      // No image. Distinguish a HARD safety/policy block (terminal — re-rolling
+      // can't help) from a STOCHASTIC empty generation (re-rolling the same
+      // request almost always succeeds).
+      const blockReason = response.promptFeedback?.blockReason;
+      const finishReason = candidate?.finishReason;
+      const hardBlock =
+        blockReason ||
+        (finishReason &&
+          /SAFETY|PROHIBITED|BLOCK|RECITATION/i.test(String(finishReason)));
+      if (hardBlock) {
+        throw new Error(
+          `Gemini blocked the image (reason: ${blockReason || finishReason})`
+        );
+      }
+      throw new Error("No image data in Gemini response (empty generation)");
+    } catch (err) {
+      lastErr = err instanceof Error ? err : new Error(String(err));
+      const msg = lastErr.message.toLowerCase();
+      const isTransient =
+        msg.includes("fetch failed") ||
+        msg.includes("timeout") ||
+        msg.includes("exceeded 80s") ||
+        msg.includes("network") ||
+        msg.includes("econn") ||
+        msg.includes("etimedout") ||
+        msg.includes("503") ||
+        msg.includes("unavailable") ||
+        msg.includes("500") ||
+        msg.includes("empty generation");
+      const terminal = msg.includes("gemini blocked the image");
+      if (terminal || !isTransient || attempt >= MAX_ATTEMPTS) {
+        throw lastErr;
+      }
+      await new Promise((r) => setTimeout(r, 500));
+    }
+  }
+  throw lastErr ?? new Error(`Gemini ${label} generation failed`);
+}
+
+// Wallpaper generation — builds the prompt + parts, delegates to the shared
+// generateGeminiImage core for retry/timeout/hard-block handling.
 export async function generateWallpaperPortrait(
   petPhotoBuffer: Buffer,
   colorName: string,
@@ -138,92 +217,7 @@ export async function generateWallpaperPortrait(
     });
   }
 
-  const aiClient = getWallpaperAI();
-  // 3 attempts: gemini-2.5-flash-image is STOCHASTIC and intermittently
-  // returns a text-only / empty response with no image part (~1 in 5 calls,
-  // measured live 2026-05-28) even for a perfectly valid prompt. That whiff
-  // is NOT a safety refusal — re-rolling the exact same request almost
-  // always produces an image. With 2 attempts a ~22% whiff rate left ~5%
-  // user-facing failures; 3 attempts drives it to ~1% (0.22^3). Genuine
-  // safety/policy blocks (blockReason / finishReason) are still terminal so
-  // we don't waste 3 calls on a hard-blocked image.
-  const MAX_ATTEMPTS = 3;
-  let lastErr: Error | null = null;
-
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    try {
-      // Hard 80s ceiling via Promise.race — belt to the SDK timeout's
-      // suspenders. The losing branch's underlying request is abandoned
-      // (not cancelled) but won't block us.
-      const response = await Promise.race([
-        aiClient.models.generateContent({
-          model: "gemini-2.5-flash-image",
-          contents: [{ role: "user", parts }],
-          config: { responseModalities: ["IMAGE", "TEXT"] },
-        }),
-        new Promise<never>((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Gemini wallpaper call exceeded 80s")),
-            80_000
-          )
-        ),
-      ]);
-
-      const candidate = response.candidates?.[0];
-      const responseParts = candidate?.content?.parts;
-      if (responseParts) {
-        for (const part of responseParts) {
-          if (part.inlineData?.data) {
-            return Buffer.from(part.inlineData.data, "base64");
-          }
-        }
-      }
-      // No image in this response. Distinguish a HARD safety/policy block
-      // (re-rolling won't help — terminal) from a STOCHASTIC empty
-      // generation (the model just whiffed — re-rolling almost always
-      // succeeds). gemini-2.5-flash-image whiffs ~1 in 5; the old code
-      // treated every no-image as terminal, which is why ~22% of prod
-      // requests 500'd. Only blockReason / a safety-ish finishReason is a
-      // true terminal refusal.
-      const blockReason = response.promptFeedback?.blockReason;
-      const finishReason = candidate?.finishReason;
-      const hardBlock =
-        blockReason ||
-        (finishReason &&
-          /SAFETY|PROHIBITED|BLOCK|RECITATION/i.test(String(finishReason)));
-      if (hardBlock) {
-        throw new Error(
-          `Gemini blocked the image (reason: ${blockReason || finishReason})`
-        );
-      }
-      // Stochastic empty generation — retryable.
-      throw new Error("No image data in Gemini response (empty generation)");
-    } catch (err) {
-      lastErr = err instanceof Error ? err : new Error(String(err));
-      const msg = lastErr.message.toLowerCase();
-      const isTransient =
-        msg.includes("fetch failed") ||
-        msg.includes("timeout") ||
-        msg.includes("exceeded 80s") ||
-        msg.includes("network") ||
-        msg.includes("econn") ||
-        msg.includes("etimedout") ||
-        msg.includes("503") ||
-        msg.includes("unavailable") ||
-        msg.includes("500") ||
-        // Stochastic empty generation — re-rolling the same request almost
-        // always succeeds, so this is the MOST important retry case.
-        msg.includes("empty generation");
-      // A genuine safety/policy block is the only terminal no-image case —
-      // re-rolling can't get past it. Everything else gets another attempt.
-      const terminal = msg.includes("gemini blocked the image");
-      if (terminal || !isTransient || attempt >= MAX_ATTEMPTS) {
-        throw lastErr;
-      }
-      await new Promise((r) => setTimeout(r, 500));
-    }
-  }
-  throw lastErr ?? new Error("Wallpaper generation failed");
+  return generateGeminiImage(parts, "wallpaper");
 }
 
 export async function generatePortrait(
@@ -257,25 +251,11 @@ export async function generatePortrait(
     });
   }
 
-  const response = await getAI().models.generateContent({
-    model: "gemini-2.5-flash-image",
-    contents: [{ role: "user", parts }],
-    config: {
-      responseModalities: ["IMAGE", "TEXT"],
-    },
-  });
-
-  // Extract the generated image from the response
-  const responseParts = response.candidates?.[0]?.content?.parts;
-  if (!responseParts) throw new Error("No response from Gemini");
-
-  for (const part of responseParts) {
-    if (part.inlineData?.data) {
-      return Buffer.from(part.inlineData.data, "base64");
-    }
-  }
-
-  throw new Error("No image data in Gemini response");
+  // Delegate to the shared core: bounded timeout + 3x retry on stochastic
+  // empty generations (the ~22% no-image whiff), terminal on real safety
+  // blocks. Previously this was a single unguarded call, so ~1 in 5 paid
+  // portrait generations failed with "use a clearer photo" on a good photo.
+  return generateGeminiImage(parts, `portrait:${style}`);
 }
 
 // ─── Breed identification (free top-of-funnel tool) ────────────────────────

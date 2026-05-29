@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.FROM_EMAIL || "Paw Masterpiece <orders@pawmasterpiece.com>";
   if (apiKey) {
-    const { html, text, subject } = renderWallpaperThanksEmail(petName);
+    const { html, text, subject } = renderWallpaperThanksEmail(email, petName);
     const client = new Resend(apiKey);
     client.emails
       .send({ from: fromEmail, to: email, subject, html, text })

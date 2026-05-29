@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { unsubUrl } from "./unsub-token";
 
 let _resend: Resend | null = null;
 
@@ -46,8 +47,19 @@ function baseTemplate(content: string) {
   `;
 }
 
-export async function sendDownloadEmail(to: string, downloadUrl: string, wallpaperUrl?: string) {
-  const wallpaperSection = wallpaperUrl
+export async function sendDownloadEmail(
+  to: string,
+  downloadUrl: string,
+  wallpaperUrl?: string,
+  opts: { kind?: "portrait" | "wallpaper" } = {}
+) {
+  const isWallpaper = opts.kind === "wallpaper";
+
+  // Only show the separate "add-on wallpaper" block for a PORTRAIT order that
+  // also bought the $5 wallpaper add-on. For a standalone $0.99 wallpaper the
+  // main download already IS the wallpaper, so a second block would just be a
+  // duplicate link — skip it.
+  const wallpaperSection = !isWallpaper && wallpaperUrl
     ? `
     <hr style="border:none;border-top:1px solid #E5E0D8;margin:32px 0;" />
     <!-- Phone wallpaper download -->
@@ -68,19 +80,33 @@ export async function sendDownloadEmail(to: string, downloadUrl: string, wallpap
     </div>`
     : "";
 
+  const heading = isWallpaper
+    ? "Your wallpaper is ready! 🎉"
+    : "Your portrait is ready! 🎉";
+  const intro = isWallpaper
+    ? "Your full-resolution phone wallpaper is ready. Tap the button below to download it, then set it as your lock screen to show off your pet every time you check your phone."
+    : "Your full-resolution Paw Masterpiece portrait is waiting for you. Click below to download it before the link expires.";
+  const ctaLabel = isWallpaper ? "Download My Wallpaper" : "Download My Portrait";
+  const redoLine = isWallpaper
+    ? "Not happy with your wallpaper? Reply and we&rsquo;ll redo it for free."
+    : "Not happy with your portrait? Reply and we&rsquo;ll redo it for free.";
+  const subject = isWallpaper
+    ? "Your Paw Masterpiece wallpaper is ready 🐾"
+    : "Your Paw Masterpiece is ready to download 🐾";
+
   const content = `
-    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your portrait is ready! 🎉</h1>
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">${heading}</h1>
     <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 28px;">
-      Your full-resolution Paw Masterpiece portrait is waiting for you. Click below to download it before the link expires.
+      ${intro}
     </p>
 
     <!-- Download CTA -->
     <div style="text-align:center;margin-bottom:32px;">
       <a href="${downloadUrl}"
          style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:18px 48px;border-radius:50px;font-size:17px;font-weight:700;letter-spacing:-0.2px;">
-        Download My Portrait
+        ${ctaLabel}
       </a>
-      <p style="margin:12px 0 0;color:#AAA;font-size:12px;">Link expires in 24 hours</p>
+      <p style="margin:12px 0 0;color:#AAA;font-size:12px;">Link expires in 7 days</p>
     </div>
     ${wallpaperSection}
 
@@ -89,13 +115,13 @@ export async function sendDownloadEmail(to: string, downloadUrl: string, wallpap
     <!-- Canvas upsell -->
     <div style="background:#fff;border:2px solid #2D4A3E;border-radius:12px;padding:24px;text-align:center;margin-bottom:8px;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#C4A35A;">
-        Upgrade your order
+        ${isWallpaper ? "Love it on your wall too?" : "Upgrade your order"}
       </p>
       <h2 style="font-size:20px;color:#2D4A3E;margin:0 0 10px;font-weight:700;">
-        Turn it into a canvas print
+        Turn your pet into a canvas print
       </h2>
       <p style="color:#666;font-size:14px;line-height:1.6;margin:0 0 20px;">
-        Display your portrait on a stunning 8&times;12 framed gallery-quality canvas.
+        Display your pet on a stunning 8&times;12 framed gallery-quality canvas.
         Arrives in 5&ndash;7 days &mdash; the perfect gift for a pet lover.
       </p>
       <a href="${siteUrl()}"
@@ -105,14 +131,14 @@ export async function sendDownloadEmail(to: string, downloadUrl: string, wallpap
     </div>
 
     <p style="text-align:center;color:#AAA;font-size:12px;margin:16px 0 0;">
-      Not happy with your portrait? Reply and we&rsquo;ll redo it for free.
+      ${redoLine}
     </p>
   `;
 
   await getResend().emails.send({
     from: fromEmail(),
     to,
-    subject: "Your Paw Masterpiece is ready to download 🐾",
+    subject,
     html: baseTemplate(content),
   });
 }
@@ -192,7 +218,12 @@ export async function sendPhysicalConfirmationEmail(to: string, productType: str
 // winback are marketing and must carry the footer link).
 
 function unsubscribeFooter(email: string) {
-  const url = `${siteUrl()}/unsubscribe?email=${encodeURIComponent(email)}`;
+  // Use the HMAC-token URL (/api/unsubscribe?email=&token=) — the route that
+  // actually records the opt-out. The old "${siteUrl()}/unsubscribe?email="
+  // link hit the static status page with no token and silently did NOTHING,
+  // so every marketing email shipped a non-functional unsubscribe (CAN-SPAM
+  // violation). unsubUrl() matches what the campaign sender already uses.
+  const url = unsubUrl(email);
   return `
     <p style="text-align:center;color:#AAA;font-size:11px;margin:24px 0 0;">
       <a href="${url}" style="color:#AAA;text-decoration:underline;">Unsubscribe</a>

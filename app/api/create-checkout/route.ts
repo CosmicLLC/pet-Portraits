@@ -27,6 +27,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing imageId" }, { status: 400 });
     }
 
+    // Multi-pet is an UPGRADE/surcharge layered onto a base product — it's
+    // auto-added as a line item via the multiN_ imageId in the surcharge block
+    // below, and it has NO standalone fulfillment branch in the webhook. Reject
+    // it as a standalone purchase so a customer can never pay $20 for nothing.
+    if (productType === "multipet") {
+      return NextResponse.json(
+        { error: "Multi-pet is an add-on to a portrait, not a standalone product." },
+        { status: 400 }
+      );
+    }
+
     const isBundle = productType === "bundle";
     const hasPrice = isBundle
       ? PRICE_IDS.bundle || (PRICE_IDS.digital && PRICE_IDS.canvas)
@@ -36,7 +47,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    // Match the webhook's hardened fallback — if NEXT_PUBLIC_BASE_URL is ever
+    // unset in prod, success/cancel redirects must still go to the live site,
+    // not localhost. (Local dev sets the var in .env.local.)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://pawmasterpiece.com";
 
     // Bundle uses two line items if no dedicated bundle price is set
     const lineItems: { price: string; quantity: number }[] =
