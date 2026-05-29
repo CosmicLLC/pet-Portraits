@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { extractTracking, type ProdigiOrderResponse } from "@/lib/prodigi";
 import { sendPrintShippedEmail } from "@/lib/resend";
@@ -28,8 +29,13 @@ type ProdigiEvent = {
 
 export async function POST(req: NextRequest) {
   const expected = process.env.PRODIGI_WEBHOOK_SECRET;
-  const provided = req.nextUrl.searchParams.get("secret");
-  if (!expected || provided !== expected) {
+  const provided = req.nextUrl.searchParams.get("secret") || "";
+  // Constant-time compare to avoid leaking the secret via response timing.
+  const authed =
+    !!expected &&
+    provided.length === expected.length &&
+    timingSafeEqual(Buffer.from(provided), Buffer.from(expected));
+  if (!authed) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

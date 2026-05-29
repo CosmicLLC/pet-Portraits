@@ -169,7 +169,12 @@ export async function POST(req: NextRequest) {
     // 4) Persist the unwatermarked composite to private blob (the webhook
     //    fetches this on purchase and serves it via the signed download).
     const imageId = uuidv4();
-    const blob = await withTimeout(
+    // Store the UNwatermarked full-res asset privately. We deliberately do NOT
+    // keep/return the blob URL: it's the paid deliverable, and a Vercel Blob
+    // URL is a bearer capability (whoever holds it can GET the file). The
+    // webhook re-locates it server-side via list({ prefix: wallpapers/<id> }),
+    // so the client never needs — and must never receive — this URL.
+    await withTimeout(
       put(
         `wallpapers/${imageId}.jpg`,
         phoneAspect,
@@ -215,7 +220,6 @@ export async function POST(req: NextRequest) {
       bgHex: color.hex,
       bgName: color.name,
       preview: watermarkedDataUrl,
-      sourceUrl: blob.url,
     });
   } catch (err) {
     console.error("Wallpaper preview failed:", err);

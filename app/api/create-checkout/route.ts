@@ -4,6 +4,7 @@ import { getStripe, PRICE_IDS } from "@/lib/stripe";
 import { isPhysicalProduct } from "@/lib/products";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 import {
   REFERRAL_COOKIE,
   REFERRAL_DISCOUNT_CENTS,
@@ -17,6 +18,18 @@ import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit — each call mints a live Stripe Coupon + Checkout Session.
+    // Unauthenticated, so without this an attacker could flood Stripe object
+    // creation (cost / quota abuse). 15/min per IP is ample for real users.
+    const ip = clientIp(req.headers);
+    const limit = await rateLimit(`create-checkout:${ip}`, 15, 60);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many requests — please wait a moment and try again." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      );
+    }
+
     const { productType, imageId, customerEmail, addWallpaper, bgHex } = await req.json();
 
     if (!productType) {

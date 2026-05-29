@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe, PRICE_IDS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 // Wallpaper → canvas upsell checkout. Server is the source of truth on
 // whether the $10 discount window is still open: we look up the original
@@ -29,6 +30,16 @@ const ALLOWED_SOURCES: ReadonlySet<UpsellSource> = new Set<UpsellSource>([
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit — mints a live Stripe Checkout Session per call. Bound it.
+    const ip = clientIp(req.headers);
+    const limit = await rateLimit(`upsell-checkout:${ip}`, 15, 60);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many requests — please wait a moment and try again." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfterSeconds) } }
+      );
+    }
+
     const body = await req.json().catch(() => null) as
       | { originalSessionId?: string; upsellSource?: string }
       | null;

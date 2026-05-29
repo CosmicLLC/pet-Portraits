@@ -37,8 +37,15 @@ export async function POST(req: NextRequest) {
 
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const name = typeof body.name === "string" && body.name.trim() ? body.name.trim() : null;
-  const petName =
+  // Sanitize: petName is interpolated into the email's HTML body AND its
+  // Subject header. Strip HTML-significant chars (prevents stored XSS in the
+  // outbound email) and CR/LF/control chars (prevents subject header
+  // injection), then cap length. Anything left is plain text safe for both.
+  const rawPetName =
     typeof body.petName === "string" && body.petName.trim() ? body.petName.trim() : undefined;
+  const petName = rawPetName
+    ? rawPetName.replace(/[<>&"'`\r\n\t\0]/g, "").slice(0, 40) || undefined
+    : undefined;
 
   if (!isValidEmail(email)) {
     return NextResponse.json({ error: "Please enter a valid email" }, { status: 400 });
