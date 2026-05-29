@@ -126,6 +126,11 @@ const PHYSICAL_PRODUCT_TYPES = new Set<string>([
   "prism",
   "mug",
   "pillow",
+  // Post-purchase upsell: a discounted 8×12 framed canvas (its own Stripe
+  // price ID, defaults to the canvas price). MUST be physical — otherwise
+  // checkout skips shipping collection and the webhook never prints it, so
+  // the customer pays ~$59 and gets nothing. Fulfilled identically to canvas.
+  "canvas_upsell",
 ]);
 
 export function isPhysicalProduct(type: string): boolean {

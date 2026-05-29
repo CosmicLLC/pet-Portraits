@@ -66,6 +66,7 @@ const PRODUCT_SKU_ENV: Record<string, string> = {
   mounted: "PRODIGI_MOUNTED_SKU",
   canvas: "PRODIGI_CANVAS_SKU",
   bundle: "PRODIGI_CANVAS_SKU",
+  canvas_upsell: "PRODIGI_CANVAS_SKU", // discounted post-purchase canvas == canvas
   // 2026-04-24 expansion. Look up actual SKUs in the Prodigi catalog
   // (https://www.prodigi.com/products/) and paste into your env vars.
   canvas_16x20: "PRODIGI_CANVAS_16X20_SKU",
@@ -103,6 +104,7 @@ const PRODUCT_ATTRIBUTES: Record<string, Record<string, string>> = {
   mounted: {},
   canvas: { color: "black", wrap: "ImageWrap" },
   bundle: { color: "black", wrap: "ImageWrap" },
+  canvas_upsell: { color: "black", wrap: "ImageWrap" },
   canvas_16x20: { color: "black", wrap: "ImageWrap" },
   gallery_set: {},
   acrylic: {},

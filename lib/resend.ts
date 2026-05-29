@@ -149,6 +149,7 @@ const PRODUCT_EMAIL_LABEL: Record<string, string> = {
   mounted: "11×14 mounted print",
   canvas: "8×12 framed canvas print",
   bundle: "8×12 framed canvas print",
+  canvas_upsell: "8×12 framed canvas print",
 };
 
 export async function sendPhysicalConfirmationEmail(to: string, productType: string) {
