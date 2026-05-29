@@ -5,6 +5,7 @@ import {
   isValidWallpaperHex,
 } from "@/lib/gemini";
 import { composePhoneWallpaper } from "@/lib/wallpaper-compose";
+import { removeBackground } from "@/lib/bg-removal";
 import { applyWatermark } from "@/lib/watermark";
 import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
     const photoBuffer = Buffer.from(await file.arrayBuffer());
     trace("3_buffer_extracted", { bufferBytes: photoBuffer.length });
 
-    // 1) Generate the square minimalist portrait with the chosen bg color
+    // 1) Generate the square illustration (dog on ~solid bg) via Gemini.
     const squarePortrait = await generateWallpaperPortrait(
       photoBuffer,
       color.name,
@@ -133,17 +134,30 @@ export async function POST(req: NextRequest) {
     );
     trace("4_generation_complete", { outputBytes: squarePortrait.length });
 
-    // 2) Extend to phone aspect (1290 × 2796) — this is the UNwatermarked
-    //    full-resolution version that goes to the paying customer.
-    const phoneAspect = await withTimeout(
-      composePhoneWallpaper(squarePortrait),
-      20_000,
-      "composePhoneWallpaper(unwatermarked)"
+    // 2) Isolate the subject (fal birefnet) → transparent-bg PNG of just
+    //    the pet. This is what lets us composite onto a perfectly uniform
+    //    solid-color canvas, eliminating the horizontal seam the old
+    //    extend-with-sampled-color approach produced. birefnet preserves
+    //    light fur that a chroma-key would have eaten (validated 2026-05-28).
+    const cutout = await withTimeout(
+      removeBackground(squarePortrait),
+      45_000,
+      "removeBackground(birefnet)"
     );
-    trace("5_phone_aspect_composed", { phoneAspectBytes: phoneAspect.length });
+    trace("5_subject_isolated", { cutoutBytes: cutout.length });
 
-    // 3) Persist the unwatermarked phone-aspect version to private blob
-    //    (what the webhook fetches and ships on successful purchase).
+    // 3) Composite the cutout onto a clean 1290×2796 canvas filled with
+    //    the EXACT requested hex. Uniform background → no seam possible.
+    //    This is the UNwatermarked full-res the paying customer receives.
+    const phoneAspect = await withTimeout(
+      composePhoneWallpaper(cutout, color.hex),
+      20_000,
+      "composePhoneWallpaper"
+    );
+    trace("6_composed", { phoneAspectBytes: phoneAspect.length });
+
+    // 4) Persist the unwatermarked composite to private blob (the webhook
+    //    fetches this on purchase and serves it via the signed download).
     const imageId = uuidv4();
     const blob = await withTimeout(
       put(
@@ -154,48 +168,29 @@ export async function POST(req: NextRequest) {
       15_000,
       "blob.put"
     );
-    trace("6_blob_put", { imageId });
+    trace("7_blob_put", { imageId });
 
-    // 4) Watermark the SMALL square (1024×1024), NOT the big phone-aspect
-    //    image. The previous order watermarked the 1290×2796 canvas which
-    //    forced Sharp/librsvg to rasterize ~14-200k SVG <rect> elements
-    //    onto a 3.6 megapixel surface — 14-25s with huge variance and
-    //    occasional total hangs. On the 1024×1024 canvas, the same
-    //    operation runs in ~1-2s deterministically (proven by the
-    //    single-pet portrait flow which has always worked).
-    //
-    //    The customer sees a watermark on the PET portion of the image
-    //    (which is the only part with ownership value). The top/bottom
-    //    padding extension below has no watermark, but it's just solid
-    //    background color — replicating that color is trivial in any
-    //    editor, so a watermark there wouldn't add anti-theft value.
-    const watermarkedSquare = await withTimeout(
-      applyWatermark(squarePortrait),
-      20_000,
-      "applyWatermark(square)"
+    // 5) Build the watermarked preview. Downscale to 645×1398 FIRST, then
+    //    watermark the small canvas — watermarking the full 1290×2796 was
+    //    the 14-25s bottleneck (Sharp/librsvg rasterizing SVG over a 3.6MP
+    //    surface). On the half-res canvas it's ~1-2s. The watermark now
+    //    covers the WHOLE frame uniformly (no top/bottom discontinuity).
+    const small = await withTimeout(
+      sharp(phoneAspect).resize(645, 1398, { fit: "cover" }).png().toBuffer(),
+      10_000,
+      "downscale(preview)"
     );
-    trace("7_watermark_applied", { watermarkedBytes: watermarkedSquare.length });
-
-    // 5) Compose the watermarked square to phone aspect for the preview
-    const watermarkedPhoneAspect = await withTimeout(
-      composePhoneWallpaper(watermarkedSquare),
-      20_000,
-      "composePhoneWallpaper(watermarked)"
+    const watermarkedSmall = await withTimeout(
+      applyWatermark(small),
+      15_000,
+      "applyWatermark(preview)"
     );
-    trace("8_watermarked_extended", { bytes: watermarkedPhoneAspect.length });
+    trace("8_watermark_applied", { watermarkedBytes: watermarkedSmall.length });
 
-    // 6) Downscale + JPEG-compress for the response. The studio UI
-    //    displays the preview inside a 240×480 phone-shaped frame, so
-    //    full-resolution 1290×2796 (~3MB JPEG) is wasted bandwidth.
-    //    Half-resolution at JPEG quality 78 is visually identical at
-    //    the display size and drops the payload ~7x — kills the
-    //    "response takes 30s+ to transfer over residential network"
-    //    class of customer-visible failure.
+    // 6) JPEG-compress the watermarked preview for a small response payload
+    //    (~100KB vs ~3MB) — keeps response transfer fast on any network.
     const compressed = await withTimeout(
-      sharp(watermarkedPhoneAspect)
-        .resize(645, 1398, { fit: "cover" })
-        .jpeg({ quality: 78, mozjpeg: true })
-        .toBuffer(),
+      sharp(watermarkedSmall).jpeg({ quality: 78, mozjpeg: true }).toBuffer(),
       10_000,
       "compress(preview)"
     );

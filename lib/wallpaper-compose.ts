@@ -1,77 +1,73 @@
 import sharp from "sharp";
 
-// Phone wallpaper composition. Takes a square minimalist portrait (typically
-// 1024×1024 from Gemini) and extends it to a 9:19.5 phone-aspect canvas by
-// padding top and bottom with the SAME background color that's already in
-// the portrait. Edge-samples the corner pixel rather than using the user's
-// requested hex so any color drift from Gemini is matched seamlessly.
+// Phone wallpaper composition. Takes a background-removed subject cutout
+// (transparent PNG of just the pet, from lib/bg-removal.ts) and composites
+// it onto a perfectly uniform solid-color phone-aspect canvas.
+//
+// This REPLACES the old "upscale square + extend top with a sampled color"
+// approach, which produced a visible horizontal seam: the Gemini square's
+// rendered background never exactly matched the flat extension color, so
+// the junction showed a step (plus a watermark-texture discontinuity).
+// Building the background ourselves at the exact requested hex makes a
+// seam structurally impossible — the entire canvas is one uniform color.
 
 // iPhone 14 Pro / Pro Max — the most common modern phone aspect.
 export const WALLPAPER_W = 1290;
 export const WALLPAPER_H = 2796;
 
+// How much of the canvas height the pet should fill (bottom-anchored).
+// 0.68 = pet dominates the lower ~2/3, solid color fills the upper third
+// where the lock-screen clock lives. Tunable after visual QA.
+const SUBJECT_HEIGHT_FRACTION = 0.68;
+
 /**
- * Compose a phone-aspect wallpaper from a square minimalist portrait. The
- * pet stays centered horizontally and gets vertical padding above and below
- * filled with the portrait's edge color (which should match the requested
- * background — but we sample it to handle Gemini's slight color drift).
+ * Compose a phone-aspect wallpaper: solid `hex` background with the
+ * isolated `subjectCutout` (transparent PNG) bottom-anchored and
+ * horizontally centered. If the subject is wider than the canvas after
+ * scaling, the sides are center-cropped (keeps the head centered).
  */
-export async function composePhoneWallpaper(squareBuffer: Buffer): Promise<Buffer> {
-  // Sample a small block from the top-left corner of the portrait — that's
-  // background area, so it's the cleanest sample of the actual rendered
-  // background color. Use 8×8 + resize-to-1 to average out compression noise.
-  const sample = await sharp(squareBuffer)
-    .extract({ left: 4, top: 4, width: 16, height: 16 })
-    .resize(1, 1)
-    .raw()
+export async function composePhoneWallpaper(
+  subjectCutout: Buffer,
+  hex: string
+): Promise<Buffer> {
+  // 1) Trim the transparent padding so we have a tight bounding box of
+  //    just the pet — lets us control framing precisely regardless of
+  //    where Gemini placed the subject in its 1024² frame.
+  const trimmed = await sharp(subjectCutout)
+    .trim({ threshold: 10 })
     .toBuffer();
-  const r = sample[0];
-  const g = sample[1];
-  const b = sample[2];
+  const meta = await sharp(trimmed).metadata();
+  const subjW = meta.width || 1024;
+  const subjH = meta.height || 1024;
 
-  // Up-scale the source square LARGER than the phone width before placing
-  // it. The Gemini source is 1024×1024 and gets scaled to a 1700-pixel
-  // square — wider than the 1290 phone width, which means the sides get
-  // cropped (mostly empty background per the wallpaper prompt) while the
-  // pet appears much bigger in the final composition. Result: pet fills
-  // the bottom ~61% of the phone (1700/2796) instead of the bottom 46%
-  // (1290/2796) that a width-fit would give. Matches the Etsy-style
-  // pet-wallpaper reference where the pet dominates the lower 2/3 of the
-  // screen.
-  //
-  // The prompt asks Gemini to keep the pet's silhouette to 65-75% of the
-  // source-square width, which works out to roughly 75-85% of the final
-  // phone width after this scale-and-crop — within the 80% range visible
-  // in premium reference wallpapers.
-  const SOURCE_TARGET = 1700;
-  const upscaled = await sharp(squareBuffer)
-    .resize(SOURCE_TARGET, SOURCE_TARGET, { fit: "cover", position: "center" })
+  // 2) Scale the subject to fill SUBJECT_HEIGHT_FRACTION of the canvas
+  //    height. Width follows aspect ratio; if it exceeds the canvas
+  //    width, the composite step center-crops the overflow.
+  const targetH = Math.round(WALLPAPER_H * SUBJECT_HEIGHT_FRACTION);
+  const scaledW = Math.round((subjW * targetH) / subjH);
+  const resized = await sharp(trimmed)
+    .resize(scaledW, targetH, { fit: "fill" })
+    .png()
     .toBuffer();
 
-  // Center-crop horizontally to the phone width. Trims (SOURCE_TARGET -
-  // WALLPAPER_W) / 2 = 205px off each side — all background.
-  const horizontalCrop = Math.floor((SOURCE_TARGET - WALLPAPER_W) / 2);
-  const cropped = await sharp(upscaled)
-    .extract({
-      left: horizontalCrop,
-      top: 0,
+  // 3) Bottom-anchor + horizontally center. Negative `left` (when the
+  //    subject is wider than the canvas) makes Sharp crop the overflow
+  //    symmetrically. `top` places the bottom of the subject flush with
+  //    the canvas bottom → head lands ~32% down, body fills to the edge.
+  const left = Math.round((WALLPAPER_W - scaledW) / 2);
+  const top = WALLPAPER_H - targetH;
+
+  // 4) Build the uniform solid-color canvas at the EXACT requested hex
+  //    and composite the subject onto it. One flat color, no seam.
+  return sharp({
+    create: {
       width: WALLPAPER_W,
-      height: SOURCE_TARGET,
-    })
-    .toBuffer();
-
-  // Extend upward to reach 2796px phone height. The cropped block sits
-  // flush at the bottom (matching the prompt's "pet body extends off the
-  // bottom edge"), all the padding goes above the pet's head where the
-  // lock screen clock + home screen icons live.
-  return sharp(cropped)
-    .extend({
-      top: WALLPAPER_H - SOURCE_TARGET,
-      bottom: 0,
-      left: 0,
-      right: 0,
-      background: { r, g, b, alpha: 1 },
-    })
+      height: WALLPAPER_H,
+      channels: 4,
+      background: hex,
+    },
+  })
+    .composite([{ input: resized, top, left }])
     .jpeg({ quality: 92 })
     .toBuffer();
 }
