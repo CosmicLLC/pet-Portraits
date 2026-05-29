@@ -92,25 +92,17 @@ export async function applyWatermark(imageBuffer: Buffer): Promise<Buffer> {
   const word = renderWord("PREVIEW", pixel, "#ffffff", 0.55);
   const wordShadow = renderWord("PREVIEW", pixel, "#000000", 0.4);
 
-  // Tile the word diagonally across the image, with a HARD CAP on rows
-  // and cols. Diagnostic trace on 2026-05-28 pinpointed this function
-  // as the wallpaper-preview pipeline's actual failure point on a
-  // 1290×2796 canvas — Sharp/librsvg rasterization scales with both
-  // rect count AND output canvas area.
-  //
-  // MAX_HALF = 3 → loop produces 2*3 × 2*3 = 36 tiles max, each ~196
-  // rects × 2 (word + shadow) ≈ 14k rects total. Rendering on a
-  // 1290×2796 canvas runs in ~5-10s; on a 1024×1024 portrait it's
-  // sub-second. Watermark density on the wallpaper is reduced
-  // (~430×930 per tile cell) but still defeats casual crop-out
-  // attempts — combined with the larger central stamp below, any
-  // crop containing the pet contains the watermark.
-  const MAX_HALF = 3;
+  // Tile the word diagonally across the image. The previous MAX_HALF
+  // cap was a band-aid for wallpapers calling this on a 1290×2796
+  // canvas (~200k rects → minutes-long render). The REAL fix is to
+  // call applyWatermark BEFORE the phone-aspect extension, so the
+  // canvas here is always ~1024×1024 — fast and predictable.
+  // Watermark density restored to the original spec.
   const tileSpacingX = word.width + pixel * 8;
   const tileSpacingY = word.height + pixel * 10;
   const diag = Math.ceil(Math.sqrt(width * width + height * height));
-  const cols = Math.min(MAX_HALF, Math.ceil(diag / tileSpacingX) + 4);
-  const rows = Math.min(MAX_HALF, Math.ceil(diag / tileSpacingY) + 4);
+  const cols = Math.ceil(diag / tileSpacingX) + 4;
+  const rows = Math.ceil(diag / tileSpacingY) + 4;
 
   let tiles = "";
   for (let r = -rows; r < rows; r++) {

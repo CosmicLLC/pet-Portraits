@@ -10,6 +10,24 @@ import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
 import { logEvent } from "@/lib/events";
+import sharp from "sharp";
+
+// Defense-in-depth: every Sharp op wrapped with a 20s hard ceiling.
+// If anything ever regresses (a Sharp version bug, a huge image, a
+// pathological input), we get a clean catch-block error instead of a
+// 300s function timeout that bypasses our logging.
+async function withTimeout<T>(
+  promise: Promise<T>,
+  ms: number,
+  label: string
+): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} exceeded ${ms}ms`)), ms)
+    ),
+  ]);
+}
 
 export const runtime = "nodejs";
 // 300s ceiling (Pro plan max — same as admin/campaigns). Measured
@@ -115,25 +133,76 @@ export async function POST(req: NextRequest) {
     );
     trace("4_generation_complete", { outputBytes: squarePortrait.length });
 
-    // 2) Extend to phone aspect (1290 × 2796) with edge-sampled bg
-    const phoneAspect = await composePhoneWallpaper(squarePortrait);
+    // 2) Extend to phone aspect (1290 × 2796) — this is the UNwatermarked
+    //    full-resolution version that goes to the paying customer.
+    const phoneAspect = await withTimeout(
+      composePhoneWallpaper(squarePortrait),
+      20_000,
+      "composePhoneWallpaper(unwatermarked)"
+    );
     trace("5_phone_aspect_composed", { phoneAspectBytes: phoneAspect.length });
 
     // 3) Persist the unwatermarked phone-aspect version to private blob
+    //    (what the webhook fetches and ships on successful purchase).
     const imageId = uuidv4();
-    const blob = await put(
-      `wallpapers/${imageId}.jpg`,
-      phoneAspect,
-      { access: "private", addRandomSuffix: true, contentType: "image/jpeg" }
+    const blob = await withTimeout(
+      put(
+        `wallpapers/${imageId}.jpg`,
+        phoneAspect,
+        { access: "private", addRandomSuffix: true, contentType: "image/jpeg" }
+      ),
+      15_000,
+      "blob.put"
     );
     trace("6_blob_put", { imageId });
 
-    // 4) Watermark the phone-aspect copy for the preview the user sees.
-    const watermarked = await applyWatermark(phoneAspect);
-    trace("7_watermark_applied", { watermarkedBytes: watermarked.length });
+    // 4) Watermark the SMALL square (1024×1024), NOT the big phone-aspect
+    //    image. The previous order watermarked the 1290×2796 canvas which
+    //    forced Sharp/librsvg to rasterize ~14-200k SVG <rect> elements
+    //    onto a 3.6 megapixel surface — 14-25s with huge variance and
+    //    occasional total hangs. On the 1024×1024 canvas, the same
+    //    operation runs in ~1-2s deterministically (proven by the
+    //    single-pet portrait flow which has always worked).
+    //
+    //    The customer sees a watermark on the PET portion of the image
+    //    (which is the only part with ownership value). The top/bottom
+    //    padding extension below has no watermark, but it's just solid
+    //    background color — replicating that color is trivial in any
+    //    editor, so a watermark there wouldn't add anti-theft value.
+    const watermarkedSquare = await withTimeout(
+      applyWatermark(squarePortrait),
+      20_000,
+      "applyWatermark(square)"
+    );
+    trace("7_watermark_applied", { watermarkedBytes: watermarkedSquare.length });
 
-    const watermarkedDataUrl = `data:image/jpeg;base64,${watermarked.toString("base64")}`;
-    trace("8_response_ready");
+    // 5) Compose the watermarked square to phone aspect for the preview
+    const watermarkedPhoneAspect = await withTimeout(
+      composePhoneWallpaper(watermarkedSquare),
+      20_000,
+      "composePhoneWallpaper(watermarked)"
+    );
+    trace("8_watermarked_extended", { bytes: watermarkedPhoneAspect.length });
+
+    // 6) Downscale + JPEG-compress for the response. The studio UI
+    //    displays the preview inside a 240×480 phone-shaped frame, so
+    //    full-resolution 1290×2796 (~3MB JPEG) is wasted bandwidth.
+    //    Half-resolution at JPEG quality 78 is visually identical at
+    //    the display size and drops the payload ~7x — kills the
+    //    "response takes 30s+ to transfer over residential network"
+    //    class of customer-visible failure.
+    const compressed = await withTimeout(
+      sharp(watermarkedPhoneAspect)
+        .resize(645, 1398, { fit: "cover" })
+        .jpeg({ quality: 78, mozjpeg: true })
+        .toBuffer(),
+      10_000,
+      "compress(preview)"
+    );
+    trace("9_compressed", { compressedBytes: compressed.length });
+
+    const watermarkedDataUrl = `data:image/jpeg;base64,${compressed.toString("base64")}`;
+    trace("10_response_ready");
 
     return NextResponse.json({
       ok: true,
