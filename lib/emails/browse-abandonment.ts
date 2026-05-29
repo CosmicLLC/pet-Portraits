@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { unsubUrl } from "../unsub-token";
 
 const fromEmail = () =>
   process.env.FROM_EMAIL || "Paw Masterpiece <noreply@contact.pawmasterpiece.com>";
@@ -39,7 +40,11 @@ export async function sendBrowseAbandonmentEmail(to: string) {
           </div>
         </div>
         <div style="border-top:1px solid #E5E0D8;padding:24px 32px;text-align:center;">
-          <p style="margin:0;color:#AAA;font-size:12px;">Paw Masterpiece — Questions? Reply to this email.</p>
+          <p style="margin:0 0 6px;color:#AAA;font-size:12px;">Paw Masterpiece — Questions? Reply to this email.</p>
+          <p style="margin:0;color:#AAA;font-size:11px;">
+            <a href="${unsubUrl(to)}" style="color:#AAA;text-decoration:underline;">Unsubscribe</a>
+            &nbsp;&middot;&nbsp; Paw Masterpiece, Cosmic Company LLC
+          </p>
         </div>
       </div>
     `,
