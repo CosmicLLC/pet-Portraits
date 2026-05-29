@@ -139,7 +139,15 @@ export async function generateWallpaperPortrait(
   }
 
   const aiClient = getWallpaperAI();
-  const MAX_ATTEMPTS = 2;
+  // 3 attempts: gemini-2.5-flash-image is STOCHASTIC and intermittently
+  // returns a text-only / empty response with no image part (~1 in 5 calls,
+  // measured live 2026-05-28) even for a perfectly valid prompt. That whiff
+  // is NOT a safety refusal — re-rolling the exact same request almost
+  // always produces an image. With 2 attempts a ~22% whiff rate left ~5%
+  // user-facing failures; 3 attempts drives it to ~1% (0.22^3). Genuine
+  // safety/policy blocks (blockReason / finishReason) are still terminal so
+  // we don't waste 3 calls on a hard-blocked image.
+  const MAX_ATTEMPTS = 3;
   let lastErr: Error | null = null;
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
@@ -161,16 +169,35 @@ export async function generateWallpaperPortrait(
         ),
       ]);
 
-      const responseParts = response.candidates?.[0]?.content?.parts;
-      if (!responseParts) throw new Error("No response from Gemini");
-      for (const part of responseParts) {
-        if (part.inlineData?.data) {
-          return Buffer.from(part.inlineData.data, "base64");
+      const candidate = response.candidates?.[0];
+      const responseParts = candidate?.content?.parts;
+      if (responseParts) {
+        for (const part of responseParts) {
+          if (part.inlineData?.data) {
+            return Buffer.from(part.inlineData.data, "base64");
+          }
         }
       }
-      // Valid HTTP response but no image (safety filter / refusal) —
-      // retrying won't help, so throw immediately.
-      throw new Error("No image data in Gemini response");
+      // No image in this response. Distinguish a HARD safety/policy block
+      // (re-rolling won't help — terminal) from a STOCHASTIC empty
+      // generation (the model just whiffed — re-rolling almost always
+      // succeeds). gemini-2.5-flash-image whiffs ~1 in 5; the old code
+      // treated every no-image as terminal, which is why ~22% of prod
+      // requests 500'd. Only blockReason / a safety-ish finishReason is a
+      // true terminal refusal.
+      const blockReason = response.promptFeedback?.blockReason;
+      const finishReason = candidate?.finishReason;
+      const hardBlock =
+        blockReason ||
+        (finishReason &&
+          /SAFETY|PROHIBITED|BLOCK|RECITATION/i.test(String(finishReason)));
+      if (hardBlock) {
+        throw new Error(
+          `Gemini blocked the image (reason: ${blockReason || finishReason})`
+        );
+      }
+      // Stochastic empty generation — retryable.
+      throw new Error("No image data in Gemini response (empty generation)");
     } catch (err) {
       lastErr = err instanceof Error ? err : new Error(String(err));
       const msg = lastErr.message.toLowerCase();
@@ -183,10 +210,13 @@ export async function generateWallpaperPortrait(
         msg.includes("etimedout") ||
         msg.includes("503") ||
         msg.includes("unavailable") ||
-        msg.includes("500");
-      // "No image data" / "No response" are terminal — don't retry.
-      const terminal =
-        msg.includes("no image data") || msg.includes("no response from gemini");
+        msg.includes("500") ||
+        // Stochastic empty generation — re-rolling the same request almost
+        // always succeeds, so this is the MOST important retry case.
+        msg.includes("empty generation");
+      // A genuine safety/policy block is the only terminal no-image case —
+      // re-rolling can't get past it. Everything else gets another attempt.
+      const terminal = msg.includes("gemini blocked the image");
       if (terminal || !isTransient || attempt >= MAX_ATTEMPTS) {
         throw lastErr;
       }

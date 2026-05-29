@@ -127,10 +127,15 @@ export async function POST(req: NextRequest) {
     trace("3_buffer_extracted", { bufferBytes: photoBuffer.length });
 
     // 1) Generate the square illustration (dog on ~solid bg) via Gemini.
-    const squarePortrait = await generateWallpaperPortrait(
-      photoBuffer,
-      color.name,
-      color.hex
+    //    Wrapped in withTimeout for defense-in-depth: generateWallpaperPortrait
+    //    now re-rolls up to 3× on stochastic empty generations (each bounded
+    //    by an internal 80s ceiling), so a pathological all-hang could reach
+    //    ~240s. The 200s cap keeps total pipeline well under the 300s function
+    //    ceiling and yields a clean logged error instead of a hard timeout.
+    const squarePortrait = await withTimeout(
+      generateWallpaperPortrait(photoBuffer, color.name, color.hex),
+      200_000,
+      "generateWallpaperPortrait"
     );
     trace("4_generation_complete", { outputBytes: squarePortrait.length });
 
