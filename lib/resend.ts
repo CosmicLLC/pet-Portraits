@@ -150,6 +150,15 @@ const PRODUCT_EMAIL_LABEL: Record<string, string> = {
   canvas: "8×12 framed canvas print",
   bundle: "8×12 framed canvas print",
   canvas_upsell: "8×12 framed canvas print",
+  canvas_16x20: "16×20 framed canvas print",
+  gallery_set: "4-style gallery print set",
+  acrylic: "11×14 acrylic print",
+  metal: "11×14 metal print",
+  cards: "greeting cards (10-pack)",
+  phone_case: "custom phone case",
+  prism: "acrylic photo prism",
+  mug: "ceramic mug",
+  pillow: "throw pillow",
 };
 
 export async function sendPhysicalConfirmationEmail(to: string, productType: string) {
