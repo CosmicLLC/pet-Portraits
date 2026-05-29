@@ -56,6 +56,31 @@ export default function ScrollRevealInit() {
 
     revealAll()
 
+    // Scroll fallback — belt to the IntersectionObserver's suspenders.
+    // Observed live that the observer can leave a section stuck at opacity:0
+    // after scroll (mobile / slow hydration), which ALSO prevents its lazy
+    // <img>s from ever fetching (they sit in an invisible subtree). On each
+    // scroll, reveal any reveal element now in view. Only ADDS .visible — it
+    // can't fight the observer and still fades elements up as they enter view.
+    let revealTicking = false
+    const revealInView = () => {
+      revealTicking = false
+      const vh = window.innerHeight
+      document
+        .querySelectorAll<HTMLElement>(".reveal:not(.visible), .reveal-stagger:not(.visible)")
+        .forEach((el) => {
+          const r = el.getBoundingClientRect()
+          if (r.top < vh * 0.95 && r.bottom > 0) el.classList.add("visible")
+        })
+    }
+    const onRevealScroll = () => {
+      if (revealTicking) return
+      revealTicking = true
+      requestAnimationFrame(revealInView)
+    }
+    window.addEventListener("scroll", onRevealScroll, { passive: true })
+    window.addEventListener("resize", onRevealScroll, { passive: true })
+
     const mo = new MutationObserver(() => revealAll())
     mo.observe(document.body, { childList: true, subtree: true })
 
@@ -96,6 +121,8 @@ export default function ScrollRevealInit() {
       if (rafId) cancelAnimationFrame(rafId)
       window.removeEventListener("scroll", onScroll)
       window.removeEventListener("resize", onScroll)
+      window.removeEventListener("scroll", onRevealScroll)
+      window.removeEventListener("resize", onRevealScroll)
     }
   }, [])
 
