@@ -92,17 +92,23 @@ export async function applyWatermark(imageBuffer: Buffer): Promise<Buffer> {
   const word = renderWord("PREVIEW", pixel, "#ffffff", 0.55);
   const wordShadow = renderWord("PREVIEW", pixel, "#000000", 0.4);
 
-  // Tile the word diagonally across the image. The previous MAX_HALF
-  // cap was a band-aid for wallpapers calling this on a 1290×2796
-  // canvas (~200k rects → minutes-long render). The REAL fix is to
-  // call applyWatermark BEFORE the phone-aspect extension, so the
-  // canvas here is always ~1024×1024 — fast and predictable.
-  // Watermark density restored to the original spec.
+  // Tile the word diagonally, with a HARD CAP on rows/cols. This cap
+  // is load-bearing: Sharp/librsvg SVG rasterization cost scales with
+  // rect count, and a TALL canvas (phone-aspect preview, 645×1398 or
+  // 1290×2796) generates ~500 tiles → ~200k <rect> elements → 15s+
+  // render or outright hang. The cap bounds tiles regardless of aspect.
+  //
+  // MAX_HALF = 3 → loop produces 2*3 × 2*3 = 36 tiles, ~14k rects,
+  // renders in ~1-2s on any canvas size. Density on the preview is
+  // a "PREVIEW" stamp every ~215×465px plus the larger central stamp —
+  // still defeats casual crop-out. On square portraits (1024²) the cap
+  // rarely binds (they only need ~3-4 each way anyway).
+  const MAX_HALF = 3;
   const tileSpacingX = word.width + pixel * 8;
   const tileSpacingY = word.height + pixel * 10;
   const diag = Math.ceil(Math.sqrt(width * width + height * height));
-  const cols = Math.ceil(diag / tileSpacingX) + 4;
-  const rows = Math.ceil(diag / tileSpacingY) + 4;
+  const cols = Math.min(MAX_HALF, Math.ceil(diag / tileSpacingX) + 4);
+  const rows = Math.min(MAX_HALF, Math.ceil(diag / tileSpacingY) + 4);
 
   let tiles = "";
   for (let r = -rows; r < rows; r++) {
