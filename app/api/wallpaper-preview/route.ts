@@ -71,10 +71,9 @@ export async function POST(req: NextRequest) {
   // request flow.
   const traceId = Math.random().toString(36).slice(2, 10);
   const t0 = Date.now();
-  // TEMP DIAGNOSTIC: track the last-completed step so the catch block can
-  // surface WHERE the pipeline died directly in the response (gated behind a
-  // secret debug header so real users never see it). Remove once the prod
-  // failure is root-caused.
+  // Track the last-completed step so the catch block can log WHERE the
+  // pipeline died (failedAfterStep) — makes future prod failures diagnosable
+  // from EventLog alone without redeploying a tracer.
   let lastStep = "0_start";
   const trace = (step: string, extra?: Record<string, unknown>) => {
     lastStep = step;
@@ -228,16 +227,6 @@ export async function POST(req: NextRequest) {
       error: errMsg,
       stack: err instanceof Error ? err.stack?.slice(0, 800) : undefined,
     });
-    // TEMP DIAGNOSTIC: when a secret debug header is present, return the
-    // exact failing step + error so we can root-cause prod failures without
-    // DB access. Real users never send this header → they still get the
-    // friendly message. Remove with the lastStep tracking once fixed.
-    if (req.headers.get("x-wp-debug") === "trace-7a3f") {
-      return NextResponse.json(
-        { error: errMsg, failedAfterStep: lastStep, elapsedMs: Date.now() - t0 },
-        { status: 500 }
-      );
-    }
     return NextResponse.json(
       { error: "Wallpaper generation failed — try a clearer photo of your pet." },
       { status: 500 }
