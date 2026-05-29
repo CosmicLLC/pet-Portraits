@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
 import WallpaperUpsellModal from "@/components/WallpaperUpsellModal";
+import PawLoadingAnimation from "@/components/PawLoadingAnimation";
 import { track } from "@/lib/analytics";
 import { fetchJson } from "@/lib/fetch-json";
 
@@ -475,9 +476,14 @@ function PhoneFrame({
             />
           ) : null}
           {loading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="text-cream text-xs font-display font-semibold tracking-wider animate-pulse">
-                Generating…
+            // Same easel/paw loading animation the portrait generator shows
+            // (components/PawLoadingAnimation). Sits over a light cream backdrop
+            // so the brand-green animation + messages read clearly regardless
+            // of the selected wallpaper color behind it. Scaled to fit the
+            // 240×480 phone interior.
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-cream/95 backdrop-blur-sm px-3">
+              <div className="scale-90">
+                <PawLoadingAnimation />
               </div>
             </div>
           ) : null}
