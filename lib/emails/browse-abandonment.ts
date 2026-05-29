@@ -1,10 +1,12 @@
 import { Resend } from "resend";
 
 const fromEmail = () =>
-  process.env.FROM_EMAIL || "Paw Masterpiece <orders@yourdomain.com>";
+  process.env.FROM_EMAIL || "Paw Masterpiece <noreply@contact.pawmasterpiece.com>";
 
 const siteUrl = () =>
-  process.env.NEXT_PUBLIC_SITE_URL || "https://petportraits.ai";
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://pawmasterpiece.com";
 
 export async function sendBrowseAbandonmentEmail(to: string) {
   const resend = new Resend(process.env.RESEND_API_KEY);

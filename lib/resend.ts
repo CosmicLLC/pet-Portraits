@@ -10,9 +10,17 @@ function getResend(): Resend {
 }
 
 const fromEmail = () =>
-  process.env.FROM_EMAIL || "Paw Masterpiece <orders@yourdomain.com>";
+  process.env.FROM_EMAIL || "Paw Masterpiece <noreply@contact.pawmasterpiece.com>";
 
-const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "https://petportraits.ai";
+// Used for every CTA + the CAN-SPAM unsubscribe link in our emails. NEVER let
+// this fall back to a stale/foreign domain: NEXT_PUBLIC_SITE_URL is currently
+// unset in prod, so the old "petportraits.ai" fallback meant every email link
+// (including unsubscribe) pointed at a dead domain. Chain to NEXT_PUBLIC_BASE_URL
+// (which IS set to the live site) before the hardcoded production domain.
+const siteUrl = () =>
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://pawmasterpiece.com";
 
 function baseTemplate(content: string) {
   return `
