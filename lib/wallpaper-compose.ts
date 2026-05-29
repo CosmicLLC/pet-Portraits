@@ -41,20 +41,41 @@ export async function composePhoneWallpaper(
   const subjH = meta.height || 1024;
 
   // 2) Scale the subject to fill SUBJECT_HEIGHT_FRACTION of the canvas
-  //    height. Width follows aspect ratio; if it exceeds the canvas
-  //    width, the composite step center-crops the overflow.
+  //    height. Width follows aspect ratio.
   const targetH = Math.round(WALLPAPER_H * SUBJECT_HEIGHT_FRACTION);
   const scaledW = Math.round((subjW * targetH) / subjH);
-  const resized = await sharp(trimmed)
+  let subject = await sharp(trimmed)
     .resize(scaledW, targetH, { fit: "fill" })
     .png()
     .toBuffer();
 
-  // 3) Bottom-anchor + horizontally center. Negative `left` (when the
-  //    subject is wider than the canvas) makes Sharp crop the overflow
-  //    symmetrically. `top` places the bottom of the subject flush with
-  //    the canvas bottom → head lands ~32% down, body fills to the edge.
-  const left = Math.round((WALLPAPER_W - scaledW) / 2);
+  // 3) If the scaled subject is WIDER than the canvas, center-crop the
+  //    horizontal overflow HERE. This is load-bearing: Sharp's composite()
+  //    requires the overlay to be the same size or SMALLER than the base —
+  //    it CANNOT accept an oversized input or a negative offset. The old
+  //    code passed a negative `left` expecting Sharp to crop the overflow,
+  //    but Sharp instead throws "Image to composite must have same
+  //    dimensions or smaller". That threw for ANY cutout wider than the
+  //    canvas (spread ears, sitting/turned poses) → the intermittent prod
+  //    500s. Explicitly extracting the centered 1290px-wide slice makes the
+  //    composite input always fit, while preserving the intended framing
+  //    (subject fills the height, sides cropped symmetrically).
+  let left: number;
+  if (scaledW > WALLPAPER_W) {
+    subject = await sharp(subject)
+      .extract({
+        left: Math.floor((scaledW - WALLPAPER_W) / 2),
+        top: 0,
+        width: WALLPAPER_W,
+        height: targetH,
+      })
+      .toBuffer();
+    left = 0;
+  } else {
+    left = Math.round((WALLPAPER_W - scaledW) / 2);
+  }
+  // Bottom-anchor: `top` places the subject's bottom flush with the canvas
+  // bottom → head lands ~32% down, body fills to the edge.
   const top = WALLPAPER_H - targetH;
 
   // 4) Build the uniform solid-color canvas at the EXACT requested hex
@@ -67,7 +88,7 @@ export async function composePhoneWallpaper(
       background: hex,
     },
   })
-    .composite([{ input: resized, top, left }])
+    .composite([{ input: subject, top, left }])
     .jpeg({ quality: 92 })
     .toBuffer();
 }
