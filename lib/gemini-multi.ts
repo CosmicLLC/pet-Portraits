@@ -155,7 +155,7 @@ export async function generateMultiPetPortrait(
   // 3x retry on stochastic empty generations, terminal on real safety blocks.
   // Multi-pet sends N photos so a no-image whiff is at least as likely; the
   // old single unguarded call meant ~1 in 5 multi-pet orders failed outright.
-  return generateGeminiImage(parts, `multi-pet:${style}`);
+  return generateGeminiImage(parts, `multi-pet:${style}`, "3:4");
 }
 
 // ─── ImageId encoding ─────────────────────────────────────────────────

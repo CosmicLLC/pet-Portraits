@@ -36,13 +36,13 @@ function getWallpaperAI(): GoogleGenAI {
 }
 
 export const STYLE_PROMPTS: Record<string, string> = {
-  watercolor: `The first image is a pet photo. The second image is a watercolor style reference. Transform the pet from the first image into a fine art watercolor portrait matching the aesthetic, color palette, and brushwork style of the second image. Preserve the pet's exact likeness, facial features, fur color, and markings. Style: loose expressive brushstrokes, soft wet-on-wet blending, delicate ink outlines, pastel and muted tones, white watercolor paper texture background. Composition: centered subject, generous white space around the pet, head and shoulders framing. Print quality: high detail in face and eyes, gallery-worthy illustration, no text, no watermarks, square format.`,
+  watercolor: `The first image is a pet photo. The second image is a watercolor style reference. Transform the pet from the first image into a fine art watercolor portrait matching the aesthetic, color palette, and brushwork style of the second image. Preserve the pet's exact likeness, facial features, fur color, and markings. Style: loose expressive brushstrokes, soft wet-on-wet blending, delicate ink outlines, pastel and muted tones, white watercolor paper texture background. Composition: centered subject, generous white space around the pet, head and shoulders framing. Print quality: high detail in face and eyes, gallery-worthy illustration, no text, no watermarks. PORTRAIT orientation, taller than wide (3:4). The COMPLETE composition must be fully inside the frame with even margins on all sides — never crop the subject, and if there is any decorative border, robe, or frame element, keep it entirely within the image (do not let it run off any edge).`,
 
-  oil: `The first image is a pet photo. The second image is an oil painting style reference. Transform the pet from the first image into a classical fine art oil painting portrait matching the aesthetic of the second image. Preserve the pet's exact likeness, facial features, fur color, and markings. Style: rich impasto brushwork, Flemish portrait tradition, warm dramatic lighting from one side, deep jewel-toned or dark neutral background, museum quality finish. Composition: centered subject, formal portrait framing, head and chest visible. Print quality: highly detailed fur texture, luminous eyes, gallery-worthy illustration, no text, no watermarks, square format.`,
+  oil: `The first image is a pet photo. The second image is an oil painting style reference. Transform the pet from the first image into a classical fine art oil painting portrait matching the aesthetic of the second image. Preserve the pet's exact likeness, facial features, fur color, and markings. Style: rich impasto brushwork, Flemish portrait tradition, warm dramatic lighting from one side, deep jewel-toned or dark neutral background, museum quality finish. Composition: centered subject, formal portrait framing, head and chest visible. Print quality: highly detailed fur texture, luminous eyes, gallery-worthy illustration, no text, no watermarks. PORTRAIT orientation, taller than wide (3:4). The COMPLETE composition must be fully inside the frame with even margins on all sides — never crop the subject, and if there is any decorative border, robe, or frame element, keep it entirely within the image (do not let it run off any edge).`,
 
-  renaissance: `The first image is a pet photo. The second image is a Renaissance portrait style reference. Transform the pet from the first image into a Renaissance royal court portrait matching the aesthetic of the second image. Preserve the pet's exact likeness, facial features, fur color, and markings. Style: 16th-century Flemish oil painting, the pet wearing an ornate velvet robe or jeweled collar, gold leaf accents, rich burgundy or forest green draped fabric background with subtle ornate frame elements at edges. Composition: formal noble pose, centered, head and upper body, dignified regal expression. Print quality: museum-quality detail, highly realistic painting style, no text, no watermarks, square format.`,
+  renaissance: `The first image is a pet photo. The second image is a Renaissance portrait style reference. Transform the pet from the first image into a Renaissance royal court portrait matching the aesthetic of the second image. Preserve the pet's exact likeness, facial features, fur color, and markings. Style: 16th-century Flemish oil painting, the pet wearing an ornate velvet robe or jeweled collar, gold leaf accents, rich burgundy or forest green draped fabric background with subtle ornate frame elements at edges. Composition: formal noble pose, centered, head and upper body, dignified regal expression. Print quality: museum-quality detail, highly realistic painting style, no text, no watermarks. PORTRAIT orientation, taller than wide (3:4). The COMPLETE composition must be fully inside the frame with even margins on all sides — never crop the subject, and if there is any decorative border, robe, or frame element, keep it entirely within the image (do not let it run off any edge).`,
 
-  lineart: `The first image is a pet photo. The second image is a line art style reference. Transform the pet from the first image into a minimalist fine line art portrait matching the aesthetic of the second image. Preserve the pet's exact likeness, facial features, fur texture, and markings. Style: precise graphite pencil linework, continuous line drawing technique, cross-hatching for depth and shadow, clean white background, no filled color areas, monochrome. Composition: centered subject, head and shoulders, elegant negative space. Print quality: crisp architectural drawing precision, frameable wall art quality, no text, no watermarks, square format.`,
+  lineart: `The first image is a pet photo. The second image is a line art style reference. Transform the pet from the first image into a minimalist fine line art portrait matching the aesthetic of the second image. Preserve the pet's exact likeness, facial features, fur texture, and markings. Style: precise graphite pencil linework, continuous line drawing technique, cross-hatching for depth and shadow, clean white background, no filled color areas, monochrome. Composition: centered subject, head and shoulders, elegant negative space. Print quality: crisp architectural drawing precision, frameable wall art quality, no text, no watermarks. PORTRAIT orientation, taller than wide (3:4). The COMPLETE composition must be fully inside the frame with even margins on all sides — never crop the subject, and if there is any decorative border, robe, or frame element, keep it entirely within the image (do not let it run off any edge).`,
 };
 
 export const STYLE_KEYS = ["watercolor", "oil", "renaissance", "lineart"] as const;
@@ -114,11 +114,20 @@ type GeminiImagePart =
 
 export async function generateGeminiImage(
   parts: GeminiImagePart[],
-  label: string
+  label: string,
+  aspectRatio?: string
 ): Promise<Buffer> {
   const aiClient = getWallpaperAI();
   const MAX_ATTEMPTS = 3;
   let lastErr: Error | null = null;
+
+  // When an aspect ratio is requested (e.g. "3:4" for portrait prints), pass it
+  // via imageConfig so Gemini FRAMES the full composition at that ratio instead
+  // of generating a square it would otherwise crop (which cut off renaissance
+  // frames / subject edges). Wallpaper passes none (square → composed later).
+  const config = aspectRatio
+    ? { responseModalities: ["IMAGE", "TEXT"], imageConfig: { aspectRatio } }
+    : { responseModalities: ["IMAGE", "TEXT"] };
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
@@ -128,7 +137,7 @@ export async function generateGeminiImage(
         aiClient.models.generateContent({
           model: "gemini-2.5-flash-image",
           contents: [{ role: "user", parts }],
-          config: { responseModalities: ["IMAGE", "TEXT"] },
+          config,
         }),
         new Promise<never>((_, reject) =>
           setTimeout(
@@ -255,7 +264,7 @@ export async function generatePortrait(
   // empty generations (the ~22% no-image whiff), terminal on real safety
   // blocks. Previously this was a single unguarded call, so ~1 in 5 paid
   // portrait generations failed with "use a clearer photo" on a good photo.
-  return generateGeminiImage(parts, `portrait:${style}`);
+  return generateGeminiImage(parts, `portrait:${style}`, "3:4");
 }
 
 // ─── Breed identification (free top-of-funnel tool) ────────────────────────
