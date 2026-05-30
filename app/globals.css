@@ -134,6 +134,18 @@ html {
   .reveal-stagger > * {
     opacity: 1 !important;
     transform: none !important;
+    /* CRITICAL on iOS: also drop the GPU-layer promotion. Forcing opacity:1
+       alone left will-change:opacity,transform active, so these stayed
+       composited layers — and iOS Safari drops IMAGE painting inside
+       heavily-composited will-change layers (simple text still paints). That
+       was the "cards/text show but the style images are blank" bug. Removing
+       will-change un-promotes the layers so images paint normally. */
+    will-change: auto !important;
+  }
+  /* Parallax also promotes a layer via translate3d — neutralize on mobile. */
+  [data-parallax] {
+    transform: none !important;
+    will-change: auto !important;
   }
 }
 
