@@ -18,6 +18,7 @@ import {
 import { isPhysicalProduct } from "@/lib/products";
 import { shouldApplyFreeBonus } from "@/lib/campaigns";
 import { upscaleForPrint, isUpscalerConfigured } from "@/lib/upscale";
+import { printAssetUrl } from "@/lib/print-token";
 import { trackPurchaseServer } from "@/lib/server-pixels";
 
 // Upscaling + Prodigi can take 15-30s on a physical order.
@@ -406,10 +407,16 @@ export async function POST(req: NextRequest) {
             // upscale credits on paid orders. If the upscaler isn't configured
             // or fails, we fall back to the original blob URL and Prodigi will
             // print whatever resolution they receive.
-            let printImageUrl = portraitBlobUrl;
+            // Prodigi's lab AND Replicate's upscaler fetch image URLs
+            // anonymously, but our blob store is private (a raw blob URL 403s).
+            // Hand them the public /api/print-asset proxy URL, which streams
+            // the private blob server-side. Physical orders always start from a
+            // portrait blob at portraits/<imageId>.
+            const portraitProxyUrl = printAssetUrl(`portraits/${imageId}`, baseUrl);
+            let printImageUrl = portraitProxyUrl;
             if (isUpscalerConfigured()) {
               try {
-                printImageUrl = await upscaleForPrint(portraitBlobUrl, imageId);
+                printImageUrl = await upscaleForPrint(portraitProxyUrl, imageId, baseUrl);
                 console.log(`Upscaled print asset for order ${order.id}`);
               } catch (upErr) {
                 console.error("Upscale failed, falling back to original:", upErr);
@@ -446,7 +453,7 @@ export async function POST(req: NextRequest) {
                 prodigiOrderId: prodigi.order.id,
                 prodigiStatus: "InProgress",
                 prodigiStage: prodigi.order.status.stage,
-                printReadyBlobUrl: printImageUrl !== portraitBlobUrl ? printImageUrl : undefined,
+                printReadyBlobUrl: printImageUrl !== portraitProxyUrl ? printImageUrl : undefined,
               },
             });
             console.log(`Prodigi order created ${prodigi.order.id} for ${order.id}`);

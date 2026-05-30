@@ -6,6 +6,7 @@
 // Cost: ~$0.005-0.01 per upscale. Latency: 5-15 seconds.
 
 import { put } from "@vercel/blob";
+import { printAssetUrl } from "./print-token";
 
 const REPLICATE_MODEL_VERSION =
   // nightmareai/real-esrgan — widely used, clean output, good for illustrations
@@ -58,9 +59,16 @@ async function pollPrediction(getUrl: string, deadlineMs: number): Promise<Repli
   throw new Error("Replicate poll timed out");
 }
 
-// Upscales the portrait at sourceUrl and stores the result in Blob, returning
-// the new public URL. imageId is used to namespace the stored asset.
-export async function upscaleForPrint(sourceUrl: string, imageId: string): Promise<string> {
+// Upscales the portrait at sourceUrl (which MUST be a publicly-fetchable URL —
+// Replicate fetches it anonymously, so pass the /api/print-asset proxy URL, not
+// a raw private blob URL) and stores the 4x result in Blob. Returns a PUBLIC
+// proxy URL Prodigi can fetch. imageId namespaces the stored asset; baseUrl is
+// the site origin used to build the proxy URL.
+export async function upscaleForPrint(
+  sourceUrl: string,
+  imageId: string,
+  baseUrl: string
+): Promise<string> {
   if (!isUpscalerConfigured()) throw new Error("REPLICATE_API_TOKEN not set");
 
   let prediction = await createPrediction(sourceUrl);
@@ -86,15 +94,14 @@ export async function upscaleForPrint(sourceUrl: string, imageId: string): Promi
   if (!imgRes.ok) throw new Error(`Failed to fetch upscaled image (${imgRes.status})`);
   const buf = Buffer.from(await imgRes.arrayBuffer());
 
-  // Public because Prodigi's print lab fetches this URL directly to produce
-  // the customer's print — no way to pass a bearer token to them. Protected
-  // by an unguessable random suffix on the blob pathname, which is only
-  // logged server-side and sent to Prodigi over HTTPS.
-  const blob = await put(`print-ready/${imageId}.png`, buf, {
-    access: "public",
+  // Store PRIVATE (the store is private-only; access:"public" 500s). Prodigi
+  // can't fetch a private blob URL directly (403), so we hand it the
+  // /api/print-asset proxy URL instead, which streams this blob server-side.
+  await put(`print-ready/${imageId}.png`, buf, {
+    access: "private",
     addRandomSuffix: true,
     contentType: "image/png",
   });
 
-  return blob.url;
+  return printAssetUrl(`print-ready/${imageId}`, baseUrl);
 }

@@ -11,6 +11,7 @@ import {
 } from "@/lib/prodigi";
 import { isPhysicalProduct } from "@/lib/products";
 import { upscaleForPrint, isUpscalerConfigured } from "@/lib/upscale";
+import { printAssetUrl } from "@/lib/print-token";
 import { logEvent } from "@/lib/events";
 
 export const maxDuration = 60;
@@ -76,12 +77,15 @@ export async function POST(
   };
 
   try {
-    // Reuse the print-ready asset if we already upscaled it once. Only burn
-    // a fresh upscale credit if we haven't.
-    let printImageUrl = order.printReadyBlobUrl ?? order.portraitBlobUrl;
+    // Prodigi/Replicate fetch anonymously; our blob store is private (raw URLs
+    // 403). Use the public /api/print-asset proxy for both the upscale source
+    // and the fallback. Reuse the print-ready asset if we already upscaled once.
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://pawmasterpiece.com";
+    const portraitProxyUrl = printAssetUrl(`portraits/${order.imageId}`, baseUrl);
+    let printImageUrl = order.printReadyBlobUrl ?? portraitProxyUrl;
     if (!order.printReadyBlobUrl && isUpscalerConfigured()) {
       try {
-        printImageUrl = await upscaleForPrint(order.portraitBlobUrl, order.imageId);
+        printImageUrl = await upscaleForPrint(portraitProxyUrl, order.imageId, baseUrl);
       } catch (upErr) {
         console.error("Admin retry upscale failed, falling back to original:", upErr);
       }
@@ -105,7 +109,7 @@ export async function POST(
         prodigiStatus: "InProgress",
         prodigiStage: prodigi.order.status.stage,
         printReadyBlobUrl:
-          printImageUrl !== order.portraitBlobUrl ? printImageUrl : undefined,
+          printImageUrl !== portraitProxyUrl ? printImageUrl : undefined,
       },
     });
     await logEvent("info", "admin", "Prodigi order submitted by admin", {
