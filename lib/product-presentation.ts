@@ -23,7 +23,18 @@ export interface Presentation {
   longDescription: string
   highlights: string[]
   category: ProductCategory
+  /** Optional per-style product photos — e.g. the mounted print shown in each
+   * art style. Rendered as a labeled thumbnail row beneath the hero image. */
+  styleGallery?: { src: string; label: string }[]
 }
+
+// The 4 art-style example images, reused as per-style product photos.
+const STYLE_GALLERY: { src: string; label: string }[] = [
+  { src: "/examples/watercolor.png", label: "Watercolor" },
+  { src: "/examples/oil.png", label: "Oil Painting" },
+  { src: "/examples/renaissance.png", label: "Renaissance" },
+  { src: "/examples/lineart.png", label: "Line Art" },
+]
 
 export const PRODUCT_PRESENTATION: Presentation[] = [
   // ── Digital ───────────────────────────────────────────────────────
@@ -57,12 +68,13 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
   },
   {
     key: "mounted",
-    image: "/examples/lineart.png",
+    image: "/examples/watercolor.png",
     isPlaceholder: true,
     category: "Prints & Canvas",
     longDescription:
-      "11×14 print with a window-matted gallery mount — no frame needed, ready to display or drop into any standard frame for a layered look.",
+      "11×14 print with a window-matted gallery mount — no frame needed, ready to display or drop into any standard frame for a layered look. Available in all four art styles.",
     highlights: ["Gallery-matted finish", "Fine art paper", "Rigid backing"],
+    styleGallery: STYLE_GALLERY,
   },
   {
     key: "canvas",

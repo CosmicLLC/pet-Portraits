@@ -194,20 +194,46 @@ export default function ProductDetailPage({ params }: Props) {
       {/* Hero — product image + buy box */}
       <section className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-          {/* Image */}
-          <div className="relative aspect-[4/5] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
-            <Image
-              src={presentation.image}
-              alt={product.label}
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
-            {presentation.isPlaceholder && (
-              <span className="absolute top-4 left-4 bg-cream/92 backdrop-blur-sm rounded-full px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-gray-500">
-                Product photo coming soon
-              </span>
+          {/* Image + optional per-style product photos */}
+          <div>
+            <div className="relative aspect-[4/5] bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm">
+              <Image
+                src={presentation.image}
+                alt={product.label}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover"
+              />
+              {presentation.isPlaceholder && (
+                <span className="absolute top-4 left-4 bg-cream/92 backdrop-blur-sm rounded-full px-3 py-1.5 text-[10px] uppercase tracking-wider font-semibold text-gray-500">
+                  Product photo coming soon
+                </span>
+              )}
+            </div>
+
+            {presentation.styleGallery && (
+              <div className="mt-4">
+                <p className="text-xs font-display font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                  Available in every style
+                </p>
+                <div className="grid grid-cols-4 gap-2">
+                  {presentation.styleGallery.map((g) => (
+                    <div key={g.src} className="text-center">
+                      <div className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 bg-white">
+                        <Image
+                          src={g.src}
+                          alt={`${product.label} — ${g.label} style`}
+                          fill
+                          sizes="(max-width: 1024px) 22vw, 120px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <p className="text-[10px] text-gray-500 mt-1">{g.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
