@@ -7,6 +7,7 @@ import UploadStep from "@/components/UploadStep";
 import PortraitPreview from "@/components/PortraitPreview";
 import ProductSelector from "@/components/ProductSelector";
 import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture";
+import AddToCartButton from "@/components/AddToCartButton";
 import { track } from "@/lib/analytics";
 import { fetchJson } from "@/lib/fetch-json";
 
@@ -120,6 +121,12 @@ export default function QuickStudio() {
             <PortraitPreview watermarkedImage={watermarkedImage} />
             <div className="mt-6">
               <ProductSelector imageId={imageId} onError={setError} wallpaperSelected={false} />
+            </div>
+            <div className="mt-4 bg-white border border-gray-200 rounded-xl px-4 py-4">
+              <AddToCartButton imageId={imageId} preview={watermarkedImage ?? undefined} />
+              <p className="text-[11px] text-gray-400 text-center mt-2">
+                Want portraits of more pets, or gifts? Add to cart and check out together.
+              </p>
             </div>
             {error && (
               <p className="text-red-500 text-sm text-center mt-4">{error}</p>

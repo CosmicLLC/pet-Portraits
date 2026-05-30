@@ -6,6 +6,7 @@ import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture"
 import UploadStep from "@/components/UploadStep";
 import { fetchJson } from "@/lib/fetch-json";
 import StylePicker from "@/components/StylePicker";
+import AddToCartButton from "@/components/AddToCartButton";
 import GenerateButton from "@/components/GenerateButton";
 import PortraitPreview from "@/components/PortraitPreview";
 import ProductSelector from "@/components/ProductSelector";
@@ -743,20 +744,14 @@ export default function Home() {
 
               <ProductSelector imageId={imageId} onError={setError} wallpaperSelected={false} />
 
-              {/* Quantity discount nudge */}
-              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
-                <svg className="w-4 h-4 text-brand-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5 2a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2V4a2 2 0 00-2-2H5zm2.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3zm6.207.293a1 1 0 00-1.414 0l-6 6a1 1 0 101.414 1.414l6-6a1 1 0 000-1.414zM12.5 10a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clipRule="evenodd" />
-                </svg>
-                <span>
-                  Ordering for a friend too?{" "}
-                  <button
-                    onClick={resetState}
-                    className="text-brand-green font-semibold hover:underline"
-                  >
-                    Order 2+ portraits and save 15%
-                  </button>
-                </span>
+              {/* Multi-portrait cart — add this one and create more, then check
+                  out together in one payment. (Replaces a "save 15%" nudge that
+                  promised a discount the checkout never applied.) */}
+              <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-4">
+                <AddToCartButton imageId={imageId} preview={watermarkedImage ?? undefined} />
+                <p className="text-[11px] text-gray-400 text-center mt-2">
+                  Making portraits for several pets or as gifts? Add them to your cart and check out together.
+                </p>
               </div>
 
               {showAbandonmentCapture && !portraitEmailCaptured && (

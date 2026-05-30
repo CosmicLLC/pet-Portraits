@@ -36,3 +36,25 @@ export function verifyDownloadToken(orderId: string, token: string, exp: number)
   if (a.length !== b.length) return false
   return crypto.timingSafeEqual(a, b)
 }
+
+// Per-item token for multi-portrait CART orders. Binds the orderId AND the
+// specific imageId, so a single signed link maps to exactly one portrait blob
+// (portraits/<imageId>) without persisting a cart-items list in the DB. The
+// imageId is baked into the signature, so a link for one item can't be reused
+// to fetch a different image. No expiry param (the order link wrapper handles
+// freshness); the unguessable HMAC is the gate.
+export function signCartItemToken(orderId: string, imageId: string): string {
+  return crypto
+    .createHmac("sha256", getSecret())
+    .update(`cart-item:${orderId}:${imageId}`)
+    .digest("hex")
+}
+
+export function verifyCartItemToken(orderId: string, imageId: string, token: string): boolean {
+  if (!orderId || !imageId || !token) return false
+  const expected = signCartItemToken(orderId, imageId)
+  const a = Buffer.from(expected, "hex")
+  const b = Buffer.from(token, "hex")
+  if (a.length !== b.length) return false
+  return crypto.timingSafeEqual(a, b)
+}

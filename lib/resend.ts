@@ -143,6 +143,53 @@ export async function sendDownloadEmail(
   });
 }
 
+// Combined delivery email for a multi-portrait CART order. Lists each item:
+// digital items get their own download button; physical items show a "shipping"
+// line. `items` is already resolved (label + optional per-item downloadUrl +
+// physical flag) by the webhook.
+export async function sendCartEmail(
+  to: string,
+  items: { label: string; downloadUrl?: string; physical: boolean }[]
+) {
+  const rows = items
+    .map((it, i) => {
+      const cta = it.downloadUrl
+        ? `<a href="${it.downloadUrl}" style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:10px 22px;border-radius:50px;font-size:13px;font-weight:700;">Download</a>`
+        : `<span style="font-size:13px;color:#C4A35A;font-weight:700;">📦 Ships to your address</span>`;
+      return `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;${i > 0 ? "border-top:1px solid #E5E0D8;" : ""}">
+        <div style="text-align:left;">
+          <p style="margin:0;font-size:15px;font-weight:700;color:#2D4A3E;">Portrait ${i + 1}</p>
+          <p style="margin:2px 0 0;font-size:13px;color:#666;">${it.label}</p>
+        </div>
+        <div style="flex-shrink:0;">${cta}</div>
+      </div>`;
+    })
+    .join("");
+
+  const anyDigital = items.some((it) => it.downloadUrl);
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">Your ${items.length} portraits are ready! 🎉</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 24px;">
+      Thanks for your order. Here's everything you purchased${anyDigital ? " — download your digital items below" : ""}.
+    </p>
+    <div style="background:#fff;border:1px solid #E5E0D8;border-radius:12px;padding:8px 20px;margin-bottom:24px;">
+      ${rows}
+    </div>
+    ${anyDigital ? `<p style="margin:0 0 24px;color:#AAA;font-size:12px;text-align:center;">Download links expire in 7 days.</p>` : ""}
+    <p style="text-align:center;color:#AAA;font-size:12px;margin:8px 0 0;">
+      Not happy with any portrait? Reply and we&rsquo;ll redo it for free.
+    </p>
+  `;
+
+  await getResend().emails.send({
+    from: fromEmail(),
+    to,
+    subject: `Your ${items.length} Paw Masterpiece portraits are ready 🐾`,
+    html: baseTemplate(content),
+  });
+}
+
 // Human-readable description for each product type, used in the confirmation email
 const PRODUCT_EMAIL_LABEL: Record<string, string> = {
   display: "11×14 display print",

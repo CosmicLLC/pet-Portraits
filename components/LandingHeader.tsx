@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
+import CartButton from "@/components/CartButton"
 import { useSession, signOut } from "next-auth/react"
 
 // Sitewide landing header. Modeled on Crown & Paw's nav structure but
@@ -263,6 +264,7 @@ function HeaderNav() {
           >
             Start Now
           </Link>
+          <CartButton />
           <AuthMenu />
         </nav>
 

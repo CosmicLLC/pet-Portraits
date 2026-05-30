@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe } from "@/lib/stripe";
-import { sendDownloadEmail, sendPhysicalConfirmationEmail } from "@/lib/resend";
+import { sendDownloadEmail, sendPhysicalConfirmationEmail, sendCartEmail } from "@/lib/resend";
 import { list, put } from "@vercel/blob";
 import sharp from "sharp";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
-import { signDownloadToken } from "@/lib/download-token";
+import { signDownloadToken, signCartItemToken } from "@/lib/download-token";
 import { logEvent } from "@/lib/events";
 import {
   createProdigiOrder,
@@ -15,7 +15,8 @@ import {
   isProdigiSkuConfigured,
   type ProdigiAddress,
 } from "@/lib/prodigi";
-import { isPhysicalProduct } from "@/lib/products";
+import { isPhysicalProduct, PRODUCTS } from "@/lib/products";
+import { cartFromMetadata } from "@/lib/cart";
 import { shouldApplyFreeBonus } from "@/lib/campaigns";
 import { upscaleForPrint, isUpscalerConfigured } from "@/lib/upscale";
 import { printAssetUrl } from "@/lib/print-token";
@@ -63,6 +64,174 @@ async function buildWallpaper(sourceUrl: string): Promise<Buffer> {
     .toBuffer();
 }
 
+// Fulfill a multi-portrait CART order: ONE Order row + ONE combined delivery
+// email with a per-item signed download link, and a Prodigi order per physical
+// item (one shipping address). No cart-items DB column — per-item links bind
+// order.id + imageId via signCartItemToken; Prodigi orders are fire-and-forget.
+// Self-contained + defensive — never throws upward so the webhook always 200s.
+async function handleCartCheckout(
+  session: Stripe.Checkout.Session,
+  items: { imageId: string; productType: string }[],
+  email: string | null | undefined
+): Promise<void> {
+  if (!email) {
+    await logEvent("error", "webhook", "Cart order missing email", { sessionId: session.id });
+    return;
+  }
+
+  // Idempotency — one Order per cart session (Stripe retries are common).
+  const existing = await prisma.order
+    .findUnique({ where: { stripeSessionId: session.id } })
+    .catch(() => null);
+  if (existing) return;
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://pawmasterpiece.com";
+
+  // Shipping (present only when the cart contained a physical item).
+  const sessionAny = session as unknown as {
+    shipping_details?: { name?: string | null; address?: Stripe.Address | null } | null;
+    collected_information?: {
+      shipping_details?: { name?: string | null; address?: Stripe.Address | null } | null;
+    } | null;
+  };
+  const shippingDetails =
+    sessionAny.collected_information?.shipping_details ?? sessionAny.shipping_details ?? null;
+  const shippingName = shippingDetails?.name ?? null;
+  const shippingAddress = shippingDetails?.address ?? null;
+
+  // Resolve each item's portrait blob. Skip + log any missing so the rest fulfill.
+  const fulfilled: { imageId: string; productType: string; blobUrl: string }[] = [];
+  for (const it of items) {
+    const { blobs } = await list({ prefix: `portraits/${it.imageId}` });
+    if (!blobs.length) {
+      await logEvent("error", "webhook", "Cart item blob not found", {
+        sessionId: session.id,
+        imageId: it.imageId,
+      });
+      continue;
+    }
+    fulfilled.push({ imageId: it.imageId, productType: it.productType, blobUrl: blobs[0].url });
+  }
+  if (fulfilled.length === 0) {
+    await logEvent("error", "webhook", "Cart order had no fulfillable items", {
+      sessionId: session.id,
+      email,
+    });
+    return;
+  }
+
+  const stripePaymentIntent =
+    typeof session.payment_intent === "string"
+      ? session.payment_intent
+      : session.payment_intent?.id ?? null;
+
+  const order = await prisma.order.create({
+    data: {
+      stripeSessionId: session.id,
+      stripePaymentIntent,
+      email,
+      imageId: fulfilled[0].imageId, // item #1 for legacy admin/download views
+      productType: "cart",
+      priceCents: session.amount_total ?? null,
+      portraitBlobUrl: fulfilled[0].blobUrl,
+      shippingName,
+      shippingAddress: shippingAddress ? (shippingAddress as unknown as object) : undefined,
+    },
+  });
+
+  await prisma.subscriber
+    .upsert({ where: { email }, create: { email, source: "purchase" }, update: {} })
+    .catch(() => {});
+
+  // Per-item signed download links (?img=&itok=) — the token binds order.id +
+  // the exact imageId, so no cart-items DB column is needed.
+  const emailItems = fulfilled.map((f) => {
+    const physical = isPhysicalProduct(f.productType);
+    return {
+      label: PRODUCTS[f.productType as keyof typeof PRODUCTS]?.label ?? f.productType,
+      physical,
+      downloadUrl: physical
+        ? undefined
+        : `${baseUrl}/api/download/${order.id}?img=${encodeURIComponent(f.imageId)}&itok=${signCartItemToken(order.id, f.imageId)}`,
+    };
+  });
+
+  try {
+    await sendCartEmail(email, emailItems);
+  } catch (emailErr) {
+    await logEvent("error", "webhook", "Cart email failed (order persisted; admin can resend)", {
+      orderId: order.id,
+      error: emailErr instanceof Error ? emailErr.message : String(emailErr),
+    });
+  }
+
+  const dollars = session.amount_total ? session.amount_total / 100 : 0;
+  await trackPurchaseServer({
+    email,
+    value: dollars,
+    currency: (session.currency || "usd").toUpperCase(),
+    orderId: session.id,
+    productType: "cart",
+    user: { email, ip: null, userAgent: null },
+    sourceUrl: `${baseUrl}/success?session_id=${session.id}`,
+  }).catch(() => {});
+
+  // Physical fulfillment — one Prodigi order per physical item, single address.
+  const hasPhysical = fulfilled.some((f) => isPhysicalProduct(f.productType));
+  if (hasPhysical && shippingAddress && shippingName && isProdigiConfigured()) {
+    const prodigiAddress: ProdigiAddress = {
+      line1: shippingAddress.line1 ?? "",
+      line2: shippingAddress.line2 ?? undefined,
+      townOrCity: shippingAddress.city ?? "",
+      stateOrCounty: shippingAddress.state ?? undefined,
+      postalOrZipCode: shippingAddress.postal_code ?? "",
+      countryCode: shippingAddress.country ?? "US",
+    };
+    for (let idx = 0; idx < fulfilled.length; idx++) {
+      const f = fulfilled[idx];
+      if (!isPhysicalProduct(f.productType)) continue;
+      if (!isProdigiSkuConfigured(f.productType)) {
+        await logEvent("warning", "webhook", "Cart item Prodigi SKU not configured", {
+          orderId: order.id,
+          productType: f.productType,
+        });
+        continue;
+      }
+      try {
+        const portraitProxyUrl = printAssetUrl(`portraits/${f.imageId}`, baseUrl);
+        let printImageUrl = portraitProxyUrl;
+        if (isUpscalerConfigured()) {
+          try {
+            printImageUrl = await upscaleForPrint(portraitProxyUrl, f.imageId, baseUrl);
+          } catch (upErr) {
+            console.error("Cart upscale failed, using original:", upErr);
+          }
+        }
+        const prodigi = await createProdigiOrder({
+          merchantReference: `${order.id}-${idx}`,
+          sku: getProdigiSkuForProduct(f.productType),
+          imageUrl: printImageUrl,
+          attributes: getProdigiAttributesForProduct(f.productType),
+          recipient: {
+            name: shippingName,
+            email,
+            phoneNumber: session.customer_details?.phone ?? undefined,
+            address: prodigiAddress,
+          },
+        });
+        console.log(`Cart Prodigi order ${prodigi.order.id} for ${order.id} item ${idx}`);
+      } catch (prodigiErr) {
+        await logEvent("error", "webhook", "Cart item Prodigi order failed", {
+          orderId: order.id,
+          imageId: f.imageId,
+          productType: f.productType,
+          error: prodigiErr instanceof Error ? prodigiErr.message : String(prodigiErr),
+        });
+      }
+    }
+  }
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const sig = req.headers.get("stripe-signature");
@@ -101,6 +270,25 @@ export async function POST(req: NextRequest) {
     // and no portrait blob exists. Routes around the buildWallpaper step.
     const isStandaloneWallpaper = productType === "wallpaper" && !!bgHex;
     const email = session.customer_details?.email;
+
+    // ── Multi-portrait CART checkout ────────────────────────────────────
+    // A cart session has no single imageId/productType — it carries ci_* +
+    // cartCheckout in metadata. Route it to its own self-contained handler
+    // (creates ONE Order with cartItems[], sends one combined email, fires a
+    // Prodigi order per physical item) and return before the single-item path.
+    const cartItemsIn = cartFromMetadata(
+      session.metadata as Record<string, string> | undefined
+    );
+    if (cartItemsIn.length > 0) {
+      await handleCartCheckout(session, cartItemsIn, email).catch(async (err) => {
+        console.error("Cart fulfillment error:", err);
+        await logEvent("error", "webhook", "Cart fulfillment failed", {
+          sessionId: session.id,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      });
+      return NextResponse.json({ received: true, cart: true });
+    }
 
     if (!imageId || !email || !productType) {
       console.error("Missing required metadata in webhook", { imageId, email, productType });

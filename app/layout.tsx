@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
+import { CartProvider } from "@/components/CartProvider";
 import ScrollRevealInit from "@/components/ScrollRevealInit";
 import Analytics, { AnalyticsNoScript } from "@/components/Analytics";
 import RefCapture from "@/components/RefCapture";
@@ -146,7 +147,9 @@ export default function RootLayout({
       <body className="bg-cream font-body text-gray-800 antialiased">
         <AnalyticsNoScript />
         <CampaignBanner />
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <CartProvider>{children}</CartProvider>
+        </AuthProvider>
         <ScrollRevealInit />
         <Analytics />
         <RefCapture />
