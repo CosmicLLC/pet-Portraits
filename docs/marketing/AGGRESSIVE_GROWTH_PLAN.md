@@ -49,7 +49,7 @@ The aggressive premise: we're behind. The Mother's Day window costs us nothing t
 
 | Task | Owner |
 | --- | --- |
-| 2nd email blast: "Last call for canvas shipping by Mother's Day — order by May 3" | Owner |
+| 2nd email blast: "Last call for framed print shipping by Mother's Day — order by May 3" | Owner |
 | Increase Meta budget to $100/day (assuming ROAS ≥ 2x) | Owner |
 | Add retargeting audience to Meta: anyone who viewed `/gifts/mothers-day` but didn't checkout | Owner |
 | Repost top-performing organic content as Reels | Owner |
@@ -80,13 +80,13 @@ The aggressive premise: we're behind. The Mother's Day window costs us nothing t
 
 | Channel | Spend | Target CPA | Target volume | Notes |
 | --- | --- | --- | --- | --- |
-| Meta | $1,800 | $25 (digital) / $40 (canvas) | 60–100 orders | $50/day base, scales to $100 by T–7 if ROAS holds |
-| TikTok | $600 | $30 (digital) / $50 (canvas) | 15–25 orders | Lower budget — cheaper CPM but less conversion confidence |
+| Meta | $1,800 | $25 (digital) / $40 (framed print) | 60–100 orders | $50/day base, scales to $100 by T–7 if ROAS holds |
+| TikTok | $600 | $30 (digital) / $50 (framed print) | 15–25 orders | Lower budget — cheaper CPM but less conversion confidence |
 | Pinterest | $0 (organic) | n/a | 10–30 orders | Pin organically, $50/day promoted boost optional in week 2 |
 | Email | $0 (existing list) | n/a | 20–50 orders | List size dependent — 1% conversion is realistic |
-| Influencer | $1,500 + product | n/a | 30–80 orders | 3–5 micro-influencer placements at ~$300–500 each + free framed canvas of their pet |
+| Influencer | $1,500 + product | n/a | 30–80 orders | 3–5 micro-influencer placements at ~$300–500 each + free framed print of their pet |
 | Organic SEO | $0 | n/a | 5–20 orders | Realistically slow ramp; 5 blog posts + existing pages |
-| **Total** | **$3,900** | **~$30 blended** | **~140 orders** | $89 AOV (canvas+digital bundle) → ~$12k revenue → 3.1x ROAS |
+| **Total** | **$3,900** | **~$30 blended** | **~140 orders** | $89 AOV (framed print+digital bundle) → ~$12k revenue → 3.1x ROAS |
 
 These are aggressive but achievable assumptions. Refine after week 1 with real data.
 

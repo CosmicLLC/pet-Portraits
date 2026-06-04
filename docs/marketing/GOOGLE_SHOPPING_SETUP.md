@@ -3,7 +3,7 @@
 Paw Masterpiece has 8 flagship products live in a Google Merchant Center-compatible XML feed:
 
 - **Feed URL:** `https://pawmasterpiece.com/api/feed/google-shopping.xml`
-- 4 styles × 2 tiers (Digital $6, Framed Canvas $79)
+- 4 styles × 2 tiers (Digital $6, Framed Print $79)
 - Each product clicks through to `/start?style={key}` (zero-scroll upload page)
 
 ## One-time setup (~15 min)
@@ -58,18 +58,18 @@ Each style ships as two products:
 
 | Product ID | Title | Price | Link |
 |---|---|---|---|
-| `watercolor-canvas-8x12` | Custom Watercolor Pet Portrait — Framed Canvas 8×12 | $79 | `/start?style=watercolor` |
+| `watercolor-framed-print-8x10` | Custom Watercolor Pet Portrait — Framed Print 8×10 | $79 | `/start?style=watercolor` |
 | `watercolor-digital-download` | Custom Watercolor Pet Portrait — Digital Download | $6 | `/start?style=watercolor` |
-| `oil-canvas-8x12` | Custom Oil Painting Pet Portrait — Framed Canvas 8×12 | $79 | `/start?style=oil` |
+| `oil-framed-print-8x10` | Custom Oil Painting Pet Portrait — Framed Print 8×10 | $79 | `/start?style=oil` |
 | `oil-digital-download` | Custom Oil Painting Pet Portrait — Digital Download | $6 | `/start?style=oil` |
-| `renaissance-canvas-8x12` | Custom Renaissance Pet Portrait — Framed Canvas 8×12 | $79 | `/start?style=renaissance` |
+| `renaissance-framed-print-8x10` | Custom Renaissance Pet Portrait — Framed Print 8×10 | $79 | `/start?style=renaissance` |
 | `renaissance-digital-download` | Custom Renaissance Pet Portrait — Digital Download | $6 | `/start?style=renaissance` |
-| `lineart-canvas-8x12` | Custom Line Art Pet Portrait — Framed Canvas 8×12 | $79 | `/start?style=lineart` |
+| `lineart-framed-print-8x10` | Custom Line Art Pet Portrait — Framed Print 8×10 | $79 | `/start?style=lineart` |
 | `lineart-digital-download` | Custom Line Art Pet Portrait — Digital Download | $6 | `/start?style=lineart` |
 
 All include:
 - Brand: Paw Masterpiece
-- MPN: e.g., `PM-WATER-CANVAS-8X12`
+- MPN: e.g., `PM-WATERCOLOR-FRAMED-PRINT-8X10`
 - `identifier_exists: FALSE` (custom-made products)
 - Google product category: 500050 (Artwork > Posters & Prints)
 - Free shipping: $0 standard US shipping
@@ -77,7 +77,7 @@ All include:
 
 ## Adding more SKUs later
 
-To expand to other physical SKUs (mounted print, canvas 16×20, acrylic, etc.):
+To expand to other physical SKUs (mounted print, framed print 18×24, acrylic, etc.):
 
 Edit `app/api/feed/google-shopping.xml/route.ts` → `buildProducts()` function → push more `FeedProduct` entries to the array. The next Google fetch will see them.
 

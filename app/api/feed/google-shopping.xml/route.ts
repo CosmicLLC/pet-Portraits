@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 // One Shopping product per style × per-SKU combo would give ~25 entries,
 // but Google's algorithm prefers fewer, well-categorized listings over many
 // thin ones. We surface 8 flagship products: 4 styles × 2 tiers (Digital +
-// Framed Canvas Bundle). Each links to /start?style={key} for the zero-
+// Framed Print). Each links to /start?style={key} for the zero-
 // scroll buying experience — same page Pinterest funnels into.
 //
 // Submit at: https://merchants.google.com → Products → Feeds → Add primary
@@ -73,27 +73,27 @@ function buildProducts(): FeedProduct[] {
 
   const products: FeedProduct[] = [];
   for (const s of styles) {
-    // Tier 1: Framed canvas bundle (flagship physical product)
+    // Tier 1: Framed print (flagship physical product)
     products.push({
-      id: `${s.key}-canvas-8x12`,
-      title: `Custom ${s.name} Pet Portrait — Framed Canvas 8×12`,
-      description: `${s.blurb} Framed canvas, 8×12, ships in 3-5 business days inside the US. Love-it-or-redo-it guarantee. Includes the full-resolution digital file at no extra charge.`,
+      id: `${s.key}-framed-print-8x10`,
+      title: `Custom ${s.name} Pet Portrait — Framed Print 8×10`,
+      description: `${s.blurb} Framed print, 8×10, ships in 3-5 business days inside the US. Love-it-or-redo-it guarantee. Includes the full-resolution digital file at no extra charge.`,
       link: `${BASE_URL}/start?style=${s.key}&utm_source=google_shopping&utm_medium=cpc`,
       imageLink: `${BASE_URL}${s.image}`,
       price: "79.00 USD",
       availability: "in_stock",
       condition: "new",
       brand: "Paw Masterpiece",
-      mpn: `PM-${s.key.toUpperCase()}-CANVAS-8X12`,
+      mpn: `PM-${s.key.toUpperCase()}-FRAMED-PRINT-8X10`,
       productType: "Home & Garden > Decor > Artwork > Pet Portraits",
-      customLabel0: "framed-canvas",
+      customLabel0: "framed-print",
     });
 
     // Tier 2: Digital download (impulse-priced for cold buyers)
     products.push({
       id: `${s.key}-digital-download`,
       title: `Custom ${s.name} Pet Portrait — Digital Download`,
-      description: `${s.blurb} Full-resolution digital file, delivered by email in about 30 seconds. Print at home or any photo lab. Same artwork as our canvas, no shipping wait.`,
+      description: `${s.blurb} Full-resolution digital file, delivered by email in about 30 seconds. Print at home or any photo lab. Same artwork as our framed print, no shipping wait.`,
       link: `${BASE_URL}/start?style=${s.key}&utm_source=google_shopping&utm_medium=cpc`,
       imageLink: `${BASE_URL}${s.image}`,
       price: "6.00 USD",
@@ -149,7 +149,7 @@ export async function GET() {
   <channel>
     <title>Paw Masterpiece</title>
     <link>${BASE_URL}</link>
-    <description>Custom pet portrait art studio. Watercolor, oil painting, Renaissance, and line art portraits made from your pet's photo. Digital downloads from $6 and framed canvases from $79, shipping inside the United States.</description>
+    <description>Custom pet portrait art studio. Watercolor, oil painting, Renaissance, and line art portraits made from your pet's photo. Digital downloads from $6 and framed prints from $79, shipping inside the United States.</description>
 ${products.map(renderItem).join("\n")}
   </channel>
 </rss>

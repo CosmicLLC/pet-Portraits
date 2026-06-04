@@ -13,9 +13,9 @@ Generated 2026-05-25 after a long marketing build session. Paste this whole docu
 - Phone wallpaper — $0.99 (new tripwire, just shipped)
 - Display print 11×14 — physical, ships via Prodigi
 - Mounted print 11×14 — physical
-- Framed canvas 8×12 — physical
-- Bundle (canvas + digital) — $79
-- Expansion SKUs (env-gated, not yet active): canvas 16×20, multipet, gallery set, acrylic, metal, cards, phone case, prism, mug, pillow
+- Framed print 8×10 — physical
+- Bundle (framed print + digital) — $79
+- Expansion SKUs (env-gated, not yet active): framed print 18×24, multipet, gallery set, acrylic, metal, cards, phone case, prism, mug, pillow
 
 **Art styles:** Watercolor, Oil Painting, Renaissance, Line Art (4 styles, each at `/styles/{slug}-pet-portrait`)
 

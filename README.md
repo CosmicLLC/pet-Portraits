@@ -31,9 +31,9 @@ These are passed to OpenAI alongside the pet photo to guide the style. The app w
 | `GEMINI_API_KEY` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — Gemini API key |
 | `STRIPE_SECRET_KEY` | [dashboard.stripe.com/apikeys](https://dashboard.stripe.com/apikeys) |
 | `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard > Webhooks > your endpoint > Signing secret |
-| `STRIPE_DIGITAL_PRICE_ID` | Create a product "Digital Download" at $25 in Stripe, copy the Price ID |
-| `STRIPE_WALLPAPER_PRICE_ID` | Create a product "Phone Wallpaper" at $15 in Stripe, copy the Price ID |
-| `STRIPE_CANVAS_PRICE_ID` | Create a product "Canvas Print 8x10" at $77 in Stripe, copy the Price ID |
+| `STRIPE_DIGITAL_PRICE_ID` | Create a product "Digital Download" at $6 in Stripe, copy the Price ID |
+| `STRIPE_WALLPAPER_PRICE_ID` | Create a product "Phone Wallpaper" at $0.99 in Stripe, copy the Price ID |
+| `STRIPE_CANVAS_PRICE_ID` | Create a product "Framed Print 8x10" at $79 in Stripe, copy the Price ID |
 | `RESEND_API_KEY` | [resend.com/api-keys](https://resend.com/api-keys) |
 | `BLOB_READ_WRITE_TOKEN` | Vercel Dashboard > Storage > Create Blob Store > copy token |
 | `NEXT_PUBLIC_BASE_URL` | Your deployed URL (e.g. `https://petportraits.com`) or `http://localhost:3000` for dev |
@@ -41,9 +41,9 @@ These are passed to OpenAI alongside the pet photo to guide the style. The app w
 ## Stripe Setup
 
 1. Create 3 products in Stripe Dashboard > Products:
-   - **Digital Download** — $25 (one-time)
-   - **Phone Wallpaper** — $15 (one-time)
-   - **Canvas Print 8x10** — $77 (one-time)
+   - **Digital Download** — $6 (one-time)
+   - **Phone Wallpaper** — $0.99 (one-time)
+   - **Framed Print 8x10** — $79 (one-time)
 2. Copy each Price ID into your `.env.local`
 3. Create a webhook endpoint pointing to `https://yourdomain.com/api/webhook`
 4. Select the `checkout.session.completed` event
@@ -79,7 +79,7 @@ Make sure to:
 
 **Next steps for scaling:**
 
-- **Printful integration** — For canvas print orders, integrate with Printful API to auto-fulfill print orders. Currently canvas orders log to console and send a confirmation email.
+- **Printful integration** — For framed print orders, integrate with Printful API to auto-fulfill print orders. Currently framed print orders log to console and send a confirmation email.
 - **Analytics** — Add Vercel Analytics or Plausible for conversion tracking.
 - **Custom branding** — Replace "PREVIEW" watermark text in `lib/watermark.ts` with your brand name. Update the `from` email in `lib/resend.ts`.
 - **Additional styles** — Add new entries to `STYLE_PROMPTS` in `lib/openai.ts` and update the `StylePicker` component.

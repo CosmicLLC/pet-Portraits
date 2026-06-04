@@ -24,7 +24,7 @@ const dmSans = DM_Sans({
 const SEO_TITLE =
   "Custom Pet Portraits from Your Photo | Paw Masterpiece"
 const SEO_DESCRIPTION =
-  "Turn any photo into a custom pet portrait in 30 seconds. Choose watercolor, oil painting, Renaissance royalty, or line art. Instant digital download, or shipped as a framed canvas. Loved by 40,000+ pet parents."
+  "Turn any photo into a custom pet portrait in 30 seconds. Choose watercolor, oil painting, Renaissance royalty, or line art. Instant digital download, or shipped as a framed print. Loved by 40,000+ pet parents."
 
 export const metadata: Metadata = {
   metadataBase: new URL(

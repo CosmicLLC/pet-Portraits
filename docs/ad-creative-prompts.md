@@ -101,13 +101,13 @@ In Figma, assemble the 4 tiles into a 2×2 grid on a cream background (#FAF7F2),
 | 4.0–6.0s | Screen-record: upload photo of mom's dog (from camera roll) | Hold on the upload interaction | SFX: swoosh as upload completes |
 | 6.0–9.0s | Screen-record: 4 style thumbnails appear, creator taps "Watercolor" | Emphasize the four-style choice | **Text:** "30 seconds" with countdown timer |
 | 9.0–12.0s | Screen-record: preview animates in — the watercolor portrait of mom's dog | Let the reveal breathe — 2 full seconds on the result | Creator voice-over: "Oh my god." |
-| 12.0–15.0s | Cut to: canvas on mom's wall the next day, mom on video call, her hand at her mouth | Warm home interior, window light | **Text:** "She thinks I planned this for months." |
+| 12.0–15.0s | Cut to: framed print on mom's wall the next day, mom on video call, her hand at her mouth | Warm home interior, window light | **Text:** "She thinks I planned this for months." |
 | 15.0–18.0s | End card | Brand-green background, logo, CTA | **Text:** "pawmasterpiece.com — preview free in 30 seconds" |
 
 ### Veo 3 / Sora 2 / Runway Gen-3 prompt (for the reaction shot, 12.0–15.0s)
 
 ```
-Cinematic vertical 9:16 video, 4 seconds, of a woman in her 60s wearing a cream cashmere sweater, sitting on a beige linen sofa in a warm modern living room with afternoon sunlight streaming through a left window. She is looking up at a 8x12 framed watercolor portrait of her golden retriever hanging on a cream wall. Her hand slowly rises to cover her mouth, eyes shimmering. She does not speak. Subtle natural camera push-in, shallow depth of field, 50mm lens feel, editorial warmth, candid family-moment aesthetic. Soft ambient room tone, no music, no speaking.
+Cinematic vertical 9:16 video, 4 seconds, of a woman in her 60s wearing a cream cashmere sweater, sitting on a beige linen sofa in a warm modern living room with afternoon sunlight streaming through a left window. She is looking up at a 8x10 framed watercolor portrait of her golden retriever hanging on a cream wall. Her hand slowly rises to cover her mouth, eyes shimmering. She does not speak. Subtle natural camera push-in, shallow depth of field, 50mm lens feel, editorial warmth, candid family-moment aesthetic. Soft ambient room tone, no music, no speaking.
 ```
 
 ### Copy / text overlays
@@ -166,7 +166,7 @@ Replace "modern cream living room" with:
 ### Tone-shift for campaign moment
 
 - **Mother's Day:** warm sofa reveal with her adult child filming
-- **Father's Day:** office-desk reveal, canvas on the desk, coworker background
+- **Father's Day:** office-desk reveal, framed print on the desk, coworker background
 - **Christmas:** wrapped under tree, family gathered, unwrap ambient holiday audio
 - **Birthday:** casual kitchen counter reveal, no wrapping, just "look what I made for your dog"
 - **Memorial (separate campaign, different creator):** no reveal — quiet single shot of the portrait on a mantel beside a candle, slow pan, no faces

@@ -17,10 +17,10 @@ Benchmark from Influencer Marketing Hub 2026 Micro Rate Guide: micro-IG creators
 
 | Follower band | Flat fee (1 Reel + 1 IG feed post + 90-day paid-ad usage rights) | Plus product |
 | --- | --- | --- |
-| 5k–15k | **$150** | Free framed canvas of their pet ($79 retail) |
-| 15k–40k | **$300** | Free framed canvas |
-| 40k–75k | **$550** | Free framed canvas |
-| 75k–100k | **$850** | Free framed canvas |
+| 5k–15k | **$150** | Free framed print of their pet ($79 retail) |
+| 15k–40k | **$300** | Free framed print |
+| 40k–75k | **$550** | Free framed print |
+| 75k–100k | **$850** | Free framed print |
 
 Hard ceiling: $850. If they ask for more we walk — there are 100+ micros in this niche, and ROI does not scale above $1k/post for our AOV.
 
@@ -96,19 +96,19 @@ These came up in multiple lists but with weaker engagement signals or unclear US
 
 **1. DM script (first reach-out — send via IG DM, not email)**
 
-> Hi [first name]! [Specific compliment referencing a recent post — e.g., "the golden-hour Reel of Lola at the beach last Tuesday made my morning"]. I'm [your name] from Paw Masterpiece — we make hand-finished framed portraits of people's pets and we're seeding a small group of creators ahead of Mother's Day. We'd love to send you a free framed canvas of [pet name] (we'll need 2–3 high-res photos from you) and pay $[300/550] for one Reel + one IG feed post showing the reveal, with paid-ad usage for 90 days. The Reel would run between **May 1 and May 8**. Tone-wise we're going for warm and genuine, not salesy — closer to "look at this portrait of my dog" than a product ad. Brief and rate card here: [link]. Open to it?
+> Hi [first name]! [Specific compliment referencing a recent post — e.g., "the golden-hour Reel of Lola at the beach last Tuesday made my morning"]. I'm [your name] from Paw Masterpiece — we make hand-finished framed portraits of people's pets and we're seeding a small group of creators ahead of Mother's Day. We'd love to send you a free framed print of [pet name] (we'll need 2–3 high-res photos from you) and pay $[300/550] for one Reel + one IG feed post showing the reveal, with paid-ad usage for 90 days. The Reel would run between **May 1 and May 8**. Tone-wise we're going for warm and genuine, not salesy — closer to "look at this portrait of my dog" than a product ad. Brief and rate card here: [link]. Open to it?
 
 Send between **9–11 a.m. local time, Tue/Wed/Thu**. Skip Mondays (DM inbox is already noisy) and weekends.
 
 **2. Compensation framing**
 
-Lead with the **canvas of THEIR pet**, not the cash. The product-as-gift removes the "is this brand worth it?" friction and makes the ad authentic — they're posting because they actually love it. Cash is for the time and the usage rights, not for buying an opinion. Offer tiers above are **flat for one Reel + one IG feed post + 90-day paid-ad usage rights** (Meta + TikTok). No exclusivity. No revisions clause beyond "matches the brief."
+Lead with the **framed print of THEIR pet**, not the cash. The product-as-gift removes the "is this brand worth it?" friction and makes the ad authentic — they're posting because they actually love it. Cash is for the time and the usage rights, not for buying an opinion. Offer tiers above are **flat for one Reel + one IG feed post + 90-day paid-ad usage rights** (Meta + TikTok). No exclusivity. No revisions clause beyond "matches the brief."
 
 **3. Timeline (16 days, non-negotiable)**
 
 - **Apr 24–28:** DM 35–40 creators. Aim 30 % response, 15 confirmed.
-- **Apr 29–30:** Send canvas brief + collect pet photos. Rush canvas production.
-- **May 1–6:** Canvases arrive. Creator films reveal.
+- **Apr 29–30:** Send framed print brief + collect pet photos. Rush print production.
+- **May 1–6:** Framed prints arrive. Creator films reveal.
 - **May 1–8:** Posts go live. We boost top performers as paid Reels ads on May 6–10.
 - **May 9–10:** Final Mother's Day push using winning creative.
 

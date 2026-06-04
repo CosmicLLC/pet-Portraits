@@ -112,21 +112,21 @@ export async function sendDownloadEmail(
 
     <hr style="border:none;border-top:1px solid #E5E0D8;margin:32px 0;" />
 
-    <!-- Canvas upsell -->
+    <!-- Framed print upsell -->
     <div style="background:#fff;border:2px solid #2D4A3E;border-radius:12px;padding:24px;text-align:center;margin-bottom:8px;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#C4A35A;">
         ${isWallpaper ? "Love it on your wall too?" : "Upgrade your order"}
       </p>
       <h2 style="font-size:20px;color:#2D4A3E;margin:0 0 10px;font-weight:700;">
-        Turn your pet into a canvas print
+        Turn your pet into a framed print
       </h2>
       <p style="color:#666;font-size:14px;line-height:1.6;margin:0 0 20px;">
-        Display your pet on a stunning 8&times;12 framed gallery-quality canvas.
+        Display your pet on a stunning 8&times;10 framed gallery-quality print.
         Arrives in 5&ndash;7 days &mdash; the perfect gift for a pet lover.
       </p>
       <a href="${siteUrl()}"
          style="display:inline-block;background:#C4A35A;color:#fff;text-decoration:none;padding:12px 32px;border-radius:50px;font-size:14px;font-weight:700;">
-        Order Canvas Print &mdash; $77
+        Order Framed Print &mdash; $59
       </a>
     </div>
 
@@ -254,7 +254,7 @@ export async function sendPhysicalConfirmationEmail(to: string, productType: str
         Create a portrait for a friend&rsquo;s pet
       </p>
       <p style="margin:0 0 16px;color:#666;font-size:13px;line-height:1.5;">
-        Digital downloads are just $25 and make a thoughtful, unique gift.
+        Digital downloads are just $6 and make a thoughtful, unique gift.
       </p>
       <a href="${siteUrl()}"
          style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:12px 32px;border-radius:50px;font-size:14px;font-weight:700;">

@@ -108,7 +108,7 @@ export default async function OgImage({ params }: Props) {
                 maxWidth: 540,
               }}
             >
-              30-second preview. Free to try. Framed canvas ships 3-5 days.
+              30-second preview. Free to try. Framed print ships 3-5 days.
             </div>
           </div>
 

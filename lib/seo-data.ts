@@ -86,7 +86,7 @@ export const PET_CATEGORIES: Record<string, PetCategory> = {
     plural: "dogs",
     headline: "Custom Dog Portraits from Your Photo",
     description:
-      "Turn any photo of your dog into gallery-quality art. Watercolor, oil painting, Renaissance royalty, or minimalist line art — delivered in seconds, printable at home or shipped as a framed canvas.",
+      "Turn any photo of your dog into gallery-quality art. Watercolor, oil painting, Renaissance royalty, or minimalist line art — delivered in seconds, printable at home or shipped as a framed print.",
   },
   cats: {
     slug: "cats",

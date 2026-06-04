@@ -31,7 +31,7 @@ export function generateMetadata({ params }: Props): Metadata {
   const style = styleBySlug(params.slug)
   if (!style) return {}
   const title = `${style.fullName} from Your Photo | Instant ${style.shortName} Pet Art`
-  const description = `Turn any photo into a custom ${style.shortName.toLowerCase()} pet portrait in 30 seconds. ${style.description} Digital download or framed canvas.`
+  const description = `Turn any photo into a custom ${style.shortName.toLowerCase()} pet portrait in 30 seconds. ${style.description} Digital download or framed print.`
   return {
     title,
     description,
@@ -68,7 +68,7 @@ export default function StyleLandingPage({ params }: Props) {
     image: `${baseUrl}${style.image}`,
     offers: {
       "@type": "Offer",
-      price: "19.00",
+      price: "6.00",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
       url: `${baseUrl}/styles/${style.slug}`,
@@ -137,7 +137,7 @@ export default function StyleLandingPage({ params }: Props) {
       <LandingHero
         eyebrow={`Custom ${style.shortName} Pet Portraits`}
         headline={`${style.fullName} from Your Photo`}
-        subhead={`${style.description} Delivered instantly by email — printable at home or shipped as a framed canvas.`}
+        subhead={`${style.description} Delivered instantly by email — printable at home or shipped as a framed print.`}
         previewImage={style.image}
         previewAlt={`${style.fullName} example — custom ${style.shortName.toLowerCase()} dog portrait from photo`}
       />
@@ -221,7 +221,7 @@ export default function StyleLandingPage({ params }: Props) {
               <li>Upload any clear photo of your pet — no professional shots needed.</li>
               <li>Your {style.shortName.toLowerCase()} portrait is ready in about 30 seconds.</li>
               <li>Preview the result for free. Only pay if you love it.</li>
-              <li>Download the full-resolution file instantly, or order a print or framed canvas — shipped within the United States in 3–5 business days.</li>
+              <li>Download the full-resolution file instantly, or order a framed or unframed print — shipped within the United States in 3–5 business days.</li>
             </ol>
           </div>
         </div>

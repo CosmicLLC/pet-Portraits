@@ -52,7 +52,7 @@ const FAQS = [
   },
   {
     q: "How is this different from Crown & Paw or West & Willow?",
-    a: "Those services use human artists with 1–7 day turnaround and pricing starting around $79 for a digital file. We use AI for the heavy lift, which is what lets us deliver in 30 seconds at $6 for a digital download. The trade-off is honesty: ours is AI-assisted with curated styles; theirs is hand-finished. If you want a fully hand-painted portrait and can wait a week, choose them. If you want a preview right now and a framed canvas in 3–5 days, choose us.",
+    a: "Those services use human artists with 1–7 day turnaround and pricing starting around $79 for a digital file. We use AI for the heavy lift, which is what lets us deliver in 30 seconds at $6 for a digital download. The trade-off is honesty: ours is AI-assisted with curated styles; theirs is hand-finished. If you want a fully hand-painted portrait and can wait a week, choose them. If you want a preview right now and a framed print in 3–5 days, choose us.",
   },
   {
     q: "Is the watermarked preview really free? What's the catch?",
@@ -60,7 +60,7 @@ const FAQS = [
   },
   {
     q: "Can I get a high-resolution file for printing at a print shop?",
-    a: "Yes — the digital download ($6) is a full-resolution PNG suitable for printing at any size up to about 24×36 inches. Many customers print it at their local print shop, on canvas through a third-party, or directly on metal or acrylic. We also offer framed canvas, mounted prints, and display prints shipped to your door if you'd rather not deal with printing.",
+    a: "Yes — the digital download ($6) is a full-resolution PNG suitable for printing at any size up to about 24×36 inches. Many customers print it at their local print shop, on canvas through a third-party, or directly on metal or acrylic. We also offer framed prints, mounted prints, and display prints shipped to your door if you'd rather not deal with printing.",
   },
   {
     q: "What if I want a custom style that isn't in your library?",
@@ -141,7 +141,7 @@ const howToJsonLd = {
       "@type": "HowToStep",
       position: 3,
       name: "Download or order a print",
-      text: "Get the digital download for $6, a framed canvas for $79 (ships in 3–5 days inside the US), or the bundle that includes both.",
+      text: "Get the digital download for $6, an 8×10 framed print for $79 (ships in 3–5 days inside the US), or add the digital file to any print at checkout.",
     },
   ],
 };
@@ -216,8 +216,8 @@ export default function HowItWorksPage() {
               n: "03",
               title: "Download or order a print.",
               body:
-                "Once you love the preview, choose how to take it home: the digital download is a full-resolution PNG ($6) suitable for printing anywhere up to 24×36 inches. The 8×12 framed canvas ($79) ships from our US print partner in 3–5 business days, ready to hang. The bundle ($79) includes both — same price as the canvas alone. If something is off in the first version, reply to your confirmation email and we redo it free, unlimited revisions.",
-              note: "Bundle is the best value — same price as the canvas alone but the digital file is included.",
+                "Once you love the preview, choose how to take it home: the digital download is a full-resolution PNG ($6) suitable for printing anywhere up to 24×36 inches. The 8×10 framed print ($79) ships from our US print partner in 3–5 business days, ready to hang. Add the full-resolution digital file to any print at checkout. If something is off in the first version, reply to your confirmation email and we redo it free, unlimited revisions.",
+              note: "Best value: add the digital file to any print at checkout — the on-screen copy plus a piece for the wall.",
               icon: (
                 <svg className="w-7 h-7 text-brand-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />

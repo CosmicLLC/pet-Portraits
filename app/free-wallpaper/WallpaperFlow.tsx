@@ -236,10 +236,10 @@ export default function WallpaperFlow() {
             Want it on your wall too?
           </p>
           <h3 className="font-display text-xl text-brand-green mb-2">
-            Get the framed canvas — and the unwatermarked digital file.
+            Get the framed print — and the unwatermarked digital file.
           </h3>
           <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-            Your wallpaper is yours to keep, free, watermarked. The full-resolution file (no watermark) and the gallery-quality framed canvas ship together as the Complete Bundle. Through May 10, every order also includes a <strong>FREE 11×14 display print</strong>.
+            Your wallpaper is yours to keep, free, watermarked. The gallery-quality framed print ships to your door, and you can add the full-resolution file (no watermark) at checkout. Through May 10, every order also includes a <strong>FREE 11×14 display print</strong>.
           </p>
           <div className="flex flex-wrap gap-3">
             <a

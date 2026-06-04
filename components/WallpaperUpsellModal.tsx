@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-// Wallpaper → canvas upsell modal. Fires 4s after the wallpaper
+// Wallpaper → framed-print upsell modal. Fires 4s after the wallpaper
 // success state renders, showing the buyer's portrait inside a
-// CSS-rendered canvas frame, with a 24h real-server countdown to
-// $10 off the canvas upgrade.
+// CSS-rendered frame, with a 24h real-server countdown to
+// $10 off the framed-print upgrade.
 //
 // All discount-window logic is server-side (see
 // /api/create-upsell-checkout). The countdown shown here is a UX
@@ -17,7 +17,7 @@ interface Props {
    * Used as the server-side proof of eligibility. */
   originalSessionId: string;
   /** The watermarked wallpaper preview the buyer just saw on the
-   * studio. Embedded as the canvas-mockup image. May be a data: URL. */
+   * studio. Embedded as the framed-print mockup image. May be a data: URL. */
   portraitDataUrl: string | null;
   /** When the discount window closes (24h after the wallpaper
    * purchase). ISO timestamp from the same Stripe.session.created
@@ -81,14 +81,14 @@ export default function WallpaperUpsellModal({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        throw new Error(data.error || "Could not start canvas upgrade");
+        throw new Error(data.error || "Could not start print upgrade");
       }
       window.location.href = data.url;
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Could not start canvas upgrade — please try again."
+          : "Could not start print upgrade — please try again."
       );
       setLoading(false);
     }
@@ -112,7 +112,7 @@ export default function WallpaperUpsellModal({
         onClick={handleReopen}
         className="fixed bottom-6 right-6 z-40 rounded-full bg-brand-green px-5 py-3 text-cream shadow-xl hover:scale-105 transition-transform font-display font-semibold text-sm"
       >
-        Get the canvas — $69 · {timeLeft}
+        Get the framed print — $69 · {timeLeft}
       </button>
     );
   }
@@ -150,10 +150,10 @@ export default function WallpaperUpsellModal({
           </svg>
         </button>
 
-        {/* CSS-rendered canvas frame mockup. Real Sharp composite is a
+        {/* CSS-rendered frame mockup. Real Sharp composite is a
             phase-2 upgrade — for now, an inline wood-grain frame with
-            the buyer's portrait inside reads as a canvas at the modal's
-            display size. */}
+            the buyer's portrait inside reads as a framed print at the
+            modal's display size. */}
         <div className="mb-5 flex justify-center">
           <div
             className="relative"
@@ -170,7 +170,7 @@ export default function WallpaperUpsellModal({
             <div
               className="bg-white overflow-hidden"
               style={{
-                aspectRatio: "2 / 3",
+                aspectRatio: "4 / 5",
                 boxShadow: "inset 0 0 14px rgba(0,0,0,0.18)",
               }}
             >
@@ -196,7 +196,7 @@ export default function WallpaperUpsellModal({
           Want this on your wall too?
         </h2>
         <p className="text-sm text-gray-700 text-center mb-4 leading-relaxed">
-          Your portrait, printed on an 8×12 framed canvas. Wallpaper buyers
+          Your portrait, in an 8×10 framed print. Wallpaper buyers
           save $10 — today only.
         </p>
 
@@ -226,7 +226,7 @@ export default function WallpaperUpsellModal({
         >
           {loading
             ? "Loading checkout…"
-            : `Upgrade to canvas — $69`}
+            : `Upgrade to framed print — $69`}
         </button>
 
         <button

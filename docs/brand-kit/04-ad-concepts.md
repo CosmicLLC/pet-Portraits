@@ -49,7 +49,7 @@ Cinematic lifestyle photo of [gifter] in [warm modern interior], mid-reaction to
 - 4–6s: photo upload screen-record
 - 6–9s: style picker, tap Watercolor. Countdown text: `"30 seconds"`
 - 9–12s: preview animates in. VO: `"Oh my god."`
-- 12–15s: cut to canvas on mom's wall next day. Text: `"She thinks I planned this for months."`
+- 12–15s: cut to the framed print on mom's wall next day. Text: `"She thinks I planned this for months."`
 - 15–18s: end card. `"pawmasterpiece.com — preview free in 30 seconds"`
 
 **Copy block:**
@@ -65,7 +65,7 @@ Cinematic lifestyle photo of [gifter] in [warm modern interior], mid-reaction to
 Rotate through these. Don't use any one more than twice per campaign window.
 
 ### Reaction-framed (best CTR)
-- "I paid $19 for a portrait of my dog and I might cry."
+- "I paid $6 for a portrait of my dog and I might cry."
 - "If you have a dog, stop what you're doing."
 - "My mom's going to lose it when she sees this."
 - "Three seconds into this reveal and I screamed."

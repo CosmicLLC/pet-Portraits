@@ -55,7 +55,7 @@ const MEMORIAL_FAQS = [
   },
   {
     q: "Can I order a physical keepsake, not just a digital file?",
-    a: "Yes. We offer gallery-quality framed canvas prints (8×12), fine art display prints (11×14), and mounted gallery prints (11×14), all printed in the United States. Many families order two — one for their home and one for another family member.",
+    a: "Yes. We offer gallery-quality framed fine-art prints (8×10, 12×16, 18×24), fine art display prints (11×14), and mounted gallery prints (11×14), all printed in the United States. Many families order two — one for their home and one for another family member.",
   },
 ];
 
@@ -76,7 +76,7 @@ const productJsonLd = {
   offers: {
     "@type": "AggregateOffer",
     priceCurrency: "USD",
-    lowPrice: "19.00",
+    lowPrice: "6.00",
     highPrice: "89.00",
     offerCount: "5",
     availability: "https://schema.org/InStock",
@@ -267,7 +267,7 @@ export default function MemorialPage() {
               },
               {
                 title: "Receive your keepsake",
-                desc: "Instant digital download, or a framed canvas or gallery print shipped to your home.",
+                desc: "Instant digital download, or a framed print or gallery print shipped to your home.",
               },
             ].map((step, i) => (
               <div key={step.title} className="text-center">

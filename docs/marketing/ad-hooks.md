@@ -22,7 +22,7 @@ Notes for the shooter:
   - Thirty seconds later he's wearing a velvet cloak.
   - I will not be taking questions.
 - **CTA:** Make yours a king at pawmasterpiece.com.
-- **Visual direction:** Phone-held shot of the pet on a couch, then quick cut to phone screen showing the Renaissance result, then framed canvas leaned against a wall. Owner mock-bows to the dog.
+- **Visual direction:** Phone-held shot of the pet on a couch, then quick cut to phone screen showing the Renaissance result, then framed print leaned against a wall. Owner mock-bows to the dog.
 - **Platform fit:** Both (TikTok-first, repurpose to Reels).
 - **Audience targeting:** Broad, dog moms 25–45.
 - **Compliance note:** Disclose AI-assisted in caption ("AI-assisted, human-curated styles"). Avoid claiming the dog "is" royalty in a way that misrepresents the product.
@@ -57,11 +57,11 @@ Notes for the shooter:
 - **Opening line:** "POV: I made my husky a watercolor portrait and now he's the most expensive-looking thing in the house."
 - **Body copy:**
   - Watercolor style, soft edges, real artist energy.
-  - The canvas got here in four days.
+  - The print got here in four days.
   - It's hanging above the couch the dog isn't allowed on.
   - He knows.
 - **CTA:** Watercolor your dog at pawmasterpiece.com.
-- **Visual direction:** Phone tour of the living room ending on the framed canvas above the couch. Husky walks into frame and stares.
+- **Visual direction:** Phone tour of the living room ending on the framed print above the couch. Husky walks into frame and stares.
 - **Platform fit:** Both.
 - **Audience targeting:** Dog moms 28–50, home decor interest.
 - **Compliance note:** "3–5 day US shipping" if shipping mentioned in caption — match landing page exactly.
@@ -82,12 +82,12 @@ Notes for the shooter:
 ### Hook 6 — POV reveal
 - **Opening line:** "POV: I told the AI to paint my dog and forgot to warn my mom."
 - **Body copy:**
-  - Sent her the framed canvas for her birthday.
+  - Sent her the framed print for her birthday.
   - She FaceTimed me crying — the good kind.
   - It's the dog she lost the photo album of.
   - Thirty seconds of work. Months of crying.
 - **CTA:** Make one for someone who needs it. pawmasterpiece.com.
-- **Visual direction:** Screen-recorded FaceTime reaction (mom seeing the canvas), then cut to the framed canvas on her wall.
+- **Visual direction:** Screen-recorded FaceTime reaction (mom seeing the print), then cut to the framed print on her wall.
 - **Platform fit:** Meta-first (older gift-giver audience).
 - **Audience targeting:** Gift-givers 35–60, parents-of-pet-owners lookalike.
 - **Compliance note:** "Crying — the good kind" is the closest this section gets to emotion claims; do not extend toward loss/memorial in cold creative.
@@ -104,7 +104,7 @@ Notes for the shooter:
   - Same dog. Same week.
   - I'm not okay.
 - **CTA:** Try yours free at pawmasterpiece.com.
-- **Visual direction:** Split-screen: phone photo on left, canvas on wall on right. Pan to owner's face, jaw-drop reaction. Hold.
+- **Visual direction:** Split-screen: phone photo on left, framed print on wall on right. Pan to owner's face, jaw-drop reaction. Hold.
 - **Platform fit:** Both.
 - **Audience targeting:** Broad pet owners 25–45.
 - **Compliance note:** "AI-assisted, human-curated styles" required in caption per Etsy-aligned disclosure norm.
@@ -126,11 +126,11 @@ Notes for the shooter:
 - **Opening line:** "My partner didn't know I ordered this. Watch his face."
 - **Body copy:**
   - Photo of our rescue, taken last month.
-  - Renaissance portrait, framed canvas, on the wall before he got home.
+  - Renaissance portrait, framed print, on the wall before he got home.
   - I hit record.
   - `[real customer quote here]`
 - **CTA:** Surprise someone — start at pawmasterpiece.com.
-- **Visual direction:** Hidden-camera-style: partner walks in, stops, walks closer to the canvas. Pan to the framed piece. End on the dog watching from the floor.
+- **Visual direction:** Hidden-camera-style: partner walks in, stops, walks closer to the framed print. Pan to the framed piece. End on the dog watching from the floor.
 - **Platform fit:** Both.
 - **Audience targeting:** Couples, gift-givers 25–45.
 - **Compliance note:** Placeholder quote must be replaced with a real verified customer review before launch. No fabricated testimonials.
@@ -140,10 +140,10 @@ Notes for the shooter:
 - **Body copy:**
   - "Order it now."
   - So I did.
-  - Got the canvas four days later.
+  - Got the print four days later.
   - It's the one Mom is getting for her birthday.
 - **CTA:** Preview yours free at pawmasterpiece.com.
-- **Visual direction:** Screen recording of the iMessage thread (with sister's name redacted), then cut to the framed canvas wrapped on a counter.
+- **Visual direction:** Screen recording of the iMessage thread (with sister's name redacted), then cut to the framed print wrapped on a counter.
 - **Platform fit:** Meta-first.
 - **Audience targeting:** Gift-givers, women 30–55.
 - **Compliance note:** Texts shown on-screen should be staged-but-honest — if scripted, do not present as a real unsolicited testimonial.
@@ -171,9 +171,9 @@ Notes for the shooter:
   - One photo. One tap.
   - No "wait 5 to 7 business days."
   - No "your artist is reviewing."
-  - Just my dog, on a canvas, by Friday.
+  - Just my dog, in a frame, by Friday.
 - **CTA:** Thirty seconds to try at pawmasterpiece.com.
-- **Visual direction:** Real-time screen recording of the upload-to-preview flow on the phone, then a cut to the framed canvas on the wall.
+- **Visual direction:** Real-time screen recording of the upload-to-preview flow on the phone, then a cut to the framed print on the wall.
 - **Platform fit:** Both.
 - **Audience targeting:** Broad, retargeting from competitor-interest audiences.
 - **Compliance note:** Do not name Crown & Paw or West & Willow. Quoted competitor language ("wait 5 to 7 business days") must stay generic and not be presented as a direct quote from a specific brand.
@@ -196,10 +196,10 @@ Notes for the shooter:
 - **Body copy:**
   - Uploaded a photo from the park.
   - Watercolor style.
-  - Framed canvas at the door in four days.
+  - Framed print at the door in four days.
   - This is how it should work.
 - **CTA:** Try yours at pawmasterpiece.com.
-- **Visual direction:** Phone-in-hand at the park with the dog. Cut to upload screen, cut to preview, cut to unboxing the canvas at the door.
+- **Visual direction:** Phone-in-hand at the park with the dog. Cut to upload screen, cut to preview, cut to unboxing the framed print at the door.
 - **Platform fit:** Both.
 - **Audience targeting:** Broad, impatient-shopper psychographic.
 - **Compliance note:** "Four days" must reflect the 3–5 day US shipping window. Add "US shipping" in caption if running outside US too.
@@ -208,7 +208,7 @@ Notes for the shooter:
 - **Opening line:** "Stop paying $150 and waiting a week. Watch this."
 - **Body copy:**
   - Six dollars gets me the digital file.
-  - Seventy-nine gets me a framed canvas.
+  - Seventy-nine gets me a framed print.
   - Both in under a week.
   - I checked. Twice.
 - **CTA:** Compare for yourself at pawmasterpiece.com.
@@ -223,9 +223,9 @@ Notes for the shooter:
   - No artist queue.
   - No revision emails.
   - No "we'll have something for you next week."
-  - One photo of my cat, one canvas in my hallway.
+  - One photo of my cat, one framed print in my hallway.
 - **CTA:** Start the thirty seconds at pawmasterpiece.com.
-- **Visual direction:** Stopwatch overlay on phone for the 30-second preview generation. Cut to a calendar showing four days. End on cat sitting under the framed canvas.
+- **Visual direction:** Stopwatch overlay on phone for the 30-second preview generation. Cut to a calendar showing four days. End on cat sitting under the framed print.
 - **Platform fit:** Both.
 - **Audience targeting:** Cat lovers, broad, retargeting.
 - **Compliance note:** Stopwatch should reflect real generation time — do not edit to make it appear faster than the actual product experience.
@@ -270,7 +270,7 @@ Notes for the shooter:
   - It's hanging in the room he used to sleep in.
   - That's what I needed.
 - **CTA:** Pick a style at pawmasterpiece.com.
-- **Visual direction:** A canvas hanging on a wall in a quiet room — a pet bed visible on the floor below. Static shot, no movement, soft daylight.
+- **Visual direction:** A framed print hanging on a wall in a quiet room — a pet bed visible on the floor below. Static shot, no movement, soft daylight.
 - **Platform fit:** Meta only.
 - **Audience targeting:** Retargeting from memorial page visitors only.
 - **Compliance note:** Do not mention loss directly in the ad voiceover — context lives in the visual and the audience targeting. No "rainbow bridge" or eternity language.
@@ -283,7 +283,7 @@ Notes for the shooter:
   - Framed, on a shelf with the other pictures.
   - He's just part of the room now.
 - **CTA:** A way to remember a pet. pawmasterpiece.com.
-- **Visual direction:** A shelf with family photos and the framed pet canvas placed naturally among them. Wide static shot. No close-up.
+- **Visual direction:** A shelf with family photos and the framed pet print placed naturally among them. Wide static shot. No close-up.
 - **Platform fit:** Meta only.
 - **Audience targeting:** Retargeting only — past purchasers, memorial-lookalike, viewers of memorial gallery.
 - **Compliance note:** "Way to remember" is the strongest emotional claim allowed. No promises of comfort, healing, or presence. Keep all framing observational.

@@ -15,7 +15,7 @@ Copy should signal which persona it's for within the first line.
 | Scenario | Tone | Example hook |
 | --- | --- | --- |
 | Gift-giver, urgent | Warm + specific | "The gift she'll actually hang on the wall." |
-| Self-gifter | Playful, first-person | "I paid $19 for a portrait of my dog and I might cry." |
+| Self-gifter | Playful, first-person | "I paid $6 for a portrait of my dog and I might cry." |
 | Father's Day | Dry, direct | "Better than another tie." |
 | Christmas | Theatrical, family | "The Christmas gift that lives above the mantel for 20 years." |
 | Mother's Day | Warm, slightly reverent | "For the pet mom who already has everything." |
@@ -27,7 +27,7 @@ Copy should signal which persona it's for within the first line.
 - "Turn your pet into a work of art."
 - "Preview free in 30 seconds."
 - "Love it or we redo it free."
-- "Starting at $19."
+- "Starting at $6."
 - "Ships in 3–5 days in the US."
 - "4.9★ from 40,000+ pet parents."
 - "Hand-finished," "gallery-quality," "museum-quality," "custom portrait."
@@ -38,7 +38,7 @@ Copy should signal which persona it's for within the first line.
 
 - "AI portrait," "AI-generated," "AI art" — even though it's true. Say "custom portrait," "hand-finished," etc.
 - "Limited time!" or countdown framing like "only 24 hours left."
-- "Only $19" or "just $19" — no minimizers on price.
+- "Only $6" or "just $6" — no minimizers on price.
 - "Perfect for anyone!" — too generic. Always specify who.
 - "Resurrect," "bring back," "alive again" — memorial tone anti-pattern.
 - "Cheap," "affordable" — we're not the low-cost option.
@@ -47,7 +47,7 @@ Copy should signal which persona it's for within the first line.
 ## Sentence patterns we use
 
 - **Compare-and-win**: "Flowers wilt. A portrait doesn't." / "Better than another tie."
-- **Quoted reaction**: "She called me crying." / "I paid $19 and I might cry."
+- **Quoted reaction**: "She called me crying." / "I paid $6 and I might cry."
 - **Concrete ownership**: "Her golden retriever, above the mantel, for decades."
 - **Negative qualifier**: "Not a mug. Not a tote. Actual art."
 - **Direct imperative**: "Upload the photo. Pick the style. See it in 30 seconds."

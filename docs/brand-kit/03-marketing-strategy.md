@@ -43,8 +43,8 @@ Cold audience (Meta / TikTok / Pinterest)
   → Landing page (/gifts/[occasion] or /memorial for that persona)
     → Upload photo + preview (30s)
       → Email captured via exit-intent or browse-abandonment if they leave
-      → Purchase (digital $6 / canvas $79 / bundle $79 with free digital / etc.)
-        → Post-purchase upsell (canvas at 25% off if they bought digital)
+      → Purchase (digital $6 / framed print $79 / bundle $79 with free digital / etc.)
+        → Post-purchase upsell (framed print at 25% off if they bought digital)
         → 7-day review-request email
         → 365-day anniversary email
         → Referral link in every touchpoint
@@ -52,8 +52,8 @@ Cold audience (Meta / TikTok / Pinterest)
 
 ## Product positioning
 
-- Digital portrait ($19): entry price, instant gratification, gift-morning-of play.
-- Framed canvas ($79 / $149): the hero product. "The gift that gets hung on the wall, not put in a drawer."
+- Digital portrait ($6): entry price, instant gratification, gift-morning-of play.
+- Framed print ($79–$149): the hero product. "The gift that gets hung on the wall, not put in a drawer."
 - Bundle ($79, includes digital free): captures indecision; highest perceived value for first-order gifters since they get the digital file at no extra cost.
 - Gallery Set ($99): new for Q4 — four prints, same pet, all four styles. Christmas flagship.
 - Memorial path: same products, different funnel, unlimited revisions, no time-pressure language.
@@ -62,7 +62,7 @@ See `05-product-catalog.md` for the full SKU list.
 
 ## Pricing anchors
 
-Always lead with `$19` (the digital entry point). Anchor the canvas at $79 for the 8×12 and $149 for the 16×20. Never minimize with "only" or "just" — say the price plainly.
+Always lead with `$6` (the digital entry point). Anchor the framed print at $79 for the 8×10 and $149 for the 18×24. Never minimize with "only" or "just" — say the price plainly.
 
 ## Where we don't play
 
@@ -79,8 +79,8 @@ Always lead with `$19` (the digital entry point). Anchor the canvas at $79 for t
 
 ## What "good" looks like
 
-- Meta CPA under $25 for digital ($19 product) — unit economics only work at <$25, ideal <$15.
-- Meta CPA under $60 for canvas ($79) — target $40.
+- Meta CPA under $25 for digital ($6 product) — unit economics only work at <$25, ideal <$15.
+- Meta CPA under $60 for the framed print ($79) — target $40.
 - 3%+ purchase rate on `/gifts/mothers-day` page from paid traffic.
 - >10% email capture rate on exit-intent.
 - Referral program: >5% of purchasers share; >15% of referees convert on first visit.

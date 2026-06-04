@@ -14,7 +14,7 @@ const productJsonLd = {
   "@type": "Product",
   name: "Custom Pet Portrait",
   description:
-    "A custom fine art portrait of your pet, generated from any photo. Choose watercolor, oil painting, Renaissance, or line art. Instant digital download or shipped as a framed canvas.",
+    "A custom fine art portrait of your pet, generated from any photo. Choose watercolor, oil painting, Renaissance, or line art. Instant digital download or shipped as a framed print.",
   brand: { "@type": "Brand", name: "Paw Masterpiece" },
   image: [
     `${BASE_URL}/examples/watercolor.png`,
@@ -26,7 +26,7 @@ const productJsonLd = {
     {
       "@type": "Offer",
       name: "Digital Download",
-      price: "19.00",
+      price: "6.00",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
       url: BASE_URL,
@@ -49,7 +49,7 @@ const productJsonLd = {
     },
     {
       "@type": "Offer",
-      name: "Framed Canvas 8x12",
+      name: "Framed Print 8x10",
       price: "79.00",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",

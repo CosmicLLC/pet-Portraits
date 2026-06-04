@@ -75,7 +75,7 @@ export default function FreeWallpaperPage() {
               },
               {
                 title: "Same engine as our paid portraits",
-                body: "Same generation pipeline that produces the framed canvas prints we ship every day. The art quality is real, not a teaser.",
+                body: "Same generation pipeline that produces the framed prints we ship every day. The art quality is real, not a teaser.",
               },
             ].map((item, i) => (
               <div key={item.title} className="flex items-start gap-4">
@@ -94,8 +94,8 @@ export default function FreeWallpaperPage() {
 
       <LandingFooterCTA
         headline="Want it on your wall, too?"
-        subhead="Order a framed canvas of the same portrait — ships in 3–5 days. Through May 10, every order includes a FREE 11×14 display print automatically."
-        ctaLabel="See Canvas Options"
+        subhead="Order a framed print of the same portrait — ships in 3–5 days. Through May 10, every order includes a FREE 11×14 display print automatically."
+        ctaLabel="See Print Options"
       />
     </main>
   );

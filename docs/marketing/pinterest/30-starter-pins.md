@@ -13,13 +13,13 @@ Evergreen pin pack distributed across 8 boards. Built for keyword-front-loaded s
 ### Pin 1
 - **Title:** Renaissance Pet Portrait — Turn Your Dog Into a 17th Century Oil Painting
 - **Description:** Custom Renaissance pet portraits in the style of Rembrandt and Vermeer. Upload one photo, see a 30-second preview free, then download or order framed. Watercolor, oil, and line art styles available. Loved by 487 verified reviewers. #renaissancepetportrait #custompetportrait #petportraitart #dogwallart #petartgift
-- **Alt text:** Golden retriever painted in dramatic Renaissance oil style, wearing a dark velvet doublet with white lace collar, deep chiaroscuro lighting against a moody brown background, museum-quality framed canvas hanging above a console table.
+- **Alt text:** Golden retriever painted in dramatic Renaissance oil style, wearing a dark velvet doublet with white lace collar, deep chiaroscuro lighting against a moody brown background, museum-quality framed print hanging above a console table.
 - **URL:** `/styles/renaissance-pet-portrait`
 - **Image direction:** Golden retriever head-and-shoulders portrait, Rembrandt lighting, velvet doublet + lace collar, framed on a wall above a wood console with a brass lamp.
 
 ### Pin 2
 - **Title:** How to Make a Renaissance Portrait of Your Pet From One Phone Photo
-- **Description:** A step-by-step look at turning a regular pet photo into a museum-style Renaissance portrait. Upload, pick a style, preview in 30 seconds. Digital download $6, framed canvas $79 with US shipping in 3-5 days. #renaissanceart #petportraitstudio #customdogart #oldmasterstyle #dogportraitpainting
+- **Description:** A step-by-step look at turning a regular pet photo into a museum-style Renaissance portrait. Upload, pick a style, preview in 30 seconds. Digital download $6, framed print $79 with US shipping in 3-5 days. #renaissanceart #petportraitstudio #customdogart #oldmasterstyle #dogportraitpainting
 - **Alt text:** Side-by-side comparison showing an iPhone snapshot of a black pug on the left and a finished Renaissance oil painting of the same pug in royal blue robes on the right, with arrows between them.
 - **URL:** `/styles/renaissance-pet-portrait`
 - **Image direction:** Split-screen before/after — left side phone photo of pug, right side finished Renaissance painting of same pug in blue robes. Soft arrow connecting them.
@@ -74,7 +74,7 @@ Evergreen pin pack distributed across 8 boards. Built for keyword-front-loaded s
 
 ### Pin 9
 - **Title:** Funny Royal Dog Art for People Who Take Their Pets Too Seriously
-- **Description:** Coronation portraits, knighting ceremonies, royal hunt scenes — all starring your dog. The joke is the dignity. Available as a $6 digital download or $79 framed canvas. #funnydogposter #royaldoghumor #dogwallart #petartfunny #customdogportrait
+- **Description:** Coronation portraits, knighting ceremonies, royal hunt scenes — all starring your dog. The joke is the dignity. Available as a $6 digital download or $79 framed print. #funnydogposter #royaldoghumor #dogwallart #petartfunny #customdogportrait
 - **Alt text:** Three-panel comic gallery — a corgi being knighted with a sword, a dachshund signing a royal decree with a quill, and a great dane on horseback leading a royal hunt, all in oil painting style.
 - **URL:** `/styles/oil-painting-pet-portrait`
 - **Image direction:** 3-panel gallery wall set in an old castle — knighting, decree-signing, royal hunt. Each panel oil painting style.
@@ -94,7 +94,7 @@ Evergreen pin pack distributed across 8 boards. Built for keyword-front-loaded s
 
 ### Pin 11
 - **Title:** Best Gifts for Cat Lovers Who Already Own Everything
-- **Description:** Custom portraits of their actual cat in their actual favorite art style. Personal, specific, and the only cat gift that can't be duplicated. Digital download $6 or framed canvas $79. Ships in 3-5 days US. #catlovergiftideas #catmom #catportraitgift #catart #personalizedcatgift
+- **Description:** Custom portraits of their actual cat in their actual favorite art style. Personal, specific, and the only cat gift that can't be duplicated. Digital download $6 or framed print $79. Ships in 3-5 days US. #catlovergiftideas #catmom #catportraitgift #catart #personalizedcatgift
 - **Alt text:** A framed watercolor portrait of a gray Russian blue cat hanging in a sunlit reading nook, beside a stack of books, a coffee mug and a sleeping real-life cat curled on the windowsill.
 - **URL:** `/styles/watercolor-pet-portrait`
 - **Image direction:** Lifestyle shot — framed watercolor cat portrait in a sunlit nook, real cat napping on windowsill, books and coffee staged.
@@ -148,7 +148,7 @@ Evergreen pin pack distributed across 8 boards. Built for keyword-front-loaded s
 
 ### Pin 17
 - **Title:** Dog Mom Gift Ideas — Custom Portraits She'll Actually Hang Up
-- **Description:** The dog mom gift that doesn't end up in a drawer. Choose from watercolor, oil, Renaissance, or line art and see a free 30-second preview before paying. Digital from $6, framed canvas from $79, US shipping in 3-5 days. #dogmomgift #dogmomgiftideas #custompetportrait #dogmom #dogportraitgift
+- **Description:** The dog mom gift that doesn't end up in a drawer. Choose from watercolor, oil, Renaissance, or line art and see a free 30-second preview before paying. Digital from $6, framed print from $79, US shipping in 3-5 days. #dogmomgift #dogmomgiftideas #custompetportrait #dogmom #dogportraitgift
 - **Alt function:** Wait, alt text — A bright kitchen scene with a framed watercolor portrait of a golden doodle hanging above the coffee station, a mug that reads "Dog Mom" and a leash on the counter.
 - **Alt text:** A bright kitchen scene with a framed watercolor portrait of a goldendoodle hanging above the coffee station, a mug reading "Dog Mom" and a leash on the counter, all in soft morning light.
 - **URL:** `/gifts/dog-mom-gift`
@@ -157,13 +157,13 @@ Evergreen pin pack distributed across 8 boards. Built for keyword-front-loaded s
 ### Pin 18
 - **Title:** What to Get the Dog Mom Who Says She Doesn't Want Anything
 - **Description:** She probably means it — except for a portrait of her dog. Specific to her pet, framed, ready to hang. Four art styles. No subscription. Free preview before you pay. #giftsfordogmoms #dogmomlife #petportrait #dogloversgift #personalizeddoggift
-- **Alt text:** An overhead flat lay of gift wrap, a brown paper-wrapped framed canvas with a small dog tag tied to the bow, a card reading "for the dog mom," and a sprig of eucalyptus on a linen background.
+- **Alt text:** An overhead flat lay of gift wrap, a brown paper-wrapped framed print with a small dog tag tied to the bow, a card reading "for the dog mom," and a sprig of eucalyptus on a linen background.
 - **URL:** `/gifts/dog-mom-gift`
-- **Image direction:** Flat lay — wrapped framed canvas, dog tag on bow, handwritten card, eucalyptus sprig on linen.
+- **Image direction:** Flat lay — wrapped framed print, dog tag on bow, handwritten card, eucalyptus sprig on linen.
 
 ### Pin 19
 - **Title:** Mother's Day Gift Ideas for Dog Moms — Custom Pet Portraits
-- **Description:** A custom watercolor or oil portrait of her dog, ordered from your phone, delivered framed. Free preview in 30 seconds. Digital download arrives same day. Canvas ships in 3-5 days in the US. #mothersdaygift #dogmomgift #petportrait #mothersdayideas #custompetart
+- **Description:** A custom watercolor or oil portrait of her dog, ordered from your phone, delivered framed. Free preview in 30 seconds. Digital download arrives same day. Framed print ships in 3-5 days in the US. #mothersdaygift #dogmomgift #petportrait #mothersdayideas #custompetart
 - **Alt text:** A small jewelry-style gift box sitting on a kitchen counter beside a coffee mug, with a phone screen propped against the box showing a finished watercolor portrait of a corgi as a preview.
 - **URL:** `/gifts/mothers-day`
 - **Image direction:** Counter scene — small gift box, coffee mug, phone leaned against box showing finished corgi portrait on screen.
@@ -190,7 +190,7 @@ Evergreen pin pack distributed across 8 boards. Built for keyword-front-loaded s
 
 ### Pin 22
 - **Title:** Custom Watercolor Pet Portraits From a Photo You Already Have
-- **Description:** Soft, hand-painted watercolor portraits of dogs, cats and other pets. Made from any clear photo. Free 30-second preview before you decide anything. Digital download $6, framed canvas $79, ships in 3-5 days US. #watercolorpetportrait #custompetportrait #watercolordog #watercolorcat #petart
+- **Description:** Soft, hand-painted watercolor portraits of dogs, cats and other pets. Made from any clear photo. Free 30-second preview before you decide anything. Digital download $6, framed print $79, ships in 3-5 days US. #watercolorpetportrait #custompetportrait #watercolordog #watercolorcat #petart
 - **Alt text:** A loose watercolor portrait of a King Charles spaniel with soft peach and gray washes, paper texture visible at the edges, set against an off-white background with one stem of dried wildflower beside the frame.
 - **URL:** `/styles/watercolor-pet-portrait`
 - **Image direction:** Loose watercolor of King Charles spaniel, peach/gray palette, lots of paper texture, off-white backdrop, one dried wildflower stem.
@@ -244,7 +244,7 @@ Evergreen pin pack distributed across 8 boards. Built for keyword-front-loaded s
 
 ### Pin 28
 - **Title:** Funny Dog Posters for the Living Room — Renaissance Pet Portraits
-- **Description:** Your dog as a Renaissance noble, an 18th century admiral, or a bored aristocrat. Hangs straight, ages well, gets a reaction from every guest. Digital download $6, framed canvas $79. #funnydogposter #renaissancedog #dogwallart #funnypetart #livingroomdecor
+- **Description:** Your dog as a Renaissance noble, an 18th century admiral, or a bored aristocrat. Hangs straight, ages well, gets a reaction from every guest. Digital download $6, framed print $79. #funnydogposter #renaissancedog #dogwallart #funnypetart #livingroomdecor
 - **Alt function:** A framed Renaissance portrait of a pug dressed as an 18th century admiral with bicorn hat and gold-braided coat, hanging in a wood-paneled living room above a leather chesterfield sofa.
 - **Alt text:** A framed Renaissance-style portrait of a pug dressed as an 18th century admiral with bicorn hat and gold-braided coat, hanging in a wood-paneled living room above a leather chesterfield sofa.
 - **URL:** `/styles/renaissance-pet-portrait`

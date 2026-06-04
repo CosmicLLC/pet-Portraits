@@ -42,7 +42,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     displayName: "Mother's Day",
     metaTitle: "Mother's Day Pet Portrait Gifts — Custom Art from Her Pet's Photo",
     metaDescription:
-      "A Mother's Day gift the dog mom in your life will actually display. Turn her pet's photo into a gallery-quality portrait. Digital download in 30 seconds or framed canvas shipped to her door.",
+      "A Mother's Day gift the dog mom in your life will actually display. Turn her pet's photo into a gallery-quality portrait. Digital download in 30 seconds or framed print shipped to her door.",
     eyebrow: "Mother's Day Gifts",
     heroHeadline: "Make her cry (happy tears, promise).",
     heroSubhead:
@@ -55,17 +55,17 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       {
         heading: "The gift dog moms actually want.",
         body:
-          "Ask any dog mom what she'd frame and hang in her house, and it's not a mug, not a tote, not another pair of pet-print socks. It's a real piece of art that shows her pet the way she sees them. Paw Masterpiece turns the photo already on her phone into that piece of art — watercolor, oil painting, Renaissance, or line art — and delivers it as a full-resolution digital file she can print herself, or as a framed canvas you order shipped directly to her door.",
+          "Ask any dog mom what she'd frame and hang in her house, and it's not a mug, not a tote, not another pair of pet-print socks. It's a real piece of art that shows her pet the way she sees them. Paw Masterpiece turns the photo already on her phone into that piece of art — watercolor, oil painting, Renaissance, or line art — and delivers it as a full-resolution digital file she can print herself, or as a framed print you order shipped directly to her door.",
       },
       {
         heading: "Last-minute? The digital download is instant.",
         body:
-          "The digital portrait is ready to email within 30 seconds of upload. You can buy the full-resolution file the morning of, forward her the download link, and she'll have a framed piece of art printed at her local print shop the same day. For gifters planning further ahead, the framed canvas prints ship in 3–5 business days within the United States.",
+          "The digital portrait is ready to email within 30 seconds of upload. You can buy the full-resolution file the morning of, forward her the download link, and she'll have a framed piece of art printed at her local print shop the same day. For gifters planning further ahead, the framed prints ship in 3–5 business days within the United States.",
       },
       {
         heading: "Pair with a printable card for a complete gift.",
         body:
-          "Many gifters buy two things together: the digital portrait to email, and the framed canvas to ship ahead. That way there's something for her to open on the day and something beautiful that arrives later. The portrait itself can pull double duty — one order covers both the digital file and a shipped canvas through our bundle option, with unlimited revisions if the first version doesn't capture her pet quite right.",
+          "Many gifters buy two things together: the digital portrait to email, and the framed print to ship ahead. That way there's something for her to open on the day and something beautiful that arrives later. The portrait itself can pull double duty — add the full-resolution digital file to your framed print at checkout, with unlimited revisions if the first version doesn't capture her pet quite right.",
       },
     ],
     recommendedStyles: [
@@ -76,7 +76,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     faqs: [
       {
         q: "How fast can I get a Mother's Day pet portrait?",
-        a: "The digital download is ready in about 30 seconds. You can forward the full-resolution file to her directly from your phone. Framed canvas prints ship within 3–5 business days inside the United States — for Mother's Day delivery, order by the Tuesday of the week before to be safe.",
+        a: "The digital download is ready in about 30 seconds. You can forward the full-resolution file to her directly from your phone. Framed prints ship within 3–5 business days inside the United States — for Mother's Day delivery, order by the Tuesday of the week before to be safe.",
       },
       {
         q: "What if I don't have a photo of her pet?",
@@ -84,20 +84,20 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
       {
         q: "Can I include a printable gift card?",
-        a: "Yes. Many customers forward a printable art card along with the digital download — we'll send you a link in the confirmation email. You can print it at home on cardstock or attach it to the framed canvas box.",
+        a: "Yes. Many customers forward a printable art card along with the digital download — we'll send you a link in the confirmation email. You can print it at home on cardstock or attach it to the framed print box.",
       },
       {
         q: "Does this work for cat moms too?",
         a: "Absolutely. Cats are half our orders. All four styles — watercolor, oil painting, Renaissance, line art — work on cats just as well as dogs.",
       },
       {
-        q: "Is there a bundle of digital + framed canvas?",
-        a: "Yes — our Complete Bundle ($79) includes both the framed canvas and the full-resolution digital file at no extra cost. The digital comes free with the canvas.",
+        q: "Can I get the digital file along with the framed print?",
+        a: "Yes — add the full-resolution digital file to any framed print at checkout for $5. You get the print for her wall plus the digital file to email on the day or reprint later.",
       },
     ],
     closingHeadline: "Give her the gift she'll point to and say, 'my husband/wife/kid got me this.'",
     closingSubhead:
-      "Preview free in 30 seconds. No account required. Framed canvas ships in 3–5 business days inside the United States.",
+      "Preview free in 30 seconds. No account required. Framed print ships in 3–5 business days inside the United States.",
     keywords: ["mothers day pet portrait", "mothers day dog mom gift", "mothers day cat mom gift", "mothers day gift for pet lover"],
   },
 
@@ -106,12 +106,12 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     displayName: "Father's Day",
     metaTitle: "Father's Day Pet Portrait Gifts — For the Dog Dad in Your Life",
     metaDescription:
-      "A Father's Day gift for the dog dad who has everything. Turn his pet's photo into a custom portrait — framed canvas for his office, digital file for his phone. Preview free in 30 seconds.",
+      "A Father's Day gift for the dog dad who has everything. Turn his pet's photo into a custom portrait — framed print for his office, digital file for his phone. Preview free in 30 seconds.",
     eyebrow: "Father's Day Gifts",
     heroHeadline: "A Father's Day gift for the dog dad who has everything.",
     heroSubhead:
       "He doesn't need another tie. Turn his pet's photo into a framed portrait for his desk, his office, his man cave — a gift that says \"I noticed.\" Ready to preview in 30 seconds.",
-    heroTrust: "Free preview · Framed canvas ships 3–5 days · 100% satisfaction guarantee",
+    heroTrust: "Free preview · Framed print ships 3–5 days · 100% satisfaction guarantee",
     heroImage: "/examples/oil.png",
     heroImageAlt: "Father's Day pet portrait gift — oil painting of a dog",
     sections: [
@@ -139,7 +139,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     faqs: [
       {
         q: "When do I need to order by for Father's Day?",
-        a: "For the digital file, 30 seconds before you send it. For the 8×12 framed canvas, aim for the Tuesday of the week before — we ship in 3–5 business days inside the United States.",
+        a: "For the digital file, 30 seconds before you send it. For the framed print, aim for the Tuesday of the week before — we ship in 3–5 business days inside the United States.",
       },
       {
         q: "Renaissance portrait — joke or actually good?",
@@ -147,7 +147,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
       {
         q: "Do you ship outside the US?",
-        a: "Framed canvas prints currently ship only within the United States. Digital downloads are delivered instantly by email to any country.",
+        a: "Framed prints currently ship only within the United States. Digital downloads are delivered instantly by email to any country.",
       },
       {
         q: "What if the first version doesn't capture his pet's personality?",
@@ -155,7 +155,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
     ],
     closingHeadline: "Better than another tie.",
-    closingSubhead: "Preview free in 30 seconds. Framed canvas ships in 3–5 business days inside the United States.",
+    closingSubhead: "Preview free in 30 seconds. Framed print ships in 3–5 business days inside the United States.",
     keywords: ["fathers day pet portrait", "fathers day dog dad gift", "fathers day cat dad gift", "unique fathers day gift"],
   },
 
@@ -164,7 +164,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     displayName: "Christmas",
     metaTitle: "Christmas Pet Portrait Gifts — Order by Dec 15 for US Delivery",
     metaDescription:
-      "A Christmas gift the whole family will gather around. Turn any pet photo into a framed canvas portrait shipped in time for Christmas morning. Order by Dec 15 for standard US delivery.",
+      "A Christmas gift the whole family will gather around. Turn any pet photo into a framed print portrait shipped in time for Christmas morning. Order by Dec 15 for standard US delivery.",
     eyebrow: "Christmas Gifts",
     heroHeadline: "The Christmas gift that lives above the mantel for 20 years.",
     heroSubhead:
@@ -176,17 +176,17 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       {
         heading: "Not another mug. Not another tote. Actual art.",
         body:
-          "Every December, the same problem: what do you get the person who already has everything, for the dog they love more than they love you? The answer is a framed portrait of their dog. Not a cutout on a keychain, not a photo print, not a novelty pillow — a real piece of art, in one of four gallery-quality styles, printed on canvas and framed for hanging. The kind of gift that actually makes the wall.",
+          "Every December, the same problem: what do you get the person who already has everything, for the dog they love more than they love you? The answer is a framed portrait of their dog. Not a cutout on a keychain, not a photo print, not a novelty pillow — a real piece of art, in one of four gallery-quality styles, printed on fine-art paper and framed for hanging. The kind of gift that actually makes the wall.",
       },
       {
         heading: "Order by Dec 15 for delivery before Christmas.",
         body:
-          "Framed canvas prints ship in 3–5 business days within the United States. To land on the doorstep before Christmas morning, order by December 15. If you're reading this after December 15, the digital download still works — forward them the full-resolution file Christmas morning and they'll have something beautiful to print in January. Many gifters give the digital preview on the day and ship the canvas to arrive early January as a second surprise.",
+          "Framed prints ship in 3–5 business days within the United States. To land on the doorstep before Christmas morning, order by December 15. If you're reading this after December 15, the digital download still works — forward them the full-resolution file Christmas morning and they'll have something beautiful to print in January. Many gifters give the digital preview on the day and ship the print to arrive early January as a second surprise.",
       },
       {
         heading: "Order multiple — family gets the same pet, four ways.",
         body:
-          "If there are multiple people in the family who'd love the same portrait (parents, grandparents, adult kids), order once and get a digital download that prints at any size. Frame the same image four different ways for four different households. Our bundle option ($79) includes one framed 8×12 canvas plus the full-resolution digital file at no extra cost.",
+          "If there are multiple people in the family who'd love the same portrait (parents, grandparents, adult kids), order once and get a digital download that prints at any size. Frame the same image four different ways for four different households. Add the full-resolution digital file to your framed print at checkout for $5 — then print it at any size for every household.",
       },
     ],
     recommendedStyles: [
@@ -197,15 +197,15 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     faqs: [
       {
         q: "What's the last day to order for Christmas delivery?",
-        a: "For framed canvas prints: December 15 for standard US shipping. December 18 with expedited shipping. Digital downloads are instant — order Christmas morning and email it to them before breakfast.",
+        a: "For framed prints: December 15 for standard US shipping. December 18 with expedited shipping. Digital downloads are instant — order Christmas morning and email it to them before breakfast.",
       },
       {
         q: "Can I order from outside the United States?",
-        a: "Yes for digital downloads (delivered instantly by email). Framed canvas prints currently ship only within the United States — international customers typically purchase the digital file and print locally.",
+        a: "Yes for digital downloads (delivered instantly by email). Framed prints currently ship only within the United States — international customers typically purchase the digital file and print locally.",
       },
       {
-        q: "Can I wrap the canvas myself?",
-        a: "Yes. The canvas arrives in a clean shipping box — no Paw Masterpiece branding on the outside. Many gifters wrap it themselves or put it under the tree in the box it arrives in.",
+        q: "Can I wrap the print myself?",
+        a: "Yes. The framed print arrives in a clean shipping box — no Paw Masterpiece branding on the outside. Many gifters wrap it themselves or put it under the tree in the box it arrives in.",
       },
       {
         q: "Can I order one portrait for multiple family members?",
@@ -217,7 +217,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
     ],
     closingHeadline: "Order by Dec 15 for Christmas morning. After that, digital still works.",
-    closingSubhead: "Framed canvas prints ship in 3–5 business days within the United States. Digital downloads are instant.",
+    closingSubhead: "Framed prints ship in 3–5 business days within the United States. Digital downloads are instant.",
     keywords: ["christmas pet portrait", "pet portrait christmas gift", "custom dog portrait christmas", "christmas gift for pet lovers"],
   },
 
@@ -226,12 +226,12 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     displayName: "Birthday",
     metaTitle: "Birthday Pet Portrait Gifts — Unique Custom Art from Photo",
     metaDescription:
-      "A birthday gift for the pet lover who has everything. Turn their pet's photo into a custom portrait — digital download in 30 seconds or framed canvas shipped to their door.",
+      "A birthday gift for the pet lover who has everything. Turn their pet's photo into a custom portrait — digital download in 30 seconds or framed print shipped to their door.",
     eyebrow: "Birthday Gifts",
     heroHeadline: "A birthday gift that beats another gift card.",
     heroSubhead:
       "For the friend who's shown you 40 photos of their dog this year: turn one of those photos into a framed portrait. Ready to preview in 30 seconds.",
-    heroTrust: "Free preview · Instant digital delivery · Framed canvas ships 3–5 days",
+    heroTrust: "Free preview · Instant digital delivery · Framed print ships 3–5 days",
     heroImage: "/examples/lineart.png",
     heroImageAlt: "Birthday pet portrait gift — line art drawing of a dog",
     sections: [
@@ -243,7 +243,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       {
         heading: "Same-day digital delivery for last-minute birthdays.",
         body:
-          "Upload the photo, pick the style, get a preview in about 30 seconds. Purchase the full-resolution digital download and email it directly to their inbox with a note. For birthdays where you had more lead time, add a framed canvas that ships in 3–5 business days within the United States.",
+          "Upload the photo, pick the style, get a preview in about 30 seconds. Purchase the full-resolution digital download and email it directly to their inbox with a note. For birthdays where you had more lead time, add a framed print that ships in 3–5 business days within the United States.",
       },
       {
         heading: "Works for first birthdays too.",
@@ -275,7 +275,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
     ],
     closingHeadline: "One photo. One portrait. One gift they'll hang on the wall.",
-    closingSubhead: "Preview free in 30 seconds. Digital delivery is instant. Framed canvas ships in 3–5 business days inside the United States.",
+    closingSubhead: "Preview free in 30 seconds. Digital delivery is instant. Framed print ships in 3–5 business days inside the United States.",
     keywords: ["birthday pet portrait gift", "custom birthday gift pet lover", "birthday dog portrait", "pet birthday present"],
   },
 
@@ -289,7 +289,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
     heroHeadline: "For the dog mom who talks about her dog like he's her son.",
     heroSubhead:
       "She's shown you photos of Charlie 400 times. Turn one of those photos into a framed portrait. She'll hang it where people will see it — and talk about it for years.",
-    heroTrust: "Free preview · Framed canvas ships 3–5 days · Unlimited revisions",
+    heroTrust: "Free preview · Framed print ships 3–5 days · Unlimited revisions",
     heroImage: "/examples/watercolor.png",
     heroImageAlt: "Dog mom gift — custom watercolor portrait of a dog",
     sections: [
@@ -304,9 +304,9 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
           "Birthday, housewarming, engagement, \"just because\" — the portrait is occasion-agnostic. Many customers buy it as a thinking-of-you gift: a friend moved to a new apartment, or went through something hard, and a portrait of their dog shows up at their door. That's a different category of kindness than another gift card.",
       },
       {
-        heading: "Not sure which style she'd like? Get the digital bundle.",
+        heading: "Not sure which style she'd like? Start with the digital.",
         body:
-          "If you're debating between watercolor and oil painting, the digital download ($6) works as a preview — you can show it to her, see which she responds to, and then order the framed canvas in her preferred style. Or order the Complete Bundle ($79) — same price as the canvas alone, but includes the full-resolution digital file free.",
+          "If you're debating between watercolor and oil painting, the digital download ($6) works as a preview — you can show it to her, see which she responds to, and then order the framed print in her preferred style. Add the full-resolution digital file to any print at checkout for $5.",
       },
     ],
     recommendedStyles: [
@@ -333,7 +333,7 @@ export const GIFT_OCCASIONS: GiftOccasion[] = [
       },
     ],
     closingHeadline: "Give her the one pet-themed gift that won't end up in a donation pile.",
-    closingSubhead: "Preview free in 30 seconds. Framed canvas ships in 3–5 business days inside the United States. Unlimited revisions if the first version doesn't feel like her dog.",
+    closingSubhead: "Preview free in 30 seconds. Framed print ships in 3–5 business days inside the United States. Unlimited revisions if the first version doesn't feel like her dog.",
     keywords: ["dog mom gift", "dog mom gifts for her", "unique dog mom gift", "gifts for dog moms", "dog lover gift"],
   },
 ];

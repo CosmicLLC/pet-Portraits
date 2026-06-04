@@ -7,7 +7,7 @@ Three pre-written email broadcasts ready to fire from Resend. They're built arou
 | File | Send date | Send time | Audience | Subject lines (A/B) |
 | --- | --- | --- | --- | --- |
 | [01-launch-mothers-day.html](./01-launch-mothers-day.html) | **2026-04-25** (T-15) | 10:00 AM ET | Full active list | A: "The Mother's Day gift she'll actually hang on the wall" / B: "🎁 Free 11×14 display print with every order this week" |
-| [02-last-call-shipping.html](./02-last-call-shipping.html) | **2026-05-03** (T-7) | 10:00 AM ET | Full list, exclude buyers from last 7 days | A: "Last call: order today for Mother's Day shipping" / B: "One week to Mother's Day — canvas cutoff is tonight" |
+| [02-last-call-shipping.html](./02-last-call-shipping.html) | **2026-05-03** (T-7) | 10:00 AM ET | Full list, exclude buyers from last 7 days | A: "Last call: order today for Mother's Day shipping" / B: "One week to Mother's Day — framed print cutoff is tonight" |
 | [03-digital-rescue.html](./03-digital-rescue.html) | **2026-05-09** (T-1) | 8:00 AM ET | Full active list | A: "Forgot Mother's Day? You're still fine." / B: "30 seconds. That's how long this gift takes." |
 
 ## How to send via Resend

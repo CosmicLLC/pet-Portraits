@@ -23,8 +23,8 @@
 
 ## 3. Three gaps we can exploit
 
-1. **Nobody is leading with speed.** Crown & Paw says "1–2 days" in fine print; W&W says nothing about turnaround. Our AI pipeline produces a digital preview in **minutes**. Headline a "**Digital portrait emailed in minutes — printed canvas ships in 48h**" promise. None of them can match it.
-2. **No competitor offers a "give-it-now" digital fallback.** Every site assumes physical delivery, which forces the customer to order 2–3 weeks early. We can sell a **printable digital + a physical canvas combo**: she gets something to wrap on May 10 even if shipping slips. This is the late-buyer rescue play and nobody owns it.
+1. **Nobody is leading with speed.** Crown & Paw says "1–2 days" in fine print; W&W says nothing about turnaround. Our AI pipeline produces a digital preview in **minutes**. Headline a "**Digital portrait emailed in minutes — framed print ships in 48h**" promise. None of them can match it.
+2. **No competitor offers a "give-it-now" digital fallback.** Every site assumes physical delivery, which forces the customer to order 2–3 weeks early. We can sell a **printable digital + a physical framed print combo**: she gets something to wrap on May 10 even if shipping slips. This is the late-buyer rescue play and nobody owns it.
 3. **Generic "pet mom" messaging across the board.** Every competitor says "gifts for pet moms." Nobody segments by *who's giving* (kids gifting from the dog, husbands gifting for wife who treats the dog like a child, gifting in memoriam). A landing page like "*From the dog, with love*" or "*Her first Mother's Day as his mom*" is wide open.
 
 ## 4. Customer-language quotes to mirror
@@ -50,5 +50,5 @@ From WWD/Yahoo/Popsci 2026 MD guides — recurring framings worth stealing:
 
 1. Stand up a **3-tier MD discount** (e.g., 15/20/25% at $39/$79/$129) ending 5/4 with a hard countdown.
 2. Add a **free digital wallpaper pack** auto-applied at cart — costs us nothing, beats W&W's mug.
-3. Build a "**Get it in time — guaranteed by May 10**" badge with a real cutoff date, paired with the "digital in minutes, canvas in 48h" speed claim.
+3. Build a "**Get it in time — guaranteed by May 10**" badge with a real cutoff date, paired with the "digital in minutes, framed print in 48h" speed claim.
 4. Ship two segmented landing pages: "From the dog, with love" and "Her first Mother's Day as his mom."

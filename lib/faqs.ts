@@ -22,11 +22,11 @@ export const HOME_FAQS: Faq[] = [
   },
   {
     q: "What sizes are available?",
-    a: "Three physical options: an 11×14 display print (fine art paper on a backing board, ready to slide into your own frame), an 11×14 mounted print (gallery-matted with a window mount for a finished look), and an 8×12 framed canvas (ready to hang). Digital downloads are full-resolution and suitable for printing at any size.",
+    a: "Multiple physical options: an 11×14 display print (fine art paper on a backing board, ready to slide into your own frame), an 11×14 mounted print (gallery-matted with a window mount for a finished look), and framed fine-art prints in 8×10, 12×16, and 18×24 (ready to hang). Digital downloads are full-resolution and suitable for printing at any size.",
   },
   {
     q: "Do you ship internationally?",
-    a: "Canvas prints currently ship within the United States only. Digital downloads are delivered instantly by email, anywhere in the world, within seconds of purchase.",
+    a: "Framed prints currently ship within the United States only. Digital downloads are delivered instantly by email, anywhere in the world, within seconds of purchase.",
   },
   {
     q: "Can I request a custom style?",

@@ -88,7 +88,7 @@ export default function BreedStylePage({ params }: Props) {
     image: `${baseUrl}${style.image}`,
     offers: {
       "@type": "Offer",
-      price: "19.00",
+      price: "6.00",
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
       url: `${baseUrl}/pet-portrait/${breed.slug}/${style.slug}`,

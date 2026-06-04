@@ -317,7 +317,7 @@ export default function Home() {
               active campaign window. */}
           {successSessionId && <ClaimFreePrint sessionId={successSessionId} />}
 
-          {/* Post-purchase upsell — Canvas Print at 25% off */}
+          {/* Post-purchase upsell — Framed Print at 25% off */}
           {showCanvasUpsell && !upsellDone && (
             <div className="bg-white rounded-3xl border-2 border-brand-green/20 shadow-lg p-6 mb-8 animate-fade-in-up">
               <div className="flex items-start gap-4">
@@ -329,10 +329,10 @@ export default function Home() {
                     One-time offer
                   </p>
                   <h2 className="font-display text-lg text-brand-green font-semibold leading-snug mb-1">
-                    Add a Canvas Print — 25% Off
+                    Add a Framed Print — 25% Off
                   </h2>
                   <p className="text-sm text-gray-500 mb-3">
-                    Gallery-quality 8×12 framed canvas print shipped to your door. Normally $79 — yours right now for just{" "}
+                    Gallery-quality 8×10 framed print shipped to your door. Normally $79 — yours right now for just{" "}
                     <strong className="text-brand-green">$59</strong>.
                   </p>
                   <div className="flex items-center gap-3">
@@ -886,7 +886,7 @@ export default function Home() {
                     ["Preview before you pay", true, false],
                     ["Money-back guarantee", true, false],
                     ["Multiple art styles", true, false],
-                    ["Canvas print shipping", true, true],
+                    ["Framed print shipping", true, true],
                     ["Starting price", "$6", "$50+"],
                     ["Turnaround time", "30 seconds", "1–2 weeks"],
                   ].map(([feature, ours, theirs], i) => (

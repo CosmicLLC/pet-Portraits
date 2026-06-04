@@ -37,7 +37,7 @@ const SEED = [
 
 I run Paw Masterpiece, a small pet portrait studio — owners upload a photo and we turn it into a watercolor, oil painting, Renaissance, or line-art portrait, with a preview ready in about 30 seconds. I saw on your FAQ that you host sponsored giveaways for products like ours, and DogTipper feels like exactly the right room for this. [Reference their recent post about a specific dog product review or giveaway here.]
 
-I'd love to sponsor a giveaway — happy to provide a framed 11x14 canvas (retail $79) as the prize, plus a digital portrait code for every entrant who doesn't win, so nobody walks away empty-handed. Could you share your current sponsored giveaway rates and lead times?
+I'd love to sponsor a giveaway — happy to provide a framed 8×10 print (retail $79) as the prize, plus a digital portrait code for every entrant who doesn't win, so nobody walks away empty-handed. Could you share your current sponsored giveaway rates and lead times?
 
 If a free portrait for you to try first would help you decide, just send a favorite photo of your dog and I'll get one back to you this week.
 
@@ -57,9 +57,9 @@ Paw Masterpiece — pawmasterpiece.com`,
     subject: "Friday Freebie partnership — Paw Masterpiece",
     body: `Hi there,
 
-I'm Erinc, founder of Paw Masterpiece — we do hand-styled pet portraits (watercolor, oil, Renaissance, line art) with a 30-second preview and a 3-5 day turnaround on framed canvases. I came across the Friday Freebie program on your advertise page and it looks like a natural fit for the kind of gift our buyers are usually shopping for. [Reference a recent Modern Dog feature or Friday Freebie post here.]
+I'm Erinc, founder of Paw Masterpiece — we do hand-styled pet portraits (watercolor, oil, Renaissance, line art) with a 30-second preview and a 3-5 day turnaround on framed prints. I came across the Friday Freebie program on your advertise page and it looks like a natural fit for the kind of gift our buyers are usually shopping for. [Reference a recent Modern Dog feature or Friday Freebie post here.]
 
-For a Friday Freebie I could offer a framed 11x14 canvas portrait ($79 retail) as the prize and a discount code for everyone who enters. I'd also love to hear about your marketplace placements if that's a separate conversation.
+For a Friday Freebie I could offer a framed 8×10 print portrait ($79 retail) as the prize and a discount code for everyone who enters. I'd also love to hear about your marketplace placements if that's a separate conversation.
 
 Could you share current Friday Freebie rates and the next few open slots? Happy to send you a complimentary portrait first so you can see the finish in person.
 
@@ -81,7 +81,7 @@ pawmasterpiece.com`,
 
 I've been a quiet reader of This Dog's Life for a while — the Brooklyn-grounded voice is what keeps me coming back, and the gift guides have a level of curation most pet blogs skip. [Reference a recent This Dog's Life gift guide or product review here.]
 
-I run Paw Masterpiece, a small pet portrait studio. Owners upload a photo, pick a style (watercolor, oil, Renaissance, line art), and get a preview in about 30 seconds; digital downloads are $6 and framed canvases are $79 with 3-5 day US shipping. I'd love to send you a free portrait of your dog — no obligation — and if it earns a spot in a sponsored review or guide, I'm happy to talk rates.
+I run Paw Masterpiece, a small pet portrait studio. Owners upload a photo, pick a style (watercolor, oil, Renaissance, line art), and get a preview in about 30 seconds; digital downloads are $6 and framed prints are $79 with 3-5 day US shipping. I'd love to send you a free portrait of your dog — no obligation — and if it earns a spot in a sponsored review or guide, I'm happy to talk rates.
 
 I also run an affiliate program at 15% on the first sale and 8% on repeat orders through the same customer, in case that's a better fit than a one-off review.
 
@@ -103,7 +103,7 @@ pawmasterpiece.com`,
 
 I'm Erinc, founder of Paw Masterpiece. We turn a phone photo into a watercolor, oil painting, Renaissance, or line-art portrait with the preview ready in roughly 30 seconds — meaningfully faster than the 1-7 day turnaround most studios in this category quote — and prices start at $6 for the digital. [Reference a recent PetGuide gift guide, gear roundup, or trend piece here.]
 
-I think it'd fit naturally into a gift guide or a "what's new in pet gifting" piece, and I'd love to send you a free framed canvas portrait so you can evaluate the actual product, not just renders. If editorial works better as a paid placement, please point me at the rate card.
+I think it'd fit naturally into a gift guide or a "what's new in pet gifting" piece, and I'd love to send you a free framed print portrait so you can evaluate the actual product, not just renders. If editorial works better as a paid placement, please point me at the rate card.
 
 Open to whichever format is easiest on your side.
 
@@ -145,7 +145,7 @@ pawmasterpiece.com`,
     subject: "Paid editorial inquiry — Paw Masterpiece pet portraits",
     body: `Hi Dogster team,
 
-I'm Erinc, founder of Paw Masterpiece. We do pet portraits in four styles (watercolor, oil, Renaissance, line art) with a 30-second preview, $6 digital and $79 framed canvas. I'd like to inquire about your paid editorial program — I understand placements start around $75 and I'd love to see the current media kit and any topical roundups coming up. [Reference a recent Dogster post or roundup that would be a natural fit here.]
+I'm Erinc, founder of Paw Masterpiece. We do pet portraits in four styles (watercolor, oil, Renaissance, line art) with a 30-second preview, $6 digital and $79 framed print. I'd like to inquire about your paid editorial program — I understand placements start around $75 and I'd love to see the current media kit and any topical roundups coming up. [Reference a recent Dogster post or roundup that would be a natural fit here.]
 
 I'd be glad to send a free portrait so the writer can see the finish before drafting. If display placements are sold separately I'd appreciate that rate card too.
 

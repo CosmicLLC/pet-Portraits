@@ -27,8 +27,8 @@ export type CreateProdigiOrderInput = {
   copies?: number;
   recipient: ProdigiRecipient;
   shippingMethod?: "Budget" | "Standard" | "Express" | "Overnight";
-  // SKU-specific attributes (frame color, wrap, etc). Required for some
-  // product families like ECO-FRA-CAN (framed canvas).
+  // SKU-specific attributes (e.g. frame color). Required for some
+  // product families like GLOBAL-CFP (framed print).
   attributes?: Record<string, string>;
 };
 
@@ -60,7 +60,7 @@ function getBaseUrl(): string {
 }
 
 // Map our internal product type to the Prodigi SKU env var.
-// Bundle ships the framed canvas — its physical component == canvas.
+// Bundle ships the framed print — its physical component == canvas key.
 const PRODUCT_SKU_ENV: Record<string, string> = {
   display: "PRODIGI_DISPLAY_SKU",
   mounted: "PRODIGI_MOUNTED_SKU",
@@ -102,10 +102,11 @@ export function isProdigiSkuConfigured(productType: string): boolean {
 }
 
 // Required SKU attributes for each product type. Display + mounted prints
-// don't need attributes. Framed canvas (ECO-FRA-CAN) requires color + wrap —
-// Prodigi rejects the order without them. New additions default to no
-// attributes; when you pick a specific Prodigi SKU that requires them
-// (e.g. a framed acrylic with color options), add the row here.
+// don't need attributes. Some Prodigi families require them — e.g. GLOBAL-CFP
+// framed prints require a frame `color` — and Prodigi rejects the order
+// without them. New additions default to no attributes; when you pick a
+// specific Prodigi SKU that requires them (e.g. a framed acrylic with color
+// options), add the row here.
 const PRODUCT_ATTRIBUTES: Record<string, Record<string, string>> = {
   display: {},
   mounted: {},

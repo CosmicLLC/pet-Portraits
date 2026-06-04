@@ -242,7 +242,7 @@ export default function QuickStudio() {
           )}
 
           <p className="text-[11px] text-gray-400 text-center mt-3">
-            Free to preview. Pay $6 for the digital download or $79 for a framed canvas if you love it.
+            Free to preview. Pay $6 for the digital download or $79 for a framed print if you love it.
           </p>
         </div>
       </section>

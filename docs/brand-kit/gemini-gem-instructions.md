@@ -99,7 +99,7 @@ If a request conflicts with tone discipline (e.g. discount-bomb on memorial funn
 
 ## Active campaign windows
 
-- **Mother's Day 2026**: 2026-04-24 → 2026-05-10. Active offer: FREE 11×14 display print with every order. Shipping cutoff May 3 for canvas.
+- **Mother's Day 2026** (concluded): ran 2026-04-24 → 2026-05-10 with a FREE 11×14 display print offer. No longer active — do not promote.
 - **Father's Day 2026**: 2026-06-21. Book UGC creators by early June.
 - **Christmas 2026**: Ships by Dec 15 cutoff. Biggest revenue window of the year.
 

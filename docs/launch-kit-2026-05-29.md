@@ -69,9 +69,9 @@ been building this for months. it's live.
 
 upload any pet photo → 30-second preview → watercolor, oil
 painting, renaissance, or line art. $0.99 for the wallpaper,
-$6 for the full-res digital, $79 for a framed canvas shipped.
+$6 for the full-res digital, $79 for a framed print shipped.
 
-father's day is june 21 — order canvases by june 16 if you
+father's day is june 21 — order framed prints by june 16 if you
 want them to arrive.
 
 if you have a pet that should be on a wall, link in bio.
@@ -92,13 +92,13 @@ if you have a pet that should be on a wall, link in bio.
 - 0:00–0:02 — close-up of you holding up your phone showing your pet's photo. text overlay: "every dog mom has 4000 photos like this"
 - 0:02–0:04 — your finger drags the photo into the upload zone on the site. text overlay: "watch this"
 - 0:04–0:09 — speed-ramped loading animation, then reveal of the generated portrait. text overlay: "30 seconds. that's it."
-- 0:09–0:12 — pan across your phone showing the wallpaper-on-lock-screen preview. text overlay: "$0.99 wallpaper. or print it on canvas."
+- 0:09–0:12 — pan across your phone showing the wallpaper-on-lock-screen preview. text overlay: "$0.99 wallpaper. or get it framed."
 - 0:12–0:15 — your hand pointing at the brand name. text overlay: "pawmasterpiece dot com 🐾"
 
 **Caption:**
 ```
 finally launched. turn your pet into an actual piece of art in
-30 seconds. wallpaper is 99¢. canvas is $79 framed and ships
+30 seconds. wallpaper is 99¢. framed print is $79 and ships
 in 5 days. linked in bio (or just google pawmasterpiece).
 
 #petportrait #dogmom #dogdad #petart #ai #aiart
@@ -120,7 +120,7 @@ After 6 months of nights and weekends, I shipped pawmasterpiece.com today.
 It does one thing: turns any pet photo into a hand-styled
 portrait (watercolor / oil / renaissance / line art) in 30
 seconds. Free preview, $0.99 for a phone wallpaper, $79 for
-a framed canvas.
+a framed print.
 
 What I built: Next.js front end, Gemini for the generation,
 Stripe for checkout, Prodigi for fulfillment. Solo founder,
@@ -158,7 +158,7 @@ r/MadeMeSmile. Avoid r/dogs and r/aww — both ban promotion hard.
 > [embed: original photo + watercolor portrait, side by side]
 >
 > Found a tool that does this in 30 seconds. The likeness is
-> wild. Putting it on canvas for Father's Day for my [parent].
+> wild. Getting it framed for Father's Day for my [parent].
 >
 > First-comment me if you want the link, I'll share it (don't
 > want to look like an ad).
@@ -167,7 +167,7 @@ r/MadeMeSmile. Avoid r/dogs and r/aww — both ban promotion hard.
 > Here: https://pawmasterpiece.com/?utm_source=reddit&utm_medium=dogpics
 >
 > Free preview, like $1 for the wallpaper, $79 if you want it
-> printed on canvas. I have nothing to do with it (built it
+> printed and framed. I have nothing to do with it (built it
 > myself, but no investors, just me).
 
 ---
@@ -182,13 +182,13 @@ Set budget: **$30/day per ad set, start all 3, kill the worst performer after 24
 > Dog dad gift, ready in 5 days
 
 **Primary text (125 chars):**
-> Father's Day is June 21. Order a custom canvas of his dog by June 16
+> Father's Day is June 21. Order a custom framed print of his dog by June 16
 > — ships in 5 days, hand-styled in 30s.
 
 **Description (30 chars):**
 > From $79. Free shipping.
 
-**Image:** A dad-aged man holding a framed canvas of a dog. (Stock
+**Image:** A dad-aged man holding a framed print of a dog. (Stock
 photo OK if you don't have one — Unsplash has hundreds.)
 
 **Landing URL:**
@@ -288,7 +288,7 @@ Before you log off tomorrow, write 3 numbers in your phone notes:
 
 1. Sessions on the site (check `/admin/events`)
 2. Wallpaper sales (Stripe dashboard)
-3. Canvas sales (Stripe dashboard)
+3. Framed print sales (Stripe dashboard)
 
 Whatever the numbers are, they're the baseline. Now we have something
 to beat next week. Good luck.

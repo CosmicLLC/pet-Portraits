@@ -51,7 +51,7 @@ export default function GiftOccasionPage({ params }: Props) {
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "USD",
-      lowPrice: "19.00",
+      lowPrice: "6.00",
       highPrice: "89.00",
       offerCount: "5",
       availability: "https://schema.org/InStock",

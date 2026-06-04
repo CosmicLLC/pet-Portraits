@@ -43,18 +43,18 @@ export function renderWallpaperThanksEmail(email: string, petName?: string): {
 
     <h2 style="font-size:18px;color:#2D4A3E;margin:0 0 12px;font-weight:700;">Want them on your wall too?</h2>
     <p style="color:#666;font-size:15px;line-height:1.65;margin:0 0 18px;">
-      The wallpaper is yours to keep — free, forever. If you'd like the same portrait as a real piece of art on your wall, the framed canvas ships in 3–5 days inside the US. Mother's Day orders include a <strong>FREE 11×14 display print</strong> automatically — through May 10.
+      The wallpaper is yours to keep — free, forever. If you'd like the same portrait as a real piece of art on your wall, the framed print ships in 3–5 days inside the US.
     </p>
     <div style="background:#fff;border:2px solid #2D4A3E;border-radius:12px;padding:24px;text-align:center;margin-bottom:32px;">
       <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#C4A35A;">Most popular</p>
-      <p style="margin:0 0 6px;font-size:22px;font-weight:700;color:#2D4A3E;">Framed Canvas 8×12</p>
+      <p style="margin:0 0 6px;font-size:22px;font-weight:700;color:#2D4A3E;">Framed Print 8×10</p>
       <p style="margin:0 0 16px;color:#666;font-size:14px;line-height:1.5;">
-        Gallery-quality canvas, premium frame, ready to hang.<br/>
-        $79 · ships in 3–5 days · FREE display print included.
+        Gallery-quality print, premium frame, ready to hang.<br/>
+        $79 · ships in 3–5 days.
       </p>
       <a href="${SITE_URL}"
          style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:12px 32px;border-radius:50px;font-size:14px;font-weight:700;">
-        Order the Canvas
+        Order the Print
       </a>
     </div>
 
@@ -76,7 +76,7 @@ export function renderWallpaperThanksEmail(email: string, petName?: string): {
 Download: ${SITE_URL}/free-wallpaper
 1290 × 2796, optimized for iPhone 14 Pro.
 
-Want the same portrait as wall art? The framed canvas ships in 3–5 days. Through May 10, every order also includes a FREE 11×14 display print: ${SITE_URL}
+Want the same portrait as wall art? The framed print ships in 3–5 days: ${SITE_URL}
 
 — Paw Masterpiece`;
 

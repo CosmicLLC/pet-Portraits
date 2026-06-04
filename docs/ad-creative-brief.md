@@ -12,7 +12,7 @@ Hand this document to any UGC creator we hire so they have everything they need 
 - **Tagline:** Turn Your Pet Into a Work of Art.
 - **Who buys:** Pet parents buying for themselves (~35%), gift-givers (~50%), and memorial buyers (~15%). Ads can target any of these; tone shifts per persona.
 - **What matters:** Emotional payoff over feature lists. We're closer to Minted / Etsy than SaaS — the ad is not "look at our tech," it's "look at this portrait of MY dog."
-- **Price points to mention:** $19 digital, $79 framed canvas. Avoid listing every tier.
+- **Price points to mention:** $6 digital, $79 framed print. Avoid listing every tier.
 
 **Tone:** Warm, playful, slightly reverent. Never schlocky. Never clinical. Never "AI-coded" — we use AI but the word "AI" should rarely appear in ad copy because it distracts from the emotional payoff.
 
@@ -25,10 +25,10 @@ Shoot one of each unless directed otherwise. Each concept is a separate video �
 ### A) Reveal
 > **The money shot.** Creator uploads their dog/cat's photo, waits ~10s, then the first framed preview animates into view. Their reaction is the ad.
 
-- **Opening 2s hook:** "I paid $19 for a portrait of my dog and I might cry." OR "My dog's never seen herself like this."
+- **Opening 2s hook:** "I paid $6 for a portrait of my dog and I might cry." OR "My dog's never seen herself like this."
 - **Middle 3–6s:** Hands-on phone, choosing a style (watercolor, oil, Renaissance). Hold on the loading spinner.
 - **Reveal 7–12s:** Preview appears. Creator's face on-camera. Beat of genuine reaction.
-- **Proof 13–18s:** Cut to the physical canvas unboxing OR frame on the wall. Pan shot.
+- **Proof 13–18s:** Cut to the physical framed print unboxing OR frame on the wall. Pan shot.
 - **CTA 19–22s:** "You can do this in 30 seconds. PawMasterpiece.com. Free preview."
 
 ### B) Gift-giver POV
@@ -36,7 +36,7 @@ Shoot one of each unless directed otherwise. Each concept is a separate video �
 
 - **Hook:** "I figured out what to get my mom who has everything. It took me 30 seconds."
 - **Middle:** Show the phone workflow. Mom's dog photo pulled from the shared family group chat.
-- **Reveal:** Wrapped canvas handed to mom. Keep the reaction natural — no one actor should react for the camera.
+- **Reveal:** Wrapped framed print handed to mom. Keep the reaction natural — no one actor should react for the camera.
 - **CTA:** "Ships in 3–5 days. PawMasterpiece.com."
 
 ### C) Memorial (rare — only if the creator is comfortable and has a relevant personal story)
@@ -66,7 +66,7 @@ Shoot one of each unless directed otherwise. Each concept is a separate video �
 - Don't overuse urgency language ("limited time only!" is against our brand).
 - Don't mention competitors by name. Ever.
 - Don't fake emotion. Ever. Better to reshoot than to perform.
-- Don't use "only $19" or "just $19" — we say "$19" or "starting at $19" without minimizers.
+- Don't use "only $6" or "just $6" — we say "$6" or "starting at $6" without minimizers.
 - Don't include any clinical / pharma / veterinary imagery.
 - Don't imply the portrait can prevent loss, replace a pet, or resurrect a pet.
 
@@ -93,7 +93,7 @@ Shoot one of each unless directed otherwise. Each concept is a separate video �
 
 These have tested well in pet UGC. Rotate, adapt, or pitch your own — don't script word-for-word.
 
-- "I paid $19 for a portrait of my dog and I might cry."
+- "I paid $6 for a portrait of my dog and I might cry."
 - "If you have a dog, stop what you're doing."
 - "My mom's going to lose it when she sees this."
 - "Watch what happens when I upload a photo of my cat."
@@ -107,7 +107,7 @@ These have tested well in pet UGC. Rotate, adapt, or pitch your own — don't sc
 ## 6. Props & setup checklist
 
 - **Phone** (for the uploading shot). Shoot phone-screen footage with a second camera or screen recording — don't use reflection hacks.
-- **Framed canvas mockup** if available (we can ship one for larger creators).
+- **Framed print mockup** if available (we can ship one for larger creators).
 - **Natural daylight** near a window. Avoid yellow tungsten overhead lighting.
 - **Pet treats** on hand — pets get antsy on set.
 - **Clean, neutral background.** No cluttered kitchens, no visible competitor products, no branded swag.
@@ -123,7 +123,7 @@ Only use these claims verbatim or paraphrase closely. Don't invent new ones.
 - "Love it or we redo it free"
 - "Ships in 3–5 days in the US"
 - "100% satisfaction guarantee"
-- "Starting at $19"
+- "Starting at $6"
 - "40,000+ pet parents" (only if current — confirm with us before using)
 - "4.9 out of 5 stars" (ditto)
 

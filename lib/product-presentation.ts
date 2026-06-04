@@ -8,7 +8,7 @@ import type { ProductType } from "./products"
 
 export type ProductCategory =
   | "Digital"
-  | "Prints & Canvas"
+  | "Prints & Wall Art"
   | "Home & Lifestyle"
   | "Gifts"
   | "Add-ons"
@@ -56,12 +56,12 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
       "1290×2796 px — sized for iPhone lock screens. Download and long-press to set as wallpaper.",
     highlights: ["iPhone-optimized", "Instant download", "Gradient-ready for lock screen UI"],
   },
-  // ── Prints & Canvas ───────────────────────────────────────────────
+  // ── Prints & Wall Art ───────────────────────────────────────────────
   {
     key: "display",
     image: "/examples/renaissance.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "11×14 fine-art print on cotton paper, backed with rigid board, shipped in a protective sleeve. Ready to slide into any standard 11×14 frame.",
     highlights: ["Fine art paper", "Rigid backing board", "US shipping 3–5 days"],
@@ -70,7 +70,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "mounted",
     image: "/examples/watercolor.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "11×14 print with a window-matted gallery mount — no frame needed, ready to display or drop into any standard frame for a layered look. Available in all four art styles.",
     highlights: ["Gallery-matted finish", "Fine art paper", "Rigid backing"],
@@ -80,7 +80,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "canvas",
     image: "/examples/watercolor.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "8×10 framed fine-art print. Gallery-quality print finished in a premium frame, ready to hang straight out of the box.",
     highlights: ["Premium frame", "8×10 framed print", "Ships in 3–5 days"],
@@ -89,7 +89,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "framed_12x16",
     image: "/examples/oil.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "12×16 framed fine-art print. A step up in size for a more prominent wall presence. Gallery-quality print, premium frame, ready to hang.",
     highlights: ["Premium frame", "12×16 framed print", "Ready to hang"],
@@ -98,7 +98,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "framed_18x24",
     image: "/examples/renaissance.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "The statement piece. 18×24 framed fine-art print, proportioned for above-the-mantel display. Gallery-quality print, premium frame, ready to hang.",
     highlights: ["Statement size", "18×24 framed print", "Above-the-mantel ready"],
@@ -107,7 +107,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "poster_8x10",
     image: "/examples/watercolor.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "8×10 fine-art poster — the framed print without the frame. Premium paper, vivid color, ready to drop into any standard 8×10 frame.",
     highlights: ["Unframed poster", "8×10 fine-art paper", "Frame it your way"],
@@ -116,7 +116,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "poster_12x16",
     image: "/examples/oil.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "12×16 fine-art poster — unframed. Premium paper, vivid color, ready to drop into any standard 12×16 frame.",
     highlights: ["Unframed poster", "12×16 fine-art paper", "Frame it your way"],
@@ -125,7 +125,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "poster_18x24",
     image: "/examples/renaissance.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "18×24 fine-art poster — unframed statement size. Premium paper, vivid color, ready to drop into any standard 18×24 frame.",
     highlights: ["Unframed poster", "18×24 fine-art paper", "Statement size"],
@@ -134,7 +134,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "acrylic",
     image: "/examples/renaissance.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "11×14 photographic acrylic print — vibrant colors pop through the clear acrylic face, with a premium gallery finish. Minimalist, modern, durable.",
     highlights: ["Crystal-clear acrylic", "Deep color saturation", "Gallery finish"],
@@ -143,7 +143,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     key: "metal",
     image: "/examples/lineart.png",
     isPlaceholder: true,
-    category: "Prints & Canvas",
+    category: "Prints & Wall Art",
     longDescription:
       "11×14 aluminum metal print. Modern aesthetic, durable finish, indoor or covered-outdoor safe. Feels premium, weighs almost nothing.",
     highlights: ["Aluminum metal", "Indoor/outdoor safe", "Modern finish"],
@@ -213,7 +213,7 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
 
 export const CATEGORY_ORDER: ProductCategory[] = [
   "Digital",
-  "Prints & Canvas",
+  "Prints & Wall Art",
   "Home & Lifestyle",
   "Gifts",
   "Add-ons",

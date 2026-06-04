@@ -82,7 +82,7 @@ Drafted 2026-05-25. Paste each TypeScript object into the `BLOG_POSTS` array in 
 
 <p>The principle here: <em>frequency of contact beats grandeur</em>. A $20 mug he uses every morning will out-sentiment a $200 gift that gets put on a shelf and forgotten. Dads especially are wired for the daily-use object — the favorite hat, the broken-in wallet, the coffee mug with the chip on the handle. Get into that rotation and you've won the year.</p>
 
-<p>Our printable card pairs well with this — even if you order the digital portrait alone, the card adds a physical object he can hold on Father's Day morning while the framed canvas is still in transit.</p>
+<p>Our printable card pairs well with this — even if you order the digital portrait alone, the card adds a physical object he can hold on Father's Day morning while the framed print is still in transit.</p>
 
 <h2>For the cat dad specifically</h2>
 
@@ -98,7 +98,7 @@ Drafted 2026-05-25. Paste each TypeScript object into the `BLOG_POSTS` array in 
 
 <p><strong>$25–$75:</strong> Printed-and-shipped portrait, modest size, no frame. The mug-plus-print combo. A donation in his name plus a printed card with the dog's face on it.</p>
 
-<p><strong>$75–$200:</strong> Framed canvas portrait, 16×20 or larger. Or the multi-piece play: portrait + mug + photo book. This is the "you put real thought into this" tier and is, statistically, where the strongest Father's Day reactions sit.</p>
+<p><strong>$75–$200:</strong> Framed print portrait, 16×20 or larger. Or the multi-piece play: portrait + mug + photo book. This is the "you put real thought into this" tier and is, statistically, where the strongest Father's Day reactions sit.</p>
 
 <p><strong>$200+:</strong> Gallery-size portrait (24×36 or larger), professionally framed in a real frame shop. Or commission two portraits for a matched pair. At this tier you're buying a fixture for the house, not a gift.</p>
 
@@ -127,11 +127,11 @@ Drafted 2026-05-25. Paste each TypeScript object into the `BLOG_POSTS` array in 
 <ul>
 <li><strong>Digital download:</strong> order anytime, even Father's Day morning. Delivered by email in 30 seconds.</li>
 <li><strong>Print + ship (standard):</strong> order by about two weeks before Father's Day to be safe.</li>
-<li><strong>Framed canvas:</strong> add another 3–5 business days for production. Order with a comfortable buffer.</li>
-<li><strong>The two-arrival play:</strong> order the digital + the canvas at the same time. Email him the file Father's Day morning, canvas arrives a few days later for a second reveal. Our highest-rated configuration.</li>
+<li><strong>Framed print:</strong> add another 3–5 business days for production. Order with a comfortable buffer.</li>
+<li><strong>The two-arrival play:</strong> order the digital + the print at the same time. Email him the file Father's Day morning, the print arrives a few days later for a second reveal. Our highest-rated configuration.</li>
 </ul>
 
-<p>If you're reading this less than a week out: skip the canvas, go digital, print it at FedEx Office or CVS on Father's Day morning, frame it from Target on the way to dinner. The execution still lands.</p>
+<p>If you're reading this less than a week out: skip the framed print, go digital, print it at FedEx Office or CVS on Father's Day morning, frame it from Target on the way to dinner. The execution still lands.</p>
 
 <p><a href="/gifts/fathers-day">Browse the Father's Day collection here</a>, or <a href="/">upload a photo and preview a portrait in 30 seconds</a>. The preview is free — you only pay if you love the result.</p>
 `,
@@ -222,7 +222,7 @@ Drafted 2026-05-25. Paste each TypeScript object into the `BLOG_POSTS` array in 
 
 <p><strong>West and Willow</strong> is the design-forward minimalist play. Clean modern portraits, soft palettes, the kind of piece that fits in a Brooklyn loft. Pricier than Crown and Paw, smaller style range, generally well-loved by their target customer. <a href="/vs/west-and-willow">Side-by-side with us here.</a></p>
 
-<p><strong>Paw Masterpiece (us)</strong> sits at the value end of this segment. Digital files at $6, framed canvases in the $50–$150 range, real-time previewing before purchase, faster turnaround on physicals. We're newer, so brand recognition is lower. The trade-off you're making is "lower price and faster preview" for "you've heard of the other brands and not us yet."</p>
+<p><strong>Paw Masterpiece (us)</strong> sits at the value end of this segment. Digital files at $6, framed prints in the $50–$150 range, real-time previewing before purchase, faster turnaround on physicals. We're newer, so brand recognition is lower. The trade-off you're making is "lower price and faster preview" for "you've heard of the other brands and not us yet."</p>
 
 <p>The right pick among these three depends mostly on style preference and how much you care about brand recognition. The actual product quality at each is, frankly, comparable now. The category has converged.</p>
 
@@ -360,7 +360,7 @@ Drafted 2026-05-25. Paste each TypeScript object into the `BLOG_POSTS` array in 
 
 <ul>
 <li><strong>Hung too high.</strong> If you have to tilt your head up to see the portrait, drop it 4–8 inches. Trust the gallery height.</li>
-<li><strong>Wrong size for the wall.</strong> Small portrait swimming on a giant wall. Either size up (most of our customers wish they'd ordered the bigger canvas) or add companion pieces to fill the space.</li>
+<li><strong>Wrong size for the wall.</strong> Small portrait swimming on a giant wall. Either size up (most of our customers wish they'd ordered the bigger print) or add companion pieces to fill the space.</li>
 <li><strong>Hidden in a low-traffic room.</strong> The whole point of a pet portrait is to see it. The guest bedroom you enter four times a year is not the right wall.</li>
 <li><strong>Hung before the frame is the right frame.</strong> If you bought a $6 digital and stuck it in a $4 plastic frame from the dollar store, that's not the portrait's fault. Spend the $30 on a real frame. The whole gift uplifts.</li>
 </ul>
@@ -425,7 +425,7 @@ Drafted 2026-05-25. Paste each TypeScript object into the `BLOG_POSTS` array in 
 
 <p><strong>3. The lighting is even-ish on the face.</strong> No harsh shadow cutting across the muzzle, no extreme backlighting that silhouettes the whole face. Normal indoor light, soft outdoor light, golden hour — all fine. Direct midday sun with deep shadows under the eyes is the only lighting that consistently fights us.</p>
 
-<p>That's it. That's the whole list. If a photo passes those three filters, it's a usable reference. Resolution matters less than people think — even a phone photo from 2017 has more than enough resolution for a 16×20 canvas. Composition matters less than people think — we can crop and recompose. Background matters not at all — we replace it.</p>
+<p>That's it. That's the whole list. If a photo passes those three filters, it's a usable reference. Resolution matters less than people think — even a phone photo from 2017 has more than enough resolution for a 16×20 print. Composition matters less than people think — we can crop and recompose. Background matters not at all — we replace it.</p>
 
 <h2>The photos that secretly work the best</h2>
 
@@ -596,7 +596,7 @@ Drafted 2026-05-25. Paste each TypeScript object into the `BLOG_POSTS` array in 
 
 <p>Our digital memorial portraits are delivered by email — usually the same day, sometimes within an hour. You can preview the result for free before paying. <a href="/memorial">Our memorial page</a> walks through the process.</p>
 
-<p>If you want a physical piece, we offer printed portraits and framed canvases that ship within a few business days. There is no rush on these. If you want to take your time with the digital first and decide on the physical later, that is fine.</p>
+<p>If you want a physical piece, we offer printed portraits and framed prints that ship within a few business days. There is no rush on these. If you want to take your time with the digital first and decide on the physical later, that is fine.</p>
 
 <p>If you have an unusual situation — multiple pets, older or damaged photos, a request for a specific composition — you can include details in the order notes, and we read every one. If anything is unclear, we will email you before generating, not after.</p>
 

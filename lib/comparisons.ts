@@ -57,7 +57,7 @@ export const COMPARISONS: Comparison[] = [
       {
         headline: "Choose us if",
         body:
-          "you want to see the portrait before you pay anything, you want it now (preview in ~30 seconds, framed canvas shipped 3–5 days inside the US), and you'd rather spend $6–79 than $50+ for the digital file. Unlimited revisions are standard on every order.",
+          "you want to see the portrait before you pay anything, you want it now (preview in ~30 seconds, framed print shipped 3–5 days inside the US), and you'd rather spend $6–79 than $50+ for the digital file. Unlimited revisions are standard on every order.",
       },
       {
         headline: "Both are honest businesses",
@@ -69,7 +69,7 @@ export const COMPARISONS: Comparison[] = [
       { feature: "Time to first preview", ours: "~30 seconds", theirs: "1–3 business days", oursBetter: true },
       { feature: "Free preview before paying", ours: "Yes — watermarked", theirs: "No", oursBetter: true },
       { feature: "Digital download starting price", ours: "$6", theirs: "$50+", oursBetter: true },
-      { feature: "Framed canvas starting price", ours: "$79", theirs: "$89+", oursBetter: true },
+      { feature: "Framed print starting price", ours: "$79", theirs: "$89+", oursBetter: true },
       { feature: "Number of styles", ours: "4 curated", theirs: "100+ costumes/themes", oursBetter: false },
       { feature: "Revisions", ours: "Unlimited, free", theirs: "Available", oursBetter: true },
       { feature: "Made by", ours: "AI-assisted, human-curated", theirs: "Human illustrators", oursBetter: false },
@@ -103,7 +103,7 @@ export const COMPARISONS: Comparison[] = [
       },
       {
         q: "Which is faster — Paw Masterpiece or Crown & Paw?",
-        a: "Paw Masterpiece. Our preview generates in about 30 seconds; theirs typically takes 1–3 business days for a digital proof. Framed canvas shipping is comparable — our partner prints in 3–5 days inside the US.",
+        a: "Paw Masterpiece. Our preview generates in about 30 seconds; theirs typically takes 1–3 business days for a digital proof. Framed print shipping is comparable — our partner prints in 3–5 days inside the US.",
       },
       {
         q: "Can I compare them side-by-side before ordering?",
@@ -143,7 +143,7 @@ export const COMPARISONS: Comparison[] = [
       { feature: "Time to first preview", ours: "~30 seconds", theirs: "Multiple business days", oursBetter: true },
       { feature: "Free preview before paying", ours: "Yes — watermarked", theirs: "No", oursBetter: true },
       { feature: "Digital download starting price", ours: "$6", theirs: "$90+", oursBetter: true },
-      { feature: "Framed canvas starting price", ours: "$79", theirs: "$100+", oursBetter: true },
+      { feature: "Framed print starting price", ours: "$79", theirs: "$100+", oursBetter: true },
       { feature: "Number of styles", ours: "4 distinct fine-art styles", theirs: "1 signature look", oursBetter: false },
       { feature: "Multi-pet compositions", ours: "Yes — up to 4 pets", theirs: "Yes", oursBetter: false },
       { feature: "Made by", ours: "AI-assisted, human-curated", theirs: "Human illustrators", oursBetter: false },

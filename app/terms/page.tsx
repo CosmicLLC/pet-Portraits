@@ -75,8 +75,8 @@ export default function TermsPage() {
               <li><strong>Phone Wallpaper Pack</strong> — portrait optimized for mobile screens</li>
               <li><strong>Display Print (11×14)</strong> — fine art print on backing board, bagged ready to frame, shipped within the United States</li>
               <li><strong>Mounted Print (11×14)</strong> — fine art print with window mount and backing board, shipped within the United States</li>
-              <li><strong>Framed Canvas Print (8×12)</strong> — gallery-quality framed canvas shipped within the United States</li>
-              <li><strong>Canvas + Digital Bundle</strong> — framed canvas plus the digital download file</li>
+              <li><strong>Framed Print (8×10, 12×16, 18×24)</strong> — gallery-quality fine-art print in a premium frame, shipped within the United States</li>
+              <li><strong>Full-resolution digital file</strong> — optional add-on bundled with any print at checkout</li>
             </ul>
             <p className="mt-3">
               Prices are subject to change without notice. The price shown at the time of purchase
@@ -103,7 +103,7 @@ export default function TermsPage() {
               will work with you to find a fair resolution.
             </p>
             <p className="mt-3">
-              For canvas prints, if your print arrives damaged or defective, contact us within 14
+              For framed prints, if your print arrives damaged or defective, contact us within 14
               days with a photo of the damage and we will arrange a replacement or refund at our
               discretion.
             </p>
