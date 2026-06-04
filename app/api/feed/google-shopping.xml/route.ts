@@ -37,6 +37,24 @@ interface FeedProduct {
   mpn: string;
   productType: string;
   customLabel0?: string; // segmentation label for Performance Max
+  physical: boolean; // physical items ship via Prodigi; digital ships free
+}
+
+// Shipping must match the live Stripe checkout (app/api/create-checkout):
+// $10 flat on physical items, free above the threshold, $0 on digital.
+const STANDARD_SHIPPING_USD = 10;
+const FREE_SHIPPING_THRESHOLD_USD = Number(
+  process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD_USD
+);
+
+function shippingPriceUsd(p: FeedProduct): number {
+  if (!p.physical) return 0;
+  const priceUsd = parseFloat(p.price);
+  const qualifiesForFree =
+    Number.isFinite(FREE_SHIPPING_THRESHOLD_USD) &&
+    FREE_SHIPPING_THRESHOLD_USD > 0 &&
+    priceUsd >= FREE_SHIPPING_THRESHOLD_USD;
+  return qualifiesForFree ? 0 : STANDARD_SHIPPING_USD;
 }
 
 function buildProducts(): FeedProduct[] {
@@ -87,6 +105,7 @@ function buildProducts(): FeedProduct[] {
       mpn: `PM-${s.key.toUpperCase()}-FRAMED-PRINT-8X10`,
       productType: "Home & Garden > Decor > Artwork > Pet Portraits",
       customLabel0: "framed-print",
+      physical: true,
     });
 
     // Tier 2: Digital download (impulse-priced for cold buyers)
@@ -103,6 +122,7 @@ function buildProducts(): FeedProduct[] {
       mpn: `PM-${s.key.toUpperCase()}-DIGITAL`,
       productType: "Home & Garden > Decor > Artwork > Pet Portraits",
       customLabel0: "digital",
+      physical: false,
     });
   }
 
@@ -137,7 +157,7 @@ function renderItem(p: FeedProduct): string {
       <g:shipping>
         <g:country>US</g:country>
         <g:service>Standard</g:service>
-        <g:price>0.00 USD</g:price>
+        <g:price>${shippingPriceUsd(p).toFixed(2)} USD</g:price>
       </g:shipping>
     </item>`;
 }
