@@ -92,12 +92,14 @@ export const metadata: Metadata = {
       ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
       : undefined,
   },
-  // Pinterest domain verification — paste the token Pinterest gives you at
-  // pinterest.com/settings/claim so saves from our site become rich pins
-  // with live pricing + aggregate rating pulled from on-page schema.
-  other: process.env.PINTEREST_DOMAIN_VERIFY
-    ? { "p:domain_verify": process.env.PINTEREST_DOMAIN_VERIFY }
-    : undefined,
+  // Pinterest domain verification for pawmasterpiece.com. The token is a public
+  // verification string (served in HTML to every visitor), so it's safe to hardcode
+  // as a fallback — the meta tag renders even without the env var set. Claiming the
+  // domain unlocks rich pins with live pricing + aggregate rating from on-page schema.
+  other: {
+    "p:domain_verify":
+      process.env.PINTEREST_DOMAIN_VERIFY || "982340d54aedb705bfb6b8aa1785ac17",
+  },
 };
 
 // Site-wide Organization + WebSite schema. Rich results eligibility for the
