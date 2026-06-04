@@ -259,6 +259,7 @@ export async function POST(req: NextRequest) {
       imageId,
       productType,
       addWallpaper,
+      addDigital,
       bgHex,
       referralCode,
       referrerUserId,
@@ -523,12 +524,21 @@ export async function POST(req: NextRequest) {
           });
           console.log(`Download email sent to ${email} for ${productType}`);
         } else if (isPhysicalProduct(productType)) {
-          // ALL physical SKUs — display/mounted/canvas PLUS canvas_16x20,
-          // acrylic, metal, prism, phone_case, mug, pillow, cards, gallery_set.
+          // ALL physical SKUs — display/mounted/canvas PLUS the framed +
+          // poster sizes, acrylic, metal, prism, phone_case, mug, pillow,
+          // cards, gallery_set.
           // These previously fell through with NO email (Prodigi order created
           // but the customer heard nothing). Now every paid physical order
           // gets a confirmation.
           await sendPhysicalConfirmationEmail(email, productType);
+          // "+$5 digital" add-on (metadata.addDigital) — deliver the
+          // full-res download alongside the print, same as a bundle.
+          if (addDigital === "true") {
+            await sendDownloadEmail(email, downloadUrl, wallpaperDownloadUrl, {
+              kind: "portrait",
+            });
+            console.log(`Digital add-on delivered for ${email}`, { imageId, productType });
+          }
           console.log(`Physical order confirmed for ${email}`, { imageId, productType });
         } else {
           // Unknown / unhandled productType (e.g. a standalone tier with no

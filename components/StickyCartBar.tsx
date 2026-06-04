@@ -14,20 +14,22 @@ interface StickyCartBarProps {
 export default function StickyCartBar({ watermarkedImage, imageId, onError, wallpaperSelected }: StickyCartBarProps) {
   const [loading, setLoading] = useState(false);
 
-  // Bundle is $79 + optional $5 wallpaper add-on. ShippingProgressBar is
-  // env-gated on NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD_USD — renders nothing
-  // until that's set, so this mount is inert by default.
+  // Quick-buy the flagship Framed Print 8×10 ($79) + optional $5 wallpaper
+  // add-on. The "+$5 digital" add-on lives in the ProductSelector toggle, not
+  // here — this bar is a one-tap shortcut to the most popular print.
+  // ShippingProgressBar is env-gated on NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD_USD
+  // — renders nothing until that's set, so this mount is inert by default.
   const subtotalCents = 7900 + (wallpaperSelected ? 500 : 0);
 
   const handleBuy = async () => {
     setLoading(true);
-    const value = productValue("bundle") + (wallpaperSelected ? 5 : 0);
-    track({ name: "begin_checkout", productType: "bundle", value, imageId });
+    const value = productValue("canvas") + (wallpaperSelected ? 5 : 0);
+    track({ name: "begin_checkout", productType: "canvas", value, imageId });
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productType: "bundle", imageId, addWallpaper: !!wallpaperSelected }),
+        body: JSON.stringify({ productType: "canvas", imageId, addWallpaper: !!wallpaperSelected }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -53,13 +55,11 @@ export default function StickyCartBar({ watermarkedImage, imageId, onError, wall
 
         {/* Product info */}
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] text-gray-400 uppercase tracking-wider">Best Value</p>
+          <p className="text-[10px] text-gray-400 uppercase tracking-wider">Most Popular</p>
           <div className="flex items-baseline gap-1.5">
             <span className="font-display font-bold text-brand-green text-base">$79</span>
-            <span className="text-gray-400 text-xs line-through">$85</span>
-            <span className="text-[10px] text-brand-gold font-semibold bg-brand-gold/10 px-1.5 py-0.5 rounded-full">Digital FREE</span>
           </div>
-          <p className="text-xs text-gray-500 truncate">Canvas + free digital</p>
+          <p className="text-xs text-gray-500 truncate">Framed Print 8×10 · ready to hang</p>
         </div>
 
         {/* CTA */}

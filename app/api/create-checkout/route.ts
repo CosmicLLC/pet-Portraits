@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getStripe, PRICE_IDS } from "@/lib/stripe";
-import { isPhysicalProduct } from "@/lib/products";
+import { isPhysicalProduct, productPriceCents } from "@/lib/products";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { productType, imageId, customerEmail, addWallpaper, bgHex } = await req.json();
+    const { productType, imageId, customerEmail, addWallpaper, addDigital, bgHex } = await req.json();
 
     if (!productType) {
       return NextResponse.json({ error: "Invalid product type" }, { status: 400 });
@@ -112,9 +112,77 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Optional "+$5 digital" add-on — bundles the full-resolution download
+    // with a physical print without a dedicated bundle SKU or Stripe Price.
+    // Inline price_data (like the multi-pet surcharge) so nothing new needs
+    // provisioning. Physical-only: adding the digital file to a digital order
+    // is meaningless. The webhook reads metadata.addDigital to ALSO email the
+    // download link alongside the physical confirmation.
+    const wantsDigital = Boolean(addDigital) && isPhysicalProduct(productType);
+    if (wantsDigital) {
+      lineItemsMulti.push({
+        quantity: 1,
+        price_data: {
+          currency: "usd",
+          unit_amount: 500,
+          product_data: {
+            name: "Full-resolution digital file",
+            description: "Add-on: the print-ready digital download emailed alongside your print.",
+          },
+        },
+      });
+    }
+
     // Any physical product (display/mounted/canvas/bundle) ships via Prodigi
     // and needs a US shipping address.
     const needsShipping = isPhysicalProduct(productType);
+
+    // ─── Shipping rate ($10 flat, free over the threshold) ──────────────
+    // Stripe shipping rates are fixed amounts and can't natively go free
+    // above a cart total, so we compute the merchandise subtotal here and
+    // attach EITHER a $10 standard rate OR a $0 "Free shipping" rate. Defined
+    // inline (shipping_rate_data) so nothing needs provisioning in the Stripe
+    // dashboard. Subtotal mirrors the line items built above; based on the
+    // pre-discount merchandise value (referral/credit don't lower shipping).
+    let shippingOptions:
+      | Stripe.Checkout.SessionCreateParams["shipping_options"]
+      | undefined;
+    if (needsShipping) {
+      let merchandiseCents =
+        isBundle && !PRICE_IDS.bundle
+          ? productPriceCents("digital") + productPriceCents("canvas")
+          : productPriceCents(productType);
+      if (addWallpaper && PRICE_IDS.wallpaper) {
+        merchandiseCents += productPriceCents("wallpaper");
+      }
+      if (petCount > 1) merchandiseCents += multiPetSurchargeCents(petCount);
+      if (wantsDigital) merchandiseCents += 500;
+
+      const thresholdUsd = Number(
+        process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD_USD
+      );
+      const qualifiesForFree =
+        Number.isFinite(thresholdUsd) &&
+        thresholdUsd > 0 &&
+        merchandiseCents >= Math.round(thresholdUsd * 100);
+
+      shippingOptions = [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: qualifiesForFree ? 0 : 1000,
+              currency: "usd",
+            },
+            display_name: qualifiesForFree ? "Free shipping" : "Standard shipping",
+            delivery_estimate: {
+              minimum: { unit: "business_day", value: 3 },
+              maximum: { unit: "business_day", value: 7 },
+            },
+          },
+        },
+      ];
+    }
 
     // ─── Referral + store credit ────────────────────────────────────────
     // At most one discount per session. Priority: store credit for the
@@ -175,6 +243,7 @@ export async function POST(req: NextRequest) {
         imageId,
         productType,
         addWallpaper: addWallpaper ? "true" : "false",
+        addDigital: wantsDigital ? "true" : "false",
         ...(petCount > 1 ? { petCount: String(petCount) } : {}),
         // Standalone wallpaper SKU only — bgHex is the user's picked color.
         // Presence of this field in webhook is how we dispatch the standalone
@@ -187,6 +256,7 @@ export async function POST(req: NextRequest) {
       ...(needsShipping && {
         shipping_address_collection: { allowed_countries: ["US"] },
         phone_number_collection: { enabled: true },
+        ...(shippingOptions && { shipping_options: shippingOptions }),
       }),
       // Wallpaper standalone returns to its own landing page so the
       // success state is contextual ("your wallpaper is on its way" vs the

@@ -194,10 +194,14 @@ export async function sendCartEmail(
 const PRODUCT_EMAIL_LABEL: Record<string, string> = {
   display: "11×14 display print",
   mounted: "11×14 mounted print",
-  canvas: "8×12 framed canvas print",
-  bundle: "8×12 framed canvas print",
-  canvas_upsell: "8×12 framed canvas print",
-  canvas_16x20: "16×20 framed canvas print",
+  canvas: "8×10 framed print",
+  bundle: "8×10 framed print",
+  canvas_upsell: "8×10 framed print",
+  framed_12x16: "12×16 framed print",
+  framed_18x24: "18×24 framed print",
+  poster_8x10: "8×10 poster print",
+  poster_12x16: "12×16 poster print",
+  poster_18x24: "18×24 poster print",
   gallery_set: "4-style gallery print set",
   acrylic: "11×14 acrylic print",
   metal: "11×14 metal print",
@@ -446,7 +450,7 @@ export async function sendWinbackEmail(to: string) {
 
     <ul style="color:#555;font-size:15px;line-height:1.8;margin:0 0 28px;padding-left:20px;">
       <li><strong>Phone wallpaper add-on</strong> — $5, iPhone-optimised, instant download</li>
-      <li><strong>Framed canvas prints</strong> — 8×12 gallery-quality, ships in 3–5 days</li>
+      <li><strong>Framed prints</strong> — 8×10 to 18×24 gallery-quality, ships in 3–5 days</li>
       <li><strong>Memorial portrait funnel</strong> — gentle tone, unlimited revisions</li>
       <li><strong>Refer a friend</strong> — $10 for them, $10 back for you</li>
     </ul>

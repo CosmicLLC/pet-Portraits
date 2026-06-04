@@ -66,10 +66,17 @@ const PRODUCT_SKU_ENV: Record<string, string> = {
   mounted: "PRODIGI_MOUNTED_SKU",
   canvas: "PRODIGI_CANVAS_SKU",
   bundle: "PRODIGI_CANVAS_SKU",
-  canvas_upsell: "PRODIGI_CANVAS_SKU", // discounted post-purchase canvas == canvas
+  canvas_upsell: "PRODIGI_CANVAS_SKU", // discounted post-purchase 8×10 == canvas key
+  // Framed line, larger sizes + poster (unframed) line. Look up the actual
+  // SKUs in the Prodigi catalog (https://www.prodigi.com/products/) and paste
+  // them into your env vars. Framed-print SKUs differ from the canvas family.
+  framed_12x16: "PRODIGI_FRAMED_12X16_SKU",
+  framed_18x24: "PRODIGI_FRAMED_18X24_SKU",
+  poster_8x10: "PRODIGI_POSTER_8X10_SKU",
+  poster_12x16: "PRODIGI_POSTER_12X16_SKU",
+  poster_18x24: "PRODIGI_POSTER_18X24_SKU",
   // 2026-04-24 expansion. Look up actual SKUs in the Prodigi catalog
   // (https://www.prodigi.com/products/) and paste into your env vars.
-  canvas_16x20: "PRODIGI_CANVAS_16X20_SKU",
   gallery_set: "PRODIGI_GALLERY_SET_SKU",
   acrylic: "PRODIGI_ACRYLIC_SKU",
   metal: "PRODIGI_METAL_SKU",
@@ -102,10 +109,24 @@ export function isProdigiSkuConfigured(productType: string): boolean {
 const PRODUCT_ATTRIBUTES: Record<string, Record<string, string>> = {
   display: {},
   mounted: {},
-  canvas: { color: "black", wrap: "ImageWrap" },
-  bundle: { color: "black", wrap: "ImageWrap" },
-  canvas_upsell: { color: "black", wrap: "ImageWrap" },
-  canvas_16x20: { color: "black", wrap: "ImageWrap" },
+  // canvas/bundle/canvas_upsell all ship the 8×10 framed PRINT
+  // (PRODIGI_CANVAS_SKU = GLOBAL-CFP-8X10), matching the "Framed Print 8×10"
+  // label. Like the other GLOBAL-CFP-* sizes, only `color` (frame color) is a
+  // real choice — glaze/mount/paper are single-value and auto-applied — so no
+  // `wrap` attribute (that was the old ECO-FRA-CAN canvas requirement).
+  canvas: { color: "black" },
+  bundle: { color: "black" },
+  canvas_upsell: { color: "black" },
+  // Framed prints (paper) — GLOBAL-CFP-* Classic Frame, non-mounted, perspex
+  // glaze, EMA 200gsm. The frame size == the product size (12×16 / 18×24), both
+  // 3:4 to match the generated portrait aspect. Only `color` (frame color) has
+  // multiple options; glaze/mount/paper are single-value and auto-applied by
+  // Prodigi, so they don't need to be sent. "black" matches the canvas frame.
+  framed_12x16: { color: "black" },
+  framed_18x24: { color: "black" },
+  poster_8x10: {},
+  poster_12x16: {},
+  poster_18x24: {},
   gallery_set: {},
   acrylic: {},
   metal: {},

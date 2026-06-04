@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { track, productValue } from "@/lib/analytics";
-import type { ProductType } from "@/lib/products";
+import { isPhysicalProduct, type ProductType } from "@/lib/products";
 
 interface ProductSelectorProps {
   imageId: string;
@@ -76,33 +76,61 @@ const TIERS: Tier[] = [
   },
   {
     key: "canvas",
-    name: "Framed Canvas 8×12",
+    name: "Framed Print 8×10",
     price: "$79",
     description: "Ready to hang",
-    features: ["Gallery-quality canvas", "Premium frame", "Ships in 3–5 days"],
+    features: ["Gallery-quality print", "Premium frame", "Ships in 3–5 days"],
     badge: "Most Popular",
+    highlighted: true,
+  },
+  // NOTE: the standalone "Complete Bundle" tile was retired in favor of the
+  // "+$5 digital" add-on toggle rendered above this grid (mirrors the
+  // wallpaper add-on). The `bundle` productType still exists end-to-end for
+  // any in-flight orders / catalog links — it's just no longer a tile here.
+  // ─── Framed line, larger sizes + poster (unframed) line ───────────
+  // Each auto-hidden until its STRIPE_*_PRICE_ID env var is set.
+  {
+    key: "framed_12x16",
+    name: "Framed Print 12×16",
+    price: "$99",
+    description: "Larger framed size",
+    features: ["Gallery-quality print", "Premium frame", "12×16 wall size"],
     highlighted: false,
   },
   {
-    key: "bundle",
-    name: "Complete Bundle",
-    price: "$79",
-    originalPrice: "$85",
-    description: "Canvas + free digital",
-    features: ["8×12 framed canvas", "Full-res digital — FREE", "Save $6"],
-    badge: "Best Value",
-    highlighted: true,
+    key: "framed_18x24",
+    name: "Framed Print 18×24",
+    price: "$149",
+    description: "Statement-piece framed print",
+    features: ["Gallery-quality print", "Premium frame", "18×24 wall size"],
+    highlighted: false,
+  },
+  {
+    key: "poster_8x10",
+    name: "Poster 8×10",
+    price: "$45",
+    description: "Unframed — frame it your way",
+    features: ["Fine art paper", "Vivid color", "Fits standard 8×10 frames"],
+    highlighted: false,
+  },
+  {
+    key: "poster_12x16",
+    name: "Poster 12×16",
+    price: "$54",
+    description: "Unframed — frame it your way",
+    features: ["Fine art paper", "Vivid color", "Fits standard 12×16 frames"],
+    highlighted: false,
+  },
+  {
+    key: "poster_18x24",
+    name: "Poster 18×24",
+    price: "$67",
+    description: "Unframed statement size",
+    features: ["Fine art paper", "Vivid color", "Fits standard 18×24 frames"],
+    highlighted: false,
   },
   // ─── 2026-04-24 expansion ─────────────────────────────────────────
   // Each auto-hidden until its STRIPE_*_PRICE_ID env var is set.
-  {
-    key: "canvas_16x20",
-    name: "Framed Canvas 16×20",
-    price: "$149",
-    description: "Statement-piece framed canvas",
-    features: ["Gallery-quality canvas", "Premium frame", "16×20 wall size"],
-    highlighted: false,
-  },
   {
     key: "gallery_set",
     name: "Gallery Set",
@@ -194,6 +222,10 @@ function getSessionPortraitCount(): number {
 export default function ProductSelector({ imageId, onError, wallpaperSelected, petCount }: ProductSelectorProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [portraitCount] = useState<number>(() => getSessionPortraitCount());
+  // "+$5 digital" add-on. When on, clicking any physical print tier also
+  // bundles the full-res download (delivered by the webhook). Ignored for
+  // the digital/wallpaper tiers — adding the file to itself is meaningless.
+  const [addDigital, setAddDigital] = useState(false);
   // Which products have their Stripe price ID configured. Tiers missing
   // from this set are auto-hidden — so scaffold-then-activate works with
   // zero code edits. null = still loading.
@@ -209,7 +241,7 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected, p
       .catch(() => {
         // If the endpoint fails, fall back to showing the original 5-tier
         // ladder so the page is never empty. Matches pre-expansion behavior.
-        if (!cancelled) setEnabledKeys(new Set(["digital", "display", "mounted", "canvas", "bundle"]));
+        if (!cancelled) setEnabledKeys(new Set(["digital", "display", "mounted", "canvas"]));
       });
     return () => {
       cancelled = true;
@@ -218,18 +250,31 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected, p
 
   const visibleTiers = enabledKeys
     ? TIERS.filter((t) => enabledKeys.has(t.key))
-    : TIERS.filter((t) => ["digital", "display", "mounted", "canvas", "bundle"].includes(t.key));
+    : TIERS.filter((t) => ["digital", "display", "mounted", "canvas"].includes(t.key));
+
+  // Does the visible ladder include at least one shippable print? The
+  // "+$5 digital" add-on only applies to physical products, so the toggle
+  // is hidden on a digital-only ladder.
+  const hasPhysicalTier = visibleTiers.some((t) => isPhysicalProduct(t.key));
 
   const handleSelect = async (key: string) => {
     setLoading(key);
     const productType = key as ProductType;
-    const value = productValue(productType) + (wallpaperSelected ? 5 : 0);
+    // The digital add-on only applies to physical prints.
+    const withDigital = addDigital && isPhysicalProduct(key);
+    const value =
+      productValue(productType) + (wallpaperSelected ? 5 : 0) + (withDigital ? 5 : 0);
     track({ name: "begin_checkout", productType, value, imageId });
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productType: key, imageId, addWallpaper: !!wallpaperSelected }),
+        body: JSON.stringify({
+          productType: key,
+          imageId,
+          addWallpaper: !!wallpaperSelected,
+          addDigital: withDigital,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -249,6 +294,49 @@ export default function ProductSelector({ imageId, onError, wallpaperSelected, p
           <strong className="text-brand-green">{portraitCount}</strong> portraits purchased today
         </span>
       </div>
+
+      {/* "+$5 digital" add-on toggle — replaces the old standalone bundle
+          tile. Flip it on, then pick any framed print or canvas and the
+          full-resolution download is emailed alongside the print. */}
+      {hasPhysicalTier && (
+        <button
+          type="button"
+          onClick={() => setAddDigital((v) => !v)}
+          aria-pressed={addDigital}
+          className={`mb-6 w-full flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
+            addDigital
+              ? "border-brand-green bg-brand-green/5 shadow-md"
+              : "border-gray-200 bg-white hover:border-brand-green hover:bg-brand-green/5"
+          }`}
+        >
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <p className="font-display text-sm font-semibold text-brand-green leading-tight">
+                Add the full-res digital file
+              </p>
+              <span className="text-xs font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                +$5
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 leading-snug">
+              Get the print-ready download emailed with any print — print again at any size, anytime.
+            </p>
+          </div>
+
+          {/* Checkbox indicator */}
+          <div
+            className={`flex-shrink-0 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${
+              addDigital ? "border-brand-green bg-brand-green" : "border-gray-300 bg-white"
+            }`}
+          >
+            {addDigital && (
+              <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+          </div>
+        </button>
+      )}
 
       {/* Tier ladder — entire card is the click target so a mis-tap
           anywhere on the tile still routes to checkout (bigger hitbox,

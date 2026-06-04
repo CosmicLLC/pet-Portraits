@@ -17,11 +17,17 @@ export const PRICE_IDS: Record<string, string> = {
   display: process.env.STRIPE_DISPLAY_PRICE_ID || "",
   mounted: process.env.STRIPE_MOUNTED_PRICE_ID || "",
   canvas: process.env.STRIPE_CANVAS_PRICE_ID || "",
+  // Framed line, larger sizes. Each unset = auto-hidden until its price ID lands.
+  framed_12x16: process.env.STRIPE_FRAMED_12X16_PRICE_ID || "",
+  framed_18x24: process.env.STRIPE_FRAMED_18X24_PRICE_ID || "",
+  // Poster (unframed) line.
+  poster_8x10: process.env.STRIPE_POSTER_8X10_PRICE_ID || "",
+  poster_12x16: process.env.STRIPE_POSTER_12X16_PRICE_ID || "",
+  poster_18x24: process.env.STRIPE_POSTER_18X24_PRICE_ID || "",
   bundle: process.env.STRIPE_BUNDLE_PRICE_ID || "",
   canvas_upsell: process.env.STRIPE_CANVAS_UPSELL_PRICE_ID || process.env.STRIPE_CANVAS_PRICE_ID || "",
   // 2026-04-24 expansion — set each env var in Stripe → Products to light
   // up the corresponding tile in ProductSelector. Unset = auto-hidden.
-  canvas_16x20: process.env.STRIPE_CANVAS_16X20_PRICE_ID || "",
   multipet: process.env.STRIPE_MULTIPET_PRICE_ID || "",
   gallery_set: process.env.STRIPE_GALLERY_SET_PRICE_ID || "",
   acrylic: process.env.STRIPE_ACRYLIC_PRICE_ID || "",

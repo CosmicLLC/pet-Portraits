@@ -82,17 +82,53 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
     isPlaceholder: true,
     category: "Prints & Canvas",
     longDescription:
-      "8×12 framed canvas print. Gallery-quality canvas wrapped on a solid wood stretcher, finished in a premium black frame. Ready to hang.",
-    highlights: ["Premium black frame", "8×12 framed canvas", "Ships in 3–5 days"],
+      "8×10 framed fine-art print. Gallery-quality print finished in a premium frame, ready to hang straight out of the box.",
+    highlights: ["Premium frame", "8×10 framed print", "Ships in 3–5 days"],
   },
   {
-    key: "canvas_16x20",
+    key: "framed_12x16",
     image: "/examples/oil.png",
     isPlaceholder: true,
     category: "Prints & Canvas",
     longDescription:
-      "The statement piece. 16×20 framed canvas, proportioned for above-the-mantel display. Gallery-quality print, premium frame, ships fully assembled.",
-    highlights: ["Statement size", "16×20 framed canvas", "Above-the-mantel ready"],
+      "12×16 framed fine-art print. A step up in size for a more prominent wall presence. Gallery-quality print, premium frame, ready to hang.",
+    highlights: ["Premium frame", "12×16 framed print", "Ready to hang"],
+  },
+  {
+    key: "framed_18x24",
+    image: "/examples/renaissance.png",
+    isPlaceholder: true,
+    category: "Prints & Canvas",
+    longDescription:
+      "The statement piece. 18×24 framed fine-art print, proportioned for above-the-mantel display. Gallery-quality print, premium frame, ready to hang.",
+    highlights: ["Statement size", "18×24 framed print", "Above-the-mantel ready"],
+  },
+  {
+    key: "poster_8x10",
+    image: "/examples/watercolor.png",
+    isPlaceholder: true,
+    category: "Prints & Canvas",
+    longDescription:
+      "8×10 fine-art poster — the framed print without the frame. Premium paper, vivid color, ready to drop into any standard 8×10 frame.",
+    highlights: ["Unframed poster", "8×10 fine-art paper", "Frame it your way"],
+  },
+  {
+    key: "poster_12x16",
+    image: "/examples/oil.png",
+    isPlaceholder: true,
+    category: "Prints & Canvas",
+    longDescription:
+      "12×16 fine-art poster — unframed. Premium paper, vivid color, ready to drop into any standard 12×16 frame.",
+    highlights: ["Unframed poster", "12×16 fine-art paper", "Frame it your way"],
+  },
+  {
+    key: "poster_18x24",
+    image: "/examples/renaissance.png",
+    isPlaceholder: true,
+    category: "Prints & Canvas",
+    longDescription:
+      "18×24 fine-art poster — unframed statement size. Premium paper, vivid color, ready to drop into any standard 18×24 frame.",
+    highlights: ["Unframed poster", "18×24 fine-art paper", "Statement size"],
   },
   {
     key: "acrylic",
@@ -159,15 +195,10 @@ export const PRODUCT_PRESENTATION: Presentation[] = [
       "10-pack of premium greeting cards featuring your pet's portrait on the front. Blank inside. Envelopes included. Perfect for holiday card season.",
     highlights: ["10 cards + envelopes", "Premium cardstock", "Blank inside"],
   },
-  {
-    key: "bundle",
-    image: "/examples/oil.png",
-    isPlaceholder: false,
-    category: "Gifts",
-    longDescription:
-      "8×12 framed canvas plus the full-resolution digital file — same price as canvas alone, the digital comes free. Most customers' choice.",
-    highlights: ["Canvas + digital", "Best value", "Digital included FREE"],
-  },
+  // NOTE: the "Complete Bundle" SKU was retired from the catalog in favor of
+  // the "+$5 digital" add-on toggle in the buy flow (ProductSelector). The
+  // `bundle` productType still exists end-to-end for in-flight orders, but it
+  // no longer has a catalog tile or /products/bundle detail page.
   // ── Add-ons ───────────────────────────────────────────────────────
   {
     key: "multipet",

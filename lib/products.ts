@@ -28,24 +28,46 @@ export const PRODUCTS = {
     price: "$33",
     description: "Gallery-matted fine art print — window mount + backing",
   },
+  // Flagship framed line. Three sizes; each also sold unframed as a poster
+  // (poster_* keys below). NOTE: key is historically "canvas" — it now backs
+  // the 8×10 *framed print*, kept as-is so the bundle, post-purchase upsell,
+  // and live Stripe price (STRIPE_CANVAS_PRICE_ID) keep working untouched.
   canvas: {
-    label: "Framed Canvas Print 8×12",
+    label: "Framed Print 8×10",
     price: "$79",
-    description: "Gallery-quality framed canvas, shipped to your door",
+    description: "Framed fine-art print, ready to hang — shipped to your door",
+  },
+  framed_12x16: {
+    label: "Framed Print 12×16",
+    price: "$99",
+    description: "Larger framed fine-art print, 12×16 — ready to hang",
+  },
+  framed_18x24: {
+    label: "Framed Print 18×24",
+    price: "$149",
+    description: "Statement-size framed fine-art print, 18×24 — above the mantel",
+  },
+  // Same three prints, sold unframed (poster only).
+  poster_8x10: {
+    label: "Poster 8×10",
+    price: "$45",
+    description: "Unframed fine-art poster print, 8×10",
+  },
+  poster_12x16: {
+    label: "Poster 12×16",
+    price: "$54",
+    description: "Unframed fine-art poster print, 12×16",
+  },
+  poster_18x24: {
+    label: "Poster 18×24",
+    price: "$67",
+    description: "Unframed fine-art poster print, 18×24",
   },
   bundle: {
     label: "Complete Bundle",
     price: "$79",
     originalPrice: "$85",
-    description: "Framed canvas + digital download free",
-  },
-  // ─── 2026-04-24 expansion ─────────────────────────────────────────
-  // Higher-AOV canvas tier for statement-piece buyers. Same Prodigi
-  // fulfillment pattern as the 8×12 with a different SKU.
-  canvas_16x20: {
-    label: "Framed Canvas 16×20",
-    price: "$149",
-    description: "Statement-piece framed canvas, 16×20 — above the mantel",
+    description: "Framed print + digital download free",
   },
   // Non-physical add-on for portraits with 2+ pets composed into one
   // piece. Extra prompt/attention surcharge; no separate fulfillment.
@@ -116,8 +138,12 @@ const PHYSICAL_PRODUCT_TYPES = new Set<string>([
   "display",
   "mounted",
   "canvas",
+  "framed_12x16",
+  "framed_18x24",
+  "poster_8x10",
+  "poster_12x16",
+  "poster_18x24",
   "bundle",
-  "canvas_16x20",
   "gallery_set",
   "acrylic",
   "metal",
@@ -126,7 +152,7 @@ const PHYSICAL_PRODUCT_TYPES = new Set<string>([
   "prism",
   "mug",
   "pillow",
-  // Post-purchase upsell: a discounted 8×12 framed canvas (its own Stripe
+  // Post-purchase upsell: a discounted 8×10 framed print (its own Stripe
   // price ID, defaults to the canvas price). MUST be physical — otherwise
   // checkout skips shipping collection and the webhook never prints it, so
   // the customer pays ~$59 and gets nothing. Fulfilled identically to canvas.
@@ -135,4 +161,15 @@ const PHYSICAL_PRODUCT_TYPES = new Set<string>([
 
 export function isPhysicalProduct(type: string): boolean {
   return PHYSICAL_PRODUCT_TYPES.has(type);
+}
+
+// Server-safe price lookup in cents, parsed from the catalog price string.
+// Used by the checkout route to compute the merchandise subtotal for the
+// free-shipping threshold. Returns 0 for unknown keys (e.g. canvas_upsell,
+// which prices via its own Stripe price ID, not this catalog).
+export function productPriceCents(type: string): number {
+  const price = (PRODUCTS as Record<string, { price?: string }>)[type]?.price;
+  if (!price) return 0;
+  const n = parseFloat(price.replace(/[^0-9.]/g, ""));
+  return Number.isFinite(n) ? Math.round(n * 100) : 0;
 }

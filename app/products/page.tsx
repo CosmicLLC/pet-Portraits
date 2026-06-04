@@ -11,7 +11,7 @@ import {
 
 const PAGE_TITLE = "All Products — Custom Pet Portraits";
 const PAGE_DESCRIPTION =
-  "Every way to turn your pet into art — digital download, framed canvas, acrylic prints, gallery sets, phone wallpapers, and more. Starting at $6.";
+  "Every way to turn your pet into art — digital download, framed prints, posters, acrylic prints, gallery sets, phone wallpapers, and more. Starting at $6.";
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -51,7 +51,7 @@ export default function ProductsPage() {
           </h1>
           <p className="text-gray-700 text-lg max-w-xl mx-auto leading-relaxed">
             Every way to turn your pet into a piece of art — from a $6 digital
-            download to a 16×20 framed canvas. Upload once, pick the product
+            download to an 18×24 framed print. Upload once, pick the product
             that fits the moment.
           </p>
           <div className="mt-8">
