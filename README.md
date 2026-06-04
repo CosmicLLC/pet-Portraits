@@ -79,24 +79,27 @@ Make sure to:
 
 **Next steps for scaling:**
 
-- **Printful integration** — For framed print orders, integrate with Printful API to auto-fulfill print orders. Currently framed print orders log to console and send a confirmation email.
+- **More Prodigi SKUs** — Physical orders already auto-submit to Prodigi from the Stripe webhook (`lib/prodigi.ts`). To add more physical products, fill in the matching `PRODIGI_*_SKU` env vars; any product whose SKU is unset stays hidden.
 - **Analytics** — Add Vercel Analytics or Plausible for conversion tracking.
 - **Custom branding** — Replace "PREVIEW" watermark text in `lib/watermark.ts` with your brand name. Update the `from` email in `lib/resend.ts`.
-- **Additional styles** — Add new entries to `STYLE_PROMPTS` in `lib/openai.ts` and update the `StylePicker` component.
+- **Additional styles** — Add new entries to `STYLE_PROMPTS` in `lib/gemini.ts` and update the `StylePicker` component.
 
 ## Architecture Decisions
 
-- **No database** — Stripe metadata + Vercel Blob handles all state. Keeps the stack minimal.
-- **No auth** — Single purchase flow doesn't need accounts. Email is collected by Stripe Checkout.
+- **Postgres via Prisma (Neon)** — Orders, users, and Prodigi fulfillment state live in Postgres; Stripe metadata + Vercel Blob carry per-checkout context.
+- **Auth via NextAuth (Auth.js v5)** — Optional accounts for the order-history area, with Google OAuth, email magic links (Resend), and email/password sign-in. Checkout still works as guest — Stripe collects the email.
 - **Server-side watermark** — Uses `sharp` so the full-res image never reaches the client.
-- **Vercel Blob** — Stores full-res images with public URLs. For production, consider adding signed/expiring URLs.
+- **Vercel Blob (private)** — Full-res images are stored with `access: "private"` and served only through signed, token-bound URLs (e.g. `/api/print-asset`), so the original is never publicly reachable.
 
 ## Tech Stack
 
 - Next.js 14 (App Router)
 - Tailwind CSS
-- Google Gemini 2.0 Flash (image generation)
+- Google Gemini 2.5 Flash Image (image generation)
 - Stripe Checkout
+- Prodigi (print-on-demand fulfillment)
+- Postgres + Prisma (Neon)
+- NextAuth / Auth.js v5 (accounts)
 - Resend (email)
 - Vercel Blob (image storage)
 - sharp (watermarking)
