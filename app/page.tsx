@@ -1097,6 +1097,8 @@ export default function Home() {
               <Link href="/privacy" className="hover:text-brand-green transition-colors">Privacy</Link>
               {" "}&middot;{" "}
               <Link href="/terms" className="hover:text-brand-green transition-colors">Terms</Link>
+              {" "}&middot;{" "}
+              <Link href="/returns" className="hover:text-brand-green transition-colors">Returns</Link>
             </p>
           </div>
         </div>

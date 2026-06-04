@@ -214,6 +214,8 @@ export default function TermsPage() {
             {" "}&middot;{" "}
             <Link href="/terms" className="hover:text-brand-green transition-colors">Terms</Link>
             {" "}&middot;{" "}
+            <Link href="/returns" className="hover:text-brand-green transition-colors">Returns</Link>
+            {" "}&middot;{" "}
             <a href="mailto:cosmic.company.llc@gmail.com" className="hover:text-brand-green transition-colors">
               cosmic.company.llc@gmail.com
             </a>
