@@ -34,6 +34,8 @@ interface PortraitOfferProps {
 
 export default function PortraitOffer({ imageId, watermarkedImage, petName, onError }: PortraitOfferProps) {
   const [enabled, setEnabled] = useState<Set<string> | null>(null);
+  // Two-step flow: pick a frame size, then toggle extras and check out.
+  const [phase, setPhase] = useState<"size" | "extras">("size");
   const [sizeKey, setSizeKey] = useState<ProductType>("canvas");
   const [addDigital, setAddDigital] = useState(false);
   const [addWallpaper, setAddWallpaper] = useState(false);
@@ -75,6 +77,12 @@ export default function PortraitOffer({ imageId, watermarkedImage, petName, onEr
     selected.price + (addDigital ? DIGITAL_ADDON : 0) + (addWallpaper ? WALLPAPER_ADDON : 0);
   const freeShip = subtotal >= FREE_SHIP_OVER;
 
+  // Tap a size → lock it in and advance to the extras step.
+  function chooseSize(key: ProductType) {
+    setSizeKey(key);
+    setPhase("extras");
+  }
+
   async function checkout(
     productType: ProductType,
     opts: { addDigital?: boolean; addWallpaper?: boolean; value: number },
@@ -105,90 +113,114 @@ export default function PortraitOffer({ imageId, watermarkedImage, petName, onEr
 
   return (
     <div className="w-full mt-6">
-      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-        {/* ─────────── Framed hero ─────────── */}
-        <div className="lg:sticky lg:top-24">
-          <div className="mx-auto max-w-sm">
-            {/* Dark moulding → cream mat → portrait */}
-            <div className="rounded-[3px] bg-gradient-to-b from-[#2c2722] to-[#1b1813] p-3 sm:p-4 shadow-2xl ring-1 ring-black/20">
-              <div className="bg-cream p-4 sm:p-6 shadow-inner">
-                {petName && (
-                  <p className="text-center font-display tracking-[0.25em] uppercase text-brand-green/70 text-xs sm:text-sm mb-3">
-                    {petName}
-                  </p>
-                )}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={watermarkedImage}
-                  alt="Your custom pet portrait, framed"
-                  className="block w-full h-auto"
-                />
+      {phase === "size" ? (
+        /* ───────────── STEP 1: choose a frame size ───────────── */
+        <>
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+            <div className="lg:sticky lg:top-24">
+              <FramedHero src={watermarkedImage} petName={petName} />
+              <p className="mt-3 text-center text-xs text-gray-400">Gallery-quality framed print</p>
+            </div>
+
+            <div>
+              <h2 className="font-display text-3xl sm:text-4xl text-brand-green leading-tight">
+                Your pet, framed
+              </h2>
+              <div className="mt-2 mb-6 flex items-center gap-2">
+                <Stars />
+                <span className="text-sm text-gray-500">
+                  Loved by {REVIEW_COUNT.toLocaleString()} pet parents
+                </span>
               </div>
-            </div>
-            <p className="mt-3 text-center text-xs text-gray-400">
-              Gallery-quality framed print · {selected.label} shown
-            </p>
-          </div>
-        </div>
 
-        {/* ─────────── Offer panel ─────────── */}
-        <div>
-          <h2 className="font-display text-3xl sm:text-4xl text-brand-green leading-tight">
-            Your pet, framed
-          </h2>
-
-          {/* Social proof */}
-          <div className="mt-2 mb-6 flex items-center gap-2">
-            <div className="flex">
-              {[0, 1, 2, 3, 4].map((i) => (
-                <svg key={i} className="w-4 h-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <span className="text-sm text-gray-500">Loved by {REVIEW_COUNT.toLocaleString()} pet parents</span>
-          </div>
-
-          {/* Size selector */}
-          <p className="mb-2 font-display text-sm font-semibold text-brand-green">Choose your size</p>
-          <div className="space-y-2.5">
-            {sizes.map((s) => {
-              const active = s.key === sizeKey;
-              return (
-                <button
-                  key={s.key}
-                  type="button"
-                  onClick={() => setSizeKey(s.key)}
-                  className={`flex w-full items-center justify-between gap-3 rounded-2xl border-2 p-3.5 text-left transition-all ${
-                    active
-                      ? "border-brand-green bg-brand-green/5 shadow-sm"
-                      : "border-gray-200 bg-white hover:border-brand-green/40"
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <span
-                      className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 ${
-                        active ? "border-brand-green" : "border-gray-300"
-                      }`}
-                    >
-                      {active && <span className="h-2.5 w-2.5 rounded-full bg-brand-green" />}
-                    </span>
+              <p className="mb-2 font-display text-sm font-semibold text-brand-green">Choose your size</p>
+              <div className="space-y-2.5">
+                {sizes.map((s) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => chooseSize(s.key)}
+                    className="group flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-gray-200 bg-white p-3.5 text-left transition-all hover:border-brand-green hover:bg-brand-green/5 hover:shadow-sm active:scale-[0.99]"
+                  >
                     <span>
                       <span className="font-display font-semibold text-brand-green">{s.label}</span>
                       <span className="block text-xs text-gray-400">{s.dims}</span>
                     </span>
-                  </span>
-                  <span className="flex items-center gap-2">
-                    {s.badge && (
-                      <span className="rounded-full bg-brand-green/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-green">
-                        {s.badge}
+                    <span className="flex items-center gap-2">
+                      {s.badge && (
+                        <span className="rounded-full bg-brand-green/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-green">
+                          {s.badge}
+                        </span>
+                      )}
+                      <span className="font-display font-bold text-brand-green">${s.price}</span>
+                      <svg
+                        className="h-4 w-4 text-gray-300 transition-colors group-hover:text-brand-green"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </span>
+                  </button>
+                ))}
+              </div>
+              <p className="mt-3 text-center text-xs text-gray-400">
+                Pick a size to add extras and check out.
+              </p>
+
+              <div className="mt-5 border-t border-gray-100 pt-5 text-center">
+                <button
+                  type="button"
+                  onClick={() => checkout("digital", { value: DIGITAL_SOLO }, "digital")}
+                  disabled={loading !== null}
+                  className="text-sm text-gray-500 transition-colors hover:text-brand-green disabled:opacity-60"
+                >
+                  {loading === "digital" ? (
+                    "Taking you to checkout…"
+                  ) : (
+                    <>
+                      Just want the file?{" "}
+                      <span className="font-semibold text-brand-green underline underline-offset-2">
+                        Digital download — ${DIGITAL_SOLO}
                       </span>
-                    )}
-                    <span className="font-display font-bold text-brand-green">${s.price}</span>
-                  </span>
+                    </>
+                  )}
                 </button>
-              );
-            })}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Benefit emoji="🚚" title="Ships in 3–5 days" desc="Printed, framed, delivered to your door." />
+            <Benefit emoji="🖼️" title="Gallery quality" desc="Premium frame, fade-resistant fine-art print." />
+            <Benefit emoji="💚" title="Risk-free" desc="Not in love with it? We redo it, free." />
+          </div>
+        </>
+      ) : (
+        /* ───────────── STEP 2: extras + checkout ───────────── */
+        <div className="mx-auto max-w-md">
+          <button
+            type="button"
+            onClick={() => setPhase("size")}
+            className="mb-5 flex items-center gap-1.5 text-sm text-gray-500 transition-colors hover:text-brand-green"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Change size
+          </button>
+
+          {/* Chosen frame summary */}
+          <div className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
+            <div className="w-16 flex-shrink-0">
+              <FramedHero src={watermarkedImage} compact />
+            </div>
+            <div>
+              <p className="font-display font-semibold text-brand-green">Framed Print {selected.label}</p>
+              <p className="text-xs text-gray-400">{selected.dims}</p>
+            </div>
+            <span className="ml-auto font-display font-bold text-brand-green">${selected.price}</span>
           </div>
 
           {/* Extras / order bumps */}
@@ -249,36 +281,38 @@ export default function PortraitOffer({ imageId, watermarkedImage, petName, onEr
             </svg>
             Love it or we redo it — free.
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
-          {/* Standalone digital path */}
-          <div className="mt-5 border-t border-gray-100 pt-5 text-center">
-            <button
-              type="button"
-              onClick={() => checkout("digital", { value: DIGITAL_SOLO }, "digital")}
-              disabled={loading !== null}
-              className="text-sm text-gray-500 transition-colors hover:text-brand-green disabled:opacity-60"
-            >
-              {loading === "digital" ? (
-                "Taking you to checkout…"
-              ) : (
-                <>
-                  Just want the file?{" "}
-                  <span className="font-semibold text-brand-green underline underline-offset-2">
-                    Digital download — ${DIGITAL_SOLO}
-                  </span>
-                </>
-              )}
-            </button>
-          </div>
+function FramedHero({ src, petName, compact }: { src: string; petName?: string; compact?: boolean }) {
+  return (
+    <div className={compact ? "w-full" : "mx-auto max-w-sm"}>
+      <div className="rounded-[3px] bg-gradient-to-b from-[#2c2722] to-[#1b1813] p-1.5 shadow-2xl ring-1 ring-black/20 sm:p-2 lg:p-4">
+        <div className={`bg-cream shadow-inner ${compact ? "p-1.5" : "p-4 sm:p-6"}`}>
+          {petName && !compact && (
+            <p className="mb-3 text-center font-display text-xs uppercase tracking-[0.25em] text-brand-green/70 sm:text-sm">
+              {petName}
+            </p>
+          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={src} alt="Your custom pet portrait, framed" className="block h-auto w-full" />
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* ─────────── Reassurance band ─────────── */}
-      <div className="mt-10 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <Benefit emoji="🚚" title="Ships in 3–5 days" desc="Printed, framed, delivered to your door." />
-        <Benefit emoji="🖼️" title="Gallery quality" desc="Premium frame, fade-resistant fine-art print." />
-        <Benefit emoji="💚" title="Risk-free" desc="Not in love with it? We redo it, free." />
-      </div>
+function Stars() {
+  return (
+    <div className="flex">
+      {[0, 1, 2, 3, 4].map((i) => (
+        <svg key={i} className="h-4 w-4 text-brand-gold" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
     </div>
   );
 }

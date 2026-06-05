@@ -250,6 +250,24 @@ export default function Home() {
     [file, loading, style, handleGenerate]
   );
 
+  // Auto-start generation the instant a photo is imported — no button click.
+  // Style is chosen before upload (style → upload → generate), so the moment
+  // we land on the "generate" step with a file we kick off generation. The
+  // ref fires it once per arrival; on error the step stays put and the manual
+  // GenerateButton stays available as a fallback. Going Back from preview does
+  // NOT re-fire (watermarkedImage is already set), so no surprise re-generation.
+  const autoGenRef = useRef(false);
+  useEffect(() => {
+    if (step !== "generate") {
+      autoGenRef.current = false;
+      return;
+    }
+    if (file && style && !loading && !watermarkedImage && !error && !autoGenRef.current) {
+      autoGenRef.current = true;
+      handleGenerate();
+    }
+  }, [step, file, style, loading, watermarkedImage, error, handleGenerate]);
+
   const handleUpsell = useCallback(async () => {
     if (!successImageId) return;
     setUpsellLoading(true);
