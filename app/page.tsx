@@ -837,12 +837,17 @@ export default function Home() {
                   key={s.name}
                   className="relative rounded-2xl overflow-hidden aspect-[3/4] shadow-sm ring-1 ring-gray-100 group"
                 >
-                  <Image
+                  {/* Plain eager <img>, NOT next/image. These 4 thumbnails sit far below
+                      the fold; next/image's default loading="lazy" frequently never fires on
+                      iOS Safari for deep-below-fold images, leaving them blank (naturalWidth 0)
+                      on phones while desktop loads fine. Eager <img> always fetches. Matches the
+                      working StylePicker/selector pattern; sources are pre-optimized ~100KB so
+                      the optimizer adds latency without saving bytes here. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
                     src={s.src}
                     alt={`${s.name} pet portrait from photo — custom ${s.name.toLowerCase()} dog painting example`}
-                    fill
-                    sizes="(max-width: 640px) 45vw, 22vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                   />
                   {/* Bottom gradient for text legibility — heavier so labels pop */}
                   <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/55 to-transparent" aria-hidden="true" />
@@ -971,12 +976,12 @@ export default function Home() {
               ].map((p) => (
                 <div key={p.name} className="group relative overflow-hidden rounded-2xl bg-white shadow-sm border border-gray-100 hover:shadow-lg transition-shadow">
                   <div className="relative aspect-square">
-                    <Image
+                    {/* Eager plain <img> — same iOS-Safari lazy-load fix as the style grid above. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
                       src={p.src}
                       alt={`${p.style} portrait of ${p.name}`}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      sizes="(max-width: 640px) 45vw, 220px"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
                   <div className="p-3">
