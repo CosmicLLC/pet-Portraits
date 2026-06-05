@@ -12,11 +12,18 @@ export function getStripe(): Stripe {
 }
 
 export const PRICE_IDS: Record<string, string> = {
-  digital: process.env.STRIPE_DIGITAL_PRICE_ID || "",
+  // Pinned to the corrected $6 one-time price. The STRIPE_DIGITAL_PRICE_ID env
+  // var in Vercel pointed at a stale $20 price that overcharged every digital
+  // buyer 3.3x; hardcoding the right price ID here fixes it with no Vercel
+  // change (price IDs are not secret). New $6 price created 2026-06-04.
+  digital: "price_1TeoLBRg6awxgOnRGuwoAFSE",
   wallpaper: process.env.STRIPE_WALLPAPER_PRICE_ID || "",
   display: process.env.STRIPE_DISPLAY_PRICE_ID || "",
   mounted: process.env.STRIPE_MOUNTED_PRICE_ID || "",
-  canvas: process.env.STRIPE_CANVAS_PRICE_ID || "",
+  // Pinned to the corrected $79 one-time price (env var pointed at a stale $77).
+  // NOTE: canvas_upsell below still reads STRIPE_CANVAS_PRICE_ID as a fallback —
+  // verify the post-purchase upsell price separately.
+  canvas: "price_1TeoLCRg6awxgOnRBOACrwXx",
   // Framed line, larger sizes. Each unset = auto-hidden until its price ID lands.
   framed_12x16: process.env.STRIPE_FRAMED_12X16_PRICE_ID || "",
   framed_18x24: process.env.STRIPE_FRAMED_18X24_PRICE_ID || "",
