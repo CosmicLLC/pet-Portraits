@@ -6,14 +6,11 @@ import PostGenerationEmailCapture from "@/components/PostGenerationEmailCapture"
 import UploadStep from "@/components/UploadStep";
 import { fetchJson } from "@/lib/fetch-json";
 import StylePicker from "@/components/StylePicker";
-import AddToCartButton from "@/components/AddToCartButton";
+import PortraitOffer from "@/components/PortraitOffer";
 import GenerateButton from "@/components/GenerateButton";
-import PortraitPreview from "@/components/PortraitPreview";
-import ProductSelector from "@/components/ProductSelector";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
 import FooterNewsletter from "@/components/FooterNewsletter";
 import BrowseAbandonmentCapture from "@/components/BrowseAbandonmentCapture";
-import StickyCartBar from "@/components/StickyCartBar";
 import FAQ from "@/components/FAQ";
 import HomeJsonLd from "@/components/HomeJsonLd";
 import SuccessReferralShare from "@/components/SuccessReferralShare";
@@ -22,7 +19,6 @@ import ClaimFreePrint from "@/components/ClaimFreePrint";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import PhoneWallpaperPreview from "@/components/PhoneWallpaperPreview";
 import type { StyleKey } from "@/lib/gemini";
 import { track, productValue } from "@/lib/analytics";
 import type { ProductType } from "@/lib/products";
@@ -253,29 +249,6 @@ export default function Home() {
     },
     [file, loading, style, handleGenerate]
   );
-
-  // Tapping the "Add Phone Wallpaper" card → direct checkout for
-  // DIGITAL + WALLPAPER together ($6 + $5 = $11 total). The wallpaper
-  // card is a one-click combo CTA, not a toggle — we don't carry a
-  // "selected" state around anymore since the button IS the purchase.
-  const handleBuyWallpaper = useCallback(async () => {
-    if (!imageId || loading) return;
-    setLoading(true);
-    track({ name: "begin_checkout", productType: "digital" as ProductType, value: 11, imageId });
-    try {
-      const res = await fetch("/api/create-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ productType: "digital", imageId, addWallpaper: true }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      window.location.href = data.url;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Checkout error — please try again.");
-      setLoading(false);
-    }
-  }, [imageId, loading]);
 
   const handleUpsell = useCallback(async () => {
     if (!successImageId) return;
@@ -639,7 +612,11 @@ export default function Home() {
                 </svg>
                 Back
               </button>
-              <PortraitPreview watermarkedImage={watermarkedImage} />
+              <PortraitOffer
+                imageId={imageId}
+                watermarkedImage={watermarkedImage}
+                onError={setError}
+              />
 
               {/* ─── Admin-only: download full-res without purchase ──── */}
               {session?.user?.role === "admin" && imageId && (
@@ -704,55 +681,8 @@ export default function Home() {
                 )}
               </div>
 
-              {/* ─── Add Phone Wallpaper → checkout for digital + wallpaper.
-                  Renders as an unchecked checkbox card; tapping anywhere on
-                  the card routes to Stripe for the combo ($6 digital + $5
-                  wallpaper = $11 total). */}
-              <button
-                type="button"
-                onClick={handleBuyWallpaper}
-                disabled={loading}
-                className="mt-6 w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-200 bg-white text-left hover:border-brand-green hover:bg-brand-green/5 hover:shadow-md transition-all disabled:opacity-60"
-              >
-                {/* Phone mockup */}
-                <div className="flex-shrink-0">
-                  <PhoneWallpaperPreview imageUrl={watermarkedImage} size="sm" />
-                </div>
 
-                {/* Copy */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p className="font-display text-sm font-semibold text-brand-green leading-tight">
-                      Add Phone Wallpaper
-                    </p>
-                    <span className="text-xs font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full flex-shrink-0">
-                      +$5
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 leading-snug">
-                    1290×2796 px · iPhone-optimised · instant download
-                  </p>
-                  <p className="text-[11px] text-gray-400 mt-1">
-                    Checkout for digital + wallpaper — $11 total.
-                  </p>
-                </div>
 
-                {/* Unchecked checkbox indicator — visual cue, always unchecked;
-                    tapping the card routes to checkout, it's not a toggle. */}
-                <div className="flex-shrink-0 w-6 h-6 rounded-md border-2 border-gray-300 bg-white" />
-              </button>
-
-              <ProductSelector imageId={imageId} onError={setError} wallpaperSelected={false} />
-
-              {/* Multi-portrait cart — add this one and create more, then check
-                  out together in one payment. (Replaces a "save 15%" nudge that
-                  promised a discount the checkout never applied.) */}
-              <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl px-4 py-4">
-                <AddToCartButton imageId={imageId} preview={watermarkedImage ?? undefined} />
-                <p className="text-[11px] text-gray-400 text-center mt-2">
-                  Making portraits for several pets or as gifts? Add them to your cart and check out together.
-                </p>
-              </div>
 
               {showAbandonmentCapture && !portraitEmailCaptured && (
                 <BrowseAbandonmentCapture
@@ -761,13 +691,6 @@ export default function Home() {
                 />
               )}
 
-              {/* Sticky buy bar */}
-              <StickyCartBar
-                watermarkedImage={watermarkedImage}
-                imageId={imageId}
-                onError={setError}
-                wallpaperSelected={false}
-              />
             </div>
           )}
         </div>
