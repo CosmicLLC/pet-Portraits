@@ -106,6 +106,8 @@ function nameTypographyFor(style: StyleKey): string {
       return "ornate Roman capitals in gold leaf or rich umber, period-appropriate Renaissance lettering";
     case "lineart":
       return "minimalist thin sans-serif in the same graphite tone as the linework";
+    default:
+      return "clean, modern lettering that complements the artwork";
   }
 }
 

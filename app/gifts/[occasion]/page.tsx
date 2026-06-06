@@ -192,6 +192,7 @@ export default function GiftOccasionPage({ params }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {occ.recommendedStyles.map((rec) => {
               const style = STYLE_SEO[rec.key]
+              if (!style) return null
               return (
                 <Link
                   key={rec.key}

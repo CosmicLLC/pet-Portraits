@@ -611,7 +611,7 @@ export default function Home() {
                 <div>
                   <p className="font-display text-lg font-semibold text-brand-green">Ready to create</p>
                   <p className="text-sm text-gray-500 capitalize">
-                    {style === "oil" ? "Oil Painting" : style === "lineart" ? "Pencil / Line Art" : style === "renaissance" ? "Renaissance" : "Watercolor"}{" "}style
+                    {style === "oil" ? "Oil Painting" : style === "lineart" ? "Pencil / Line Art" : style === "renaissance" ? "Renaissance" : style === "astronaut" ? "Astronaut" : style === "dogue" ? "DOGUE Cover" : "Watercolor"}{" "}style
                   </p>
                 </div>
               </div>

@@ -42,6 +42,25 @@ const STYLES: {
     fallbackGradient: "from-gray-300 via-gray-200 to-gray-300",
     emoji: "✏️",
   },
+  // Themed concept styles (added 2026-06-06). No example image yet — the tile
+  // renders an emoji/gradient placeholder until a real example is generated and
+  // dropped at /examples/astronaut.png and /examples/dogue.png.
+  {
+    key: "astronaut",
+    name: "Astronaut",
+    tagline: "Send them to space",
+    image: "",
+    fallbackGradient: "from-slate-900 via-indigo-900 to-slate-800",
+    emoji: "🚀",
+  },
+  {
+    key: "dogue",
+    name: "DOGUE Cover",
+    tagline: "Fashion-magazine star",
+    image: "",
+    fallbackGradient: "from-stone-300 via-stone-200 to-emerald-200",
+    emoji: "📸",
+  },
 ];
 
 interface StylePickerProps {
@@ -77,14 +96,23 @@ export default function StylePicker({ selected, onSelect }: StylePickerProps) {
                 pipeline (multiple srcset variants, optimizer pass) adds
                 latency without saving bytes for thumbnails this small. */}
             <div className="relative h-36 overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={style.image}
-                alt={`${style.name} portrait example`}
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              {/* Subtle overlay with style name hint */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+              {style.image ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={style.image}
+                    alt={`${style.name} portrait example`}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                  {/* Subtle overlay with style name hint */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                </>
+              ) : (
+                /* No example image yet — branded gradient + emoji placeholder. */
+                <div className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${style.fallbackGradient}`}>
+                  <span className="text-5xl drop-shadow-lg" aria-hidden="true">{style.emoji}</span>
+                </div>
+              )}
 
               {selected === style.key && (
                 <div className="absolute top-3 right-3 w-7 h-7 bg-brand-green rounded-full flex items-center justify-center shadow-lg z-10">

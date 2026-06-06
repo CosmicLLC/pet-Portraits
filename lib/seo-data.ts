@@ -16,7 +16,10 @@ export type StyleSeo = {
   image: string
 }
 
-export const STYLE_SEO: Record<StyleKey, StyleSeo> = {
+// Only the four core art styles have curated SEO landing pages + example
+// images. Themed concept styles (astronaut, dogue) are generatable but not
+// SEO-launched yet (no example imagery), so this is Partial over StyleKey.
+export const STYLE_SEO: Partial<Record<StyleKey, StyleSeo>> = {
   watercolor: {
     key: "watercolor",
     slug: "watercolor-pet-portrait",
