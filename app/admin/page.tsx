@@ -144,6 +144,7 @@ export default async function AdminPage() {
         {/* Quick actions */}
         <div className="flex flex-wrap gap-2 mb-8">
           <QuickLink href="/admin/orders" label="Orders" />
+          <QuickLink href="/admin/upsells" label="🪜 Upsell Ladder" />
           <QuickLink href="/admin/subscribers" label="Subscribers" />
           <QuickLink href="/admin/campaigns" label="Email campaigns" primary />
           <QuickLink href="/admin/ad-studio" label="🎨 Ad Studio" />
