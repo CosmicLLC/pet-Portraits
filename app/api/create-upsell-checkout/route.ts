@@ -2,31 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe, PRICE_IDS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
+import { isUpsellSource, upsellWindowMsFor, type UpsellSource } from "@/lib/upsell";
 
 // Wallpaper → canvas upsell checkout. Server is the source of truth on
-// whether the $10 discount window is still open: we look up the original
+// whether the discount window is still open: we look up the original
 // wallpaper Stripe session by id, verify productType === "wallpaper",
-// confirm the session was created within the last 24h, then create a
-// brand-new Stripe Checkout for canvas with the WALLPAPER10 coupon
+// confirm the session is inside the window for the touch that sent them
+// (modal 24h, email touches re-extend — see lib/upsell.ts), then create
+// a brand-new Stripe Checkout for canvas with the ladder coupon
 // pre-applied. The new session carries metadata so the webhook can
 // attribute the resulting Order back to the original wallpaper purchase.
 
 export const runtime = "nodejs";
-
-const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-
-type UpsellSource =
-  | "wallpaper_success_modal"
-  | "email_1h"
-  | "email_24h"
-  | "email_72h";
-
-const ALLOWED_SOURCES: ReadonlySet<UpsellSource> = new Set<UpsellSource>([
-  "wallpaper_success_modal",
-  "email_1h",
-  "email_24h",
-  "email_72h",
-]);
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,8 +32,8 @@ export async function POST(req: NextRequest) {
       | null;
     const originalSessionId = body?.originalSessionId;
     const upsellSourceRaw = body?.upsellSource ?? "wallpaper_success_modal";
-    const upsellSource = ALLOWED_SOURCES.has(upsellSourceRaw as UpsellSource)
-      ? (upsellSourceRaw as UpsellSource)
+    const upsellSource: UpsellSource = isUpsellSource(upsellSourceRaw)
+      ? upsellSourceRaw
       : "wallpaper_success_modal";
 
     if (!originalSessionId || typeof originalSessionId !== "string") {
@@ -87,10 +74,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 24h window — server-side source of truth. Stripe `created` is in
-    // seconds since epoch.
+    // Per-source window — server-side source of truth. Stripe `created`
+    // is in seconds since epoch. Email touches get a longer window than
+    // the modal so the deadline each email promises is actually honored.
     const createdMs = (originalSession.created ?? 0) * 1000;
-    const expiresMs = createdMs + TWENTY_FOUR_HOURS_MS;
+    const expiresMs = createdMs + upsellWindowMsFor(upsellSource);
     if (Date.now() >= expiresMs) {
       return NextResponse.json(
         { error: "Discount window expired" },
@@ -99,7 +87,12 @@ export async function POST(req: NextRequest) {
     }
 
     const canvasPriceId = PRICE_IDS.canvas;
-    const couponId = process.env.STRIPE_WALLPAPER10_COUPON_ID;
+    // Ladder coupon. Canonical var first; STRIPE_WALLPAPER10_COUPON_ID is
+    // the documented flip-back slot if the $10 offer ever becomes margin-
+    // safe (see lib/upsell.ts) — honored here so setting it just works.
+    const couponId =
+      process.env.STRIPE_WALLPAPER_UPSELL_COUPON_ID ||
+      process.env.STRIPE_WALLPAPER10_COUPON_ID;
     if (!canvasPriceId || !couponId) {
       console.error(
         "Upsell checkout misconfigured — canvasPriceId or couponId missing",

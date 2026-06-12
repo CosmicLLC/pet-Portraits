@@ -1,11 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import {
+  UPSELL_DISCOUNT_USD,
+  UPSELL_LIST_PRICE_USD,
+  UPSELL_PRICE_USD,
+} from "@/lib/upsell";
 
 // Wallpaper → framed-print upsell modal. Fires 4s after the wallpaper
 // success state renders, showing the buyer's portrait inside a
-// CSS-rendered frame, with a 24h real-server countdown to
-// $10 off the framed-print upgrade.
+// CSS-rendered frame, with a 24h real-server countdown to the
+// framed-print upgrade discount (amount lives in lib/upsell.ts).
 //
 // All discount-window logic is server-side (see
 // /api/create-upsell-checkout). The countdown shown here is a UX
@@ -112,7 +117,7 @@ export default function WallpaperUpsellModal({
         onClick={handleReopen}
         className="fixed bottom-6 right-6 z-40 rounded-full bg-brand-green px-5 py-3 text-cream shadow-xl hover:scale-105 transition-transform font-display font-semibold text-sm"
       >
-        Get the framed print — $69 · {timeLeft}
+        Get the framed print — ${UPSELL_PRICE_USD} · {timeLeft}
       </button>
     );
   }
@@ -197,14 +202,14 @@ export default function WallpaperUpsellModal({
         </h2>
         <p className="text-sm text-gray-700 text-center mb-4 leading-relaxed">
           Your portrait, in an 8×10 framed print. Wallpaper buyers
-          save $10 — today only.
+          save ${UPSELL_DISCOUNT_USD} — today only.
         </p>
 
         <div className="flex items-baseline justify-center gap-3 mb-3">
           <span className="font-display text-3xl font-bold text-brand-green">
-            $69
+            ${UPSELL_PRICE_USD}
           </span>
-          <span className="text-lg text-gray-400 line-through">$79</span>
+          <span className="text-lg text-gray-400 line-through">${UPSELL_LIST_PRICE_USD}</span>
           <span className="text-xs text-brand-gold font-semibold">
             + free shipping
           </span>
@@ -226,7 +231,7 @@ export default function WallpaperUpsellModal({
         >
           {loading
             ? "Loading checkout…"
-            : `Upgrade to framed print — $69`}
+            : `Upgrade to framed print — $${UPSELL_PRICE_USD}`}
         </button>
 
         <button
