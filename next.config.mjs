@@ -8,6 +8,17 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      // "Free wallpaper" is what people actually search/type; the product
+      // page lives at /wallpaper. Permanent so link equity consolidates.
+      {
+        source: "/free-wallpaper",
+        destination: "/wallpaper",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
