@@ -17,7 +17,11 @@ export type AnalyticsEvent =
   | { name: "begin_checkout"; productType: ProductType; value: number; currency?: Currency; imageId?: string }
   | { name: "purchase"; transactionId?: string; value?: number; currency?: Currency; productType?: ProductType }
   | { name: "sign_up"; source: string }
-  | { name: "exit_intent_shown" };
+  | { name: "exit_intent_shown" }
+  // Wallpaper → canvas ladder: an upsell offer became visible (modal or
+  // /upgrade email landing). Pairs with begin_checkout(canvas) on click to
+  // give per-source view→click→purchase funnels in GA4/Meta/TikTok.
+  | { name: "upsell_offer_view"; source: string };
 
 declare global {
   interface Window {
@@ -133,6 +137,16 @@ export function track(event: AnalyticsEvent): void {
       gtag?.("event", "exit_intent_shown");
       fbq?.("trackCustom", "ExitIntentShown");
       ttq?.track("ClickButton", { description: "exit_intent_shown" });
+      break;
+
+    case "upsell_offer_view":
+      gtag?.("event", "upsell_offer_view", { source: event.source });
+      fbq?.("trackCustom", "UpsellOfferView", { source: event.source });
+      ttq?.track("ViewContent", {
+        content_type: "product",
+        content_id: "canvas_upsell",
+        content_name: `upsell_${event.source}`,
+      });
       break;
   }
 }
