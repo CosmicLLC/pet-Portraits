@@ -173,7 +173,7 @@ The original 6-month growth plan provided in chat (long document, key points):
 
 ## Known issues / gotchas (CRITICAL for new session)
 
-1. **Vercel Blob store is PRIVATE** — using `access: "public"` in `put()` calls causes runtime 500s ("Cannot use public access on a private store"). All blob writes must use `access: "private"`. One known latent issue at `lib/upscale.ts:94` for Prodigi print-ready URLs — not yet triggered.
+1. **Vercel Blob store is PRIVATE** — using `access: "public"` in `put()` calls causes runtime 500s ("Cannot use public access on a private store"). All blob writes must use `access: "private"`. The previously-flagged latent issue at `lib/upscale.ts` (print-ready upload used public access) was fixed in `8e3015f`: the upload is `access: "private"` and Prodigi/Replicate fetch through the public `/api/print-asset` proxy instead of raw blob URLs. Verified 2026-06-11: zero `access: "public"` call sites remain in source.
 
 2. **ESLint `no-unused-vars` is enforced as ERROR in production builds** — TypeScript looks clean locally but Vercel blocks the deploy. Always scrub unused imports/vars before committing. This has bitten 3 deploys this session.
 
