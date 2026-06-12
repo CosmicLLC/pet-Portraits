@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/pinterest-publish",
       "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/upsell-emails",
+      "schedule": "30 13 * * *"
     }
   ]
 }

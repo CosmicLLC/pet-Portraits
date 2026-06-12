@@ -1,5 +1,10 @@
 import { Resend } from "resend";
 import { unsubUrl } from "./unsub-token";
+import {
+  UPSELL_DISCOUNT_USD,
+  UPSELL_LIST_PRICE_USD,
+  UPSELL_PRICE_USD,
+} from "./upsell";
 
 let _resend: Resend | null = null;
 
@@ -126,7 +131,7 @@ export async function sendDownloadEmail(
       </p>
       <a href="${siteUrl()}"
          style="display:inline-block;background:#C4A35A;color:#fff;text-decoration:none;padding:12px 32px;border-radius:50px;font-size:14px;font-weight:700;">
-        Order Framed Print &mdash; $59
+        Order Framed Print &mdash; $${UPSELL_LIST_PRICE_USD}
       </a>
     </div>
 
@@ -520,6 +525,91 @@ export async function sendAbandonedPortraitEmail(
     from: fromEmail(),
     to,
     subject: "Your Paw Masterpiece is saved 🐾",
+    html: baseTemplate(content),
+  });
+}
+
+// ─── Wallpaper → canvas ladder (3 scheduled touches) ────────────────────
+// Sent by /api/cron/upsell-emails at ~1h / ~24h / ~72h after a standalone
+// wallpaper purchase, unless the buyer already upgraded (the webhook
+// cancels pending rows on conversion). Each step's deadline matches the
+// server-enforced window in lib/upsell.ts — the 24h/72h copy promises an
+// extension and the API honors it, so no email click ever dead-ends.
+// Marketing email → unsubscribe footer required.
+
+export type UpsellLadderStep = "1h" | "24h" | "72h";
+
+const UPSELL_STEP_COPY: Record<
+  UpsellLadderStep,
+  { subject: string; heading: string; intro: string; deadline: string; cta: string }
+> = {
+  "1h": {
+    subject: "Your pet's portrait deserves a wall too 🖼️",
+    heading: "It looks even better framed",
+    intro:
+      "Your new wallpaper is on your phone — but the same portrait, printed and framed, is the version guests actually see. As a wallpaper buyer you've unlocked a one-day discount on the 8×10 framed print.",
+    deadline: "Your discount is good for 24 hours from your wallpaper purchase.",
+    cta: "Claim my framed print",
+  },
+  "24h": {
+    subject: "We extended your framed-print discount (1 more day)",
+    heading: "Your discount got a second life",
+    intro:
+      "Your wallpaper-buyer discount on the 8×10 framed print was about to close, so we extended it one more day. Same portrait, real wood frame, ready to hang.",
+    deadline: "The extension lasts 24 more hours — then it's back to full price.",
+    cta: "Use my extended discount",
+  },
+  "72h": {
+    subject: "Final call — your framed-print discount ends soon",
+    heading: "Last chance to frame it",
+    intro:
+      "This is the last reminder we'll send: your wallpaper-buyer discount on the 8×10 framed print expires within the next 24 hours, and we don't bring it back.",
+    deadline: "After tonight the framed print returns to full price for good.",
+    cta: "Get it before it's gone",
+  },
+};
+
+export async function sendUpsellLadderEmail(
+  to: string,
+  opts: { step: UpsellLadderStep; upgradeUrl: string }
+) {
+  const copy = UPSELL_STEP_COPY[opts.step];
+  const content = `
+    <h1 style="font-size:26px;color:#2D4A3E;margin:0 0 8px;font-weight:700;">${copy.heading}</h1>
+    <p style="color:#555;font-size:16px;line-height:1.6;margin:0 0 24px;">
+      ${copy.intro}
+    </p>
+
+    <!-- Offer block -->
+    <div style="background:#fff;border:2px solid #2D4A3E;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px;">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#C4A35A;">
+        Wallpaper-buyer exclusive
+      </p>
+      <h2 style="font-size:20px;color:#2D4A3E;margin:0 0 10px;font-weight:700;">
+        8&times;10 Framed Print
+      </h2>
+      <p style="margin:0 0 16px;">
+        <span style="font-size:30px;font-weight:700;color:#2D4A3E;">$${UPSELL_PRICE_USD}</span>
+        &nbsp;<span style="font-size:17px;color:#AAA;text-decoration:line-through;">$${UPSELL_LIST_PRICE_USD}</span>
+        &nbsp;<span style="font-size:13px;color:#C4A35A;font-weight:700;">save $${UPSELL_DISCOUNT_USD} + free shipping</span>
+      </p>
+      <a href="${opts.upgradeUrl}"
+         style="display:inline-block;background:#2D4A3E;color:#FAF7F2;text-decoration:none;padding:16px 40px;border-radius:50px;font-size:16px;font-weight:700;">
+        ${copy.cta}
+      </a>
+      <p style="margin:14px 0 0;color:#AAA;font-size:12px;">${copy.deadline}</p>
+    </div>
+
+    <p style="color:#888;font-size:13px;line-height:1.6;margin:0;text-align:center;">
+      Real wood frame &middot; ships 5&ndash;7 days in the US &middot; 100% money-back guarantee
+    </p>
+    ${unsubscribeFooter(to)}
+  `;
+
+  await getResend().emails.send({
+    from: fromEmail(),
+    to,
+    subject: copy.subject,
     html: baseTemplate(content),
   });
 }

@@ -289,3 +289,32 @@ model OutreachContact {
   @@index([channel])
   @@index([priority])
 }
+
+// Wallpaper → canvas ladder follow-up queue. Three rows are created the
+// moment a standalone wallpaper purchase lands (upsell_1h / upsell_24h /
+// upsell_72h) and /api/cron/upsell-emails delivers whichever are due.
+// Converting to any wall print cancels the remaining touches so nobody
+// gets nagged after buying (see lib/upsell-emails.ts).
+//
+// Status lifecycle: pending → sent | cancelled | failed. A transient send
+// failure stays pending (retried every cron run) until the row is 48h past
+// its sendAt, after which it's marked failed for admin attention.
+model ScheduledEmail {
+  id          String    @id @default(cuid())
+  // Template key: "upsell_1h" | "upsell_24h" | "upsell_72h"
+  template    String
+  email       String
+  // The wallpaper Order this ladder belongs to.
+  orderId     String
+  sendAt      DateTime
+  status      String    @default("pending")
+  sentAt      DateTime?
+  cancelledAt DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+
+  // Idempotent scheduling under Stripe webhook retries.
+  @@unique([orderId, template])
+  @@index([status, sendAt])
+  @@index([email])
+}

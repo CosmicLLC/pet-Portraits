@@ -1,0 +1,39 @@
+# Wallpaper → canvas ladder — 30-minute sender cadence.
+#
+# Vercel Hobby only allows DAILY crons, which is useless for the 1h email
+# touch (it would send up to 24h late, after its discount window closed).
+# This workflow curls the same idempotent cron endpoint every 30 minutes;
+# the daily Vercel cron (vercel.json, 13:30 UTC) stays on as a backstop, so
+# double-firing is harmless — the endpoint only sends rows that are due and
+# marks them sent.
+#
+# ONE-TIME SETUP (repo admin):
+#   gh secret set UPSELL_CRON_SECRET --body "<CRON_SECRET from Vercel env>"
+# The value must equal the CRON_SECRET environment variable in the Vercel
+# project, or every call 401s.
+
+name: Upsell ladder email sender
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  send-due-upsell-emails:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Trigger cron endpoint
+        run: |
+          if [ -z "${{ secrets.UPSELL_CRON_SECRET }}" ]; then
+            echo "UPSELL_CRON_SECRET secret is not set — skipping (see file header)."
+            exit 0
+          fi
+          status=$(curl -s -o /tmp/body -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.UPSELL_CRON_SECRET }}" \
+            "https://pawmasterpiece.com/api/cron/upsell-emails")
+          echo "HTTP $status"
+          cat /tmp/body
+          [ "$status" = "200" ]

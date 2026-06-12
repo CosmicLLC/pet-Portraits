@@ -21,6 +21,11 @@ import { shouldApplyFreeBonus } from "@/lib/campaigns";
 import { upscaleForPrint, isUpscalerConfigured } from "@/lib/upscale";
 import { printAssetUrl } from "@/lib/print-token";
 import { trackPurchaseServer } from "@/lib/server-pixels";
+import {
+  scheduleUpsellEmails,
+  cancelPendingUpsellEmails,
+  isUpsellConversionProduct,
+} from "@/lib/upsell-emails";
 
 // Upscaling + Prodigi can take 15-30s on a physical order.
 export const maxDuration = 60;
@@ -494,6 +499,25 @@ export async function POST(req: NextRequest) {
         create: { email, source: "purchase" },
         update: {},
       }).catch((err) => console.error("Subscriber auto-enroll failed:", err));
+
+      // ── Wallpaper → canvas ladder bookkeeping ──────────────────────
+      // A standalone wallpaper purchase starts the 3-touch email ladder;
+      // a wall-print purchase by the same buyer (attributed upsell OR
+      // organic) cancels whatever touches are still pending. Both are
+      // best-effort — ladder bookkeeping never blocks fulfillment.
+      if (isStandaloneWallpaper) {
+        await scheduleUpsellEmails(order.id, email).catch(async (err) => {
+          await logEvent("error", "webhook", "Upsell email scheduling failed", {
+            orderId: order.id,
+            error: err instanceof Error ? err.message : String(err),
+          });
+        });
+      } else if (isUpsellConversionProduct(productType)) {
+        await cancelPendingUpsellEmails({ originalOrderId, email }).catch(
+          (err) =>
+            console.error("Upsell email cancellation failed:", err)
+        );
+      }
 
       // Gated download links — HMAC-signed with a 7-day expiry, streamed
       // through /api/download/[orderId] so the raw blob URL never leaves
