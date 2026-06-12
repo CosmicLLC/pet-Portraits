@@ -6,6 +6,7 @@ import {
   UPSELL_LIST_PRICE_USD,
   UPSELL_PRICE_USD,
 } from "@/lib/upsell";
+import { track } from "@/lib/analytics";
 
 // Wallpaper → framed-print upsell modal. Fires 4s after the wallpaper
 // success state renders, showing the buyer's portrait inside a
@@ -46,7 +47,10 @@ export default function WallpaperUpsellModal({
   // confirmation to register, short enough that it still feels like a
   // beat in the same experience rather than a separate interruption.
   useEffect(() => {
-    const t = setTimeout(() => setIsOpen(true), 4000);
+    const t = setTimeout(() => {
+      setIsOpen(true);
+      track({ name: "upsell_offer_view", source: "wallpaper_success_modal" });
+    }, 4000);
     return () => clearTimeout(t);
   }, []);
 
@@ -75,6 +79,11 @@ export default function WallpaperUpsellModal({
     if (expired) return;
     setLoading(true);
     setError(null);
+    track({
+      name: "begin_checkout",
+      productType: "canvas",
+      value: UPSELL_PRICE_USD,
+    });
     try {
       const res = await fetch("/api/create-upsell-checkout", {
         method: "POST",

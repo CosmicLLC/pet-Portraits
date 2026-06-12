@@ -608,6 +608,11 @@ export async function POST(req: NextRequest) {
           userAgent: null,
         },
         sourceUrl: `${baseUrl}/success?session_id=${session.id}`,
+        // Ladder attribution rides into Meta/TikTok custom_data so ad
+        // platforms can split upsell revenue from cold-traffic revenue.
+        custom: upsellSource
+          ? { upsell_source: upsellSource, original_order_id: originalOrderId ?? "" }
+          : undefined,
       }).catch((err) => console.warn("[server-pixels] purchase tracking failed:", err));
 
       // Physical fulfillment via Prodigi. Isolated from email failures above.

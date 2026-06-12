@@ -244,6 +244,8 @@ export async function trackPurchaseServer(args: {
   productType?: string;
   user: UserContext;
   sourceUrl?: string;
+  /** Extra custom_data params (e.g. upsell_source for ladder attribution). */
+  custom?: Record<string, unknown>;
 }): Promise<void> {
   const user = { ...args.user, email: args.email };
   const baseEvent = {
@@ -252,6 +254,7 @@ export async function trackPurchaseServer(args: {
     value: args.value,
     currency: args.currency || "USD",
     user,
+    custom: args.custom,
   };
   await Promise.all([
     sendMetaEvent({

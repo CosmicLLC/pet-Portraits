@@ -2,7 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStripe, PRICE_IDS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
-import { isUpsellSource, upsellWindowMsFor, type UpsellSource } from "@/lib/upsell";
+import {
+  isUpsellSource,
+  upsellWindowMsFor,
+  UPSELL_PRICE_USD,
+  type UpsellSource,
+} from "@/lib/upsell";
+import {
+  extractUserContext,
+  sendMetaEvent,
+  sendTikTokEvent,
+} from "@/lib/server-pixels";
 
 // Wallpaper → canvas upsell checkout. Server is the source of truth on
 // whether the discount window is still open: we look up the original
@@ -142,6 +152,38 @@ export async function POST(req: NextRequest) {
       success_url: `${baseUrl}/?success=true&imageId=${encodeURIComponent(originalOrder?.imageId ?? originalSession.metadata?.imageId ?? "")}&productType=canvas&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/wallpaper?success=true&imageId=${encodeURIComponent(originalOrder?.imageId ?? originalSession.metadata?.imageId ?? "")}&session_id=${encodeURIComponent(originalSessionId)}&upsell=cancelled`,
     });
+
+    // Server-side InitiateCheckout (Meta + TikTok). Fired here — not just
+    // client-side — because email-touch clicks come from mail clients where
+    // pixels often never load. session.id doubles as the dedupe event_id
+    // against the client pixel's begin_checkout. Fire-and-forget.
+    const userCtx = extractUserContext(req);
+    const amountUsd = (session.amount_total ?? UPSELL_PRICE_USD * 100) / 100;
+    void Promise.all([
+      sendMetaEvent({
+        eventName: "InitiateCheckout",
+        eventId: session.id,
+        eventSourceUrl: `${baseUrl}/upgrade`,
+        value: amountUsd,
+        currency: "USD",
+        contentIds: ["canvas_upsell"],
+        contentName: `canvas_upsell_${upsellSource}`,
+        contentType: "product",
+        user: { ...userCtx, email: customerEmail ?? null },
+        custom: { upsell_source: upsellSource },
+      }),
+      sendTikTokEvent({
+        eventName: "InitiateCheckout",
+        eventId: session.id,
+        eventSourceUrl: `${baseUrl}/upgrade`,
+        value: amountUsd,
+        currency: "USD",
+        contentId: "canvas_upsell",
+        contentName: `canvas_upsell_${upsellSource}`,
+        user: { ...userCtx, email: customerEmail ?? null },
+        custom: { upsell_source: upsellSource },
+      }),
+    ]).catch(() => {});
 
     return NextResponse.json({
       url: session.url,
