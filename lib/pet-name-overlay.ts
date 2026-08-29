@@ -1,49 +1,31 @@
 import sharp from "sharp";
-import fs from "fs";
-import path from "path";
+import { GLYPHS, GLYPH_RENDER_SIZE, SPACE_ADVANCE } from "@/lib/pet-name-glyphs";
 
 // Composites the pet's name onto the bottom third of a generated portrait —
 // watercolor and line-art styles only (see PET_NAME_OVERLAY_STYLES in
-// app/page.tsx and the style check in app/api/generate/route.ts). Unlike
-// lib/watermark.ts's custom block-letter glyphs (built because "PREVIEW" is
-// one fixed word), a pet's name is arbitrary text, so this uses a real SVG
-// <text> element — same render-SVG-then-Sharp-composite pattern as the
-// watermark, just with text instead of pixel rects.
+// app/page.tsx and the style check in app/api/generate/route.ts).
 //
-// IMPORTANT: the font is embedded directly in the SVG as a base64 @font-face
-// data URI, NOT referenced by font-family name alone. A first pass of this
-// file relied on librsvg finding a system font ("Georgia, serif") — that
-// rendered perfectly in local dev (which has system fonts) but came back as
-// empty tofu boxes in prod on Vercel's serverless runtime, which has no
-// fonts installed at all. Embedding the font bytes inline removes the
-// dependency on the runtime having ANY font available.
-const FONT_PATH = path.join(process.cwd(), "lib/fonts/PetNameOverlay-Bold.ttf");
-const FONT_FAMILY = "PetNameOverlay";
-let cachedFontBase64: string | null = null;
+// This does NOT use SVG <text> or any font/text-shaping engine at request
+// time. Two earlier attempts both worked in local dev and both rendered as
+// invisible tofu boxes in prod: first with font-family="Georgia, serif"
+// (relying on a system font Vercel's serverless runtime doesn't have), then
+// with the font embedded as a base64 @font-face data URI (Vercel's bundled
+// Sharp/librsvg has no text-shaping support at all, embedded font or not —
+// confirmed live). See lib/pet-name-glyphs.ts for the fix: every supported
+// character is pre-rendered to a bitmap ahead of time, and this file just
+// positions + composites those bitmaps with Sharp — pure raster image
+// compositing, which is already proven to work identically everywhere
+// (it's exactly how the pet's own photo gets composited).
 
-function getFontBase64(): string {
-  if (!cachedFontBase64) {
-    cachedFontBase64 = fs.readFileSync(FONT_PATH).toString("base64");
-  }
-  return cachedFontBase64;
+const SUPPORTED = new Set(Object.keys(GLYPHS));
+
+interface PlacedGlyph {
+  base64: string;
+  scaledLeft: number;
+  scaledTop: number;
+  scaledWidth: number;
+  scaledHeight: number;
 }
-
-// Escape the 5 XML-significant characters. Pet names are free text (any
-// customer's chosen name), so this is load-bearing against SVG injection —
-// without it a name containing e.g. `<` could break the document structure.
-function escapeXml(input: string): string {
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
-
-// Rough average glyph-width factor for this serif face at a given font
-// size — used only to decide whether the name needs to shrink to fit, not
-// for exact layout (SVG text-anchor="middle" handles the rest).
-const AVG_CHAR_WIDTH_RATIO = 0.56;
 
 export async function compositePetName(
   imageBuffer: Buffer,
@@ -51,6 +33,11 @@ export async function compositePetName(
 ): Promise<Buffer> {
   const trimmed = petName.trim();
   if (!trimmed) return imageBuffer;
+
+  // Drop any character we don't have a glyph for (emoji, non-Latin script,
+  // etc.) rather than fail — a name that partially renders beats a 500.
+  const chars = trimmed.split("").filter((c) => c === " " || SUPPORTED.has(c));
+  if (chars.length === 0) return imageBuffer;
 
   const image = sharp(imageBuffer);
   const metadata = await image.metadata();
@@ -63,46 +50,86 @@ export async function compositePetName(
   // approach used for the wallpaper composite in app/api/webhook/route.ts.
   const bandHeight = height / 3;
   const bandY = height - bandHeight;
+  const scrimSvg = Buffer.from(
+    `<svg width="${width}" height="${bandHeight}" xmlns="http://www.w3.org/2000/svg">` +
+      `<defs><linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">` +
+      `<stop offset="0%" stop-color="#000000" stop-opacity="0"/>` +
+      `<stop offset="55%" stop-color="#000000" stop-opacity="0.45"/>` +
+      `<stop offset="100%" stop-color="#000000" stop-opacity="0.55"/>` +
+      `</linearGradient></defs>` +
+      `<rect x="0" y="0" width="${width}" height="${bandHeight}" fill="url(#scrim)"/>` +
+      `</svg>`
+  );
+
+  // Walk the name at native (GLYPH_RENDER_SIZE) scale to get total advance
+  // width and each glyph's cursor position, before any scaling.
+  let cursorX = 0;
+  const layout: { ch: string; x: number }[] = [];
+  for (const ch of chars) {
+    if (ch === " ") {
+      cursorX += SPACE_ADVANCE;
+      continue;
+    }
+    const glyph = GLYPHS[ch];
+    layout.push({ ch, x: cursorX + glyph.leftBearing });
+    cursorX += glyph.advance;
+  }
+  const nativeWidth = cursorX;
 
   // Font size targets ~9% of image height, scaled down if the name is
   // long enough that it would overflow 85% of the image width.
   const targetFontSize = height * 0.09;
-  const estimatedWidth = trimmed.length * targetFontSize * AVG_CHAR_WIDTH_RATIO;
+  let scale = targetFontSize / GLYPH_RENDER_SIZE;
   const maxWidth = width * 0.85;
-  const fontSize =
-    estimatedWidth > maxWidth
-      ? Math.max(height * 0.04, targetFontSize * (maxWidth / estimatedWidth))
-      : targetFontSize;
+  if (nativeWidth * scale > maxWidth) {
+    const minFontSize = height * 0.04;
+    scale = Math.max(minFontSize / GLYPH_RENDER_SIZE, maxWidth / nativeWidth);
+  }
 
-  const textX = width / 2;
+  const scaledTotalWidth = nativeWidth * scale;
+  const startX = (width - scaledTotalWidth) / 2;
   // Baseline sits in the lower half of the scrim band, leaving room for
-  // the ascenders/descenders of the chosen font.
-  const textY = bandY + bandHeight * 0.68;
-  const escaped = escapeXml(trimmed);
-  const fontBase64 = getFontBase64();
+  // ascenders/descenders.
+  const baselineY = bandY + bandHeight * 0.68;
 
-  const svgOverlay = Buffer.from(
-    `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">` +
-      `<defs>` +
-      `<style>` +
-      `@font-face { font-family: '${FONT_FAMILY}'; src: url(data:font/ttf;base64,${fontBase64}) format('truetype'); }` +
-      `</style>` +
-      `<linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">` +
-      `<stop offset="0%" stop-color="#000000" stop-opacity="0"/>` +
-      `<stop offset="55%" stop-color="#000000" stop-opacity="0.45"/>` +
-      `<stop offset="100%" stop-color="#000000" stop-opacity="0.55"/>` +
-      `</linearGradient>` +
-      `</defs>` +
-      `<rect x="0" y="${bandY}" width="${width}" height="${bandHeight}" fill="url(#scrim)"/>` +
-      `<text x="${textX}" y="${textY}" text-anchor="middle" ` +
-      `font-family="${FONT_FAMILY}" ` +
-      `font-size="${fontSize}" fill="#FAF7F2" ` +
-      `style="letter-spacing:0.02em">${escaped}</text>` +
-      `</svg>`
+  const placed: PlacedGlyph[] = layout.map(({ ch, x }) => {
+    const glyph = GLYPHS[ch];
+    const scaledWidth = Math.max(1, Math.round(glyph.width * scale));
+    const scaledHeight = Math.max(1, Math.round(glyph.height * scale));
+    return {
+      base64: glyph.base64,
+      scaledLeft: Math.round(startX + x * scale),
+      scaledTop: Math.round(baselineY - glyph.topFromBaseline * scale),
+      scaledWidth,
+      scaledHeight,
+    };
+  });
+
+  // Resize every glyph bitmap in parallel, then composite scrim + all
+  // glyphs in one pass. Color is already baked into each glyph bitmap as
+  // brand cream (#FAF7F2) at generation time — see
+  // scripts/generate-pet-name-glyphs.mjs. (An earlier version rendered
+  // black glyphs and tried sharp().tint() to recolor at request time, but
+  // tint() preserves luminance, so a fully-opaque black pixel stayed black
+  // no matter the tint color.)
+  const glyphBuffers = await Promise.all(
+    placed.map((p) =>
+      sharp(Buffer.from(p.base64, "base64"))
+        .resize(p.scaledWidth, p.scaledHeight)
+        .png()
+        .toBuffer()
+    )
   );
 
   return image
-    .composite([{ input: svgOverlay, top: 0, left: 0 }])
+    .composite([
+      { input: scrimSvg, top: Math.round(bandY), left: 0 },
+      ...glyphBuffers.map((buf, i) => ({
+        input: buf,
+        top: placed[i].scaledTop,
+        left: placed[i].scaledLeft,
+      })),
+    ])
     .png()
     .toBuffer();
 }

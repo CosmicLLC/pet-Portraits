@@ -1,0 +1,168 @@
+// Regenerates lib/pet-name-glyphs.ts — the pre-rendered bitmap glyph set
+// used by lib/pet-name-overlay.ts to composite a customer's pet name onto
+// watercolor/line-art portraits.
+//
+// WHY THIS EXISTS: SVG <text> (even with the font embedded as a base64
+// @font-face data URI) rendered correctly in local dev but came back as
+// invisible tofu boxes in prod — Vercel's bundled Sharp/librsvg has no
+// text-shaping support at all. The fix is to pre-render every supported
+// character to a small transparent PNG bitmap in an environment that CAN
+// render text (this script, run locally), bake each glyph's bitmap +
+// metrics into lib/pet-name-glyphs.ts as base64, and have
+// compositePetName() assemble names at request time by positioning +
+// compositing those bitmaps with Sharp — pure raster compositing, which
+// works identically in every environment.
+//
+// Run: node scripts/generate-pet-name-glyphs.mjs
+// Re-run only if the font (lib/fonts/PetNameOverlay-Bold.ttf) changes or a
+// new character needs support (e.g. an accented letter).
+
+import sharp from "sharp";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.join(__dirname, "..");
+
+const FONT_PATH = path.join(ROOT, "lib/fonts/PetNameOverlay-Bold.ttf");
+const OUT_PATH = path.join(ROOT, "lib/pet-name-glyphs.ts");
+const FONT_FAMILY = "PetNameOverlay";
+
+// Pet names in practice: Latin letters, digits (rare but possible, e.g.
+// "Rex2"), apostrophe (O'Malley), hyphen (Mary-Jane), period (rare).
+const CHARS = [
+  ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  ..."abcdefghijklmnopqrstuvwxyz",
+  ..."0123456789",
+  "'",
+  "-",
+  ".",
+];
+
+const CANVAS_W = 400;
+const CANVAS_H = 500;
+const FONT_SIZE = 260; // reference em size — GLYPH_RENDER_SIZE in the output
+const BASELINE_Y = 300; // fixed baseline shared by every glyph render
+
+function escapeXml(ch) {
+  return ch
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function safeName(ch) {
+  if (/[A-Z]/.test(ch)) return `upper_${ch}`;
+  if (/[a-z]/.test(ch)) return `lower_${ch}`;
+  if (/[0-9]/.test(ch)) return `digit_${ch}`;
+  return `sym_${ch.charCodeAt(0)}`;
+}
+
+async function main() {
+  const fontBase64 = fs.readFileSync(FONT_PATH).toString("base64");
+  const entries = [];
+
+  for (const ch of CHARS) {
+    const svg = Buffer.from(
+      `<svg width="${CANVAS_W}" height="${CANVAS_H}" xmlns="http://www.w3.org/2000/svg">` +
+        `<defs><style>@font-face { font-family: '${FONT_FAMILY}'; src: url(data:font/ttf;base64,${fontBase64}) format('truetype'); }</style></defs>` +
+        // Fill is baked in as the final brand cream — NOT recolored at
+        // request time. An earlier version rendered black and tried
+        // sharp().tint() to recolor at runtime, but tint() preserves
+        // luminance: a fully-opaque black pixel has ~0 luminance, so
+        // tinting it toward a light color like cream still comes out
+        // black. Baking the real color in at generation time sidesteps
+        // that entirely.
+        `<text x="0" y="${BASELINE_Y}" text-anchor="start" font-family="${FONT_FAMILY}" font-size="${FONT_SIZE}" fill="#FAF7F2">${escapeXml(ch)}</text>` +
+        `</svg>`
+    );
+    const raw = await sharp(svg).png().toBuffer();
+
+    let trimResult;
+    try {
+      trimResult = await sharp(raw)
+        .trim({ threshold: 10 })
+        .toBuffer({ resolveWithObject: true });
+    } catch {
+      console.warn(`Glyph '${ch}' rendered empty — skipping (check the font supports it)`);
+      continue;
+    }
+
+    const { data, info } = trimResult;
+    // info.trimOffsetLeft/trimOffsetTop are negative — how far the crop
+    // moved in from the original canvas's top-left.
+    const trimLeft = -info.trimOffsetLeft;
+    const trimTop = -info.trimOffsetTop;
+    const leftBearing = trimLeft;
+    const topFromBaseline = BASELINE_Y - trimTop;
+    // Advance (cursor movement to the next glyph) approximated as
+    // leftBearing + width + a symmetric right-bearing estimate. Not
+    // pixel-perfect kerning, but this is a name overlay, not book
+    // typesetting — visually even spacing is what matters.
+    const advance = info.width + 2 * leftBearing;
+
+    entries.push({
+      ch,
+      width: info.width,
+      height: info.height,
+      leftBearing,
+      topFromBaseline,
+      advance,
+      base64: data.toString("base64"),
+    });
+    console.log(`${ch} -> ${safeName(ch)}.png  ${info.width}x${info.height}`);
+  }
+
+  const body = entries
+    .map(
+      (e) =>
+        `  ${JSON.stringify(e.ch)}: { width: ${e.width}, height: ${e.height}, ` +
+        `leftBearing: ${e.leftBearing}, topFromBaseline: ${e.topFromBaseline}, ` +
+        `advance: ${e.advance}, base64: ${JSON.stringify(e.base64)} },`
+    )
+    .join("\n");
+
+  const header = `// AUTO-GENERATED by scripts/generate-pet-name-glyphs.mjs — do not hand-edit.
+// Regenerate with: node scripts/generate-pet-name-glyphs.mjs
+//
+// Why this exists: see the comment at the top of that script and in
+// lib/pet-name-overlay.ts. Short version — SVG <text> (even with the font
+// embedded as a base64 @font-face) renders as invisible tofu boxes on
+// Vercel's serverless Sharp/librsvg build, which has no text-shaping
+// support. Every supported character is pre-rendered to a bitmap here
+// instead, so the request-time code only ever does raster compositing.
+//
+// GLYPH_RENDER_SIZE is the font-size (px) each glyph was rendered at — used
+// to compute a scale factor against the runtime's target font size.
+// topFromBaseline is how many px ABOVE the shared baseline this glyph's top
+// edge sits, so descenders (g, y, ...) and ascenders (b, l, ...) line up
+// correctly against a common baseline instead of top-aligning.
+
+export const GLYPH_RENDER_SIZE = ${FONT_SIZE};
+
+export interface Glyph {
+  width: number;
+  height: number;
+  leftBearing: number;
+  topFromBaseline: number;
+  advance: number;
+  base64: string;
+}
+
+export const GLYPHS: Record<string, Glyph> = {
+${body}
+};
+
+// Space has no visible glyph — fixed advance approximating this font's
+// average character width at GLYPH_RENDER_SIZE.
+export const SPACE_ADVANCE = GLYPH_RENDER_SIZE * 0.3;
+`;
+
+  fs.writeFileSync(OUT_PATH, header);
+  console.log(`\nWrote ${entries.length} glyphs to ${path.relative(ROOT, OUT_PATH)}`);
+}
+
+main();

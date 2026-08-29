@@ -1,17 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Belt-and-suspenders for lib/pet-name-overlay.ts, which fs.readFileSync's
-  // a bundled TTF at runtime (embedded as a base64 @font-face in the SVG
-  // overlay — Vercel's serverless runtime has no system fonts, so relying
-  // on font-family alone rendered empty tofu boxes in prod). Next's file
-  // tracer usually catches static fs.readFileSync(path.join(...)) calls,
-  // but this makes the font file's inclusion in the /api/generate function
-  // bundle explicit rather than implicit.
-  experimental: {
-    outputFileTracingIncludes: {
-      "/api/generate": ["./lib/fonts/**"],
-    },
-  },
   images: {
     remotePatterns: [
       {
