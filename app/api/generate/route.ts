@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generatePortrait, STYLE_KEYS, type StyleKey } from "@/lib/gemini";
 import { applyWatermark } from "@/lib/watermark";
+import { compositePetName } from "@/lib/pet-name-overlay";
 import { put } from "@vercel/blob";
 import { v4 as uuidv4 } from "uuid";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
@@ -11,6 +12,11 @@ import { trackPreviewGeneratedServer, extractUserContext } from "@/lib/server-pi
 // FUNCTION_INVOCATION_TIMEOUT in prod — cold-start + iad1↔Gemini
 // latency makes 60s and even 120s too tight for image generation.
 export const maxDuration = 300;
+
+// Styles that support the pet-name overlay. Single gate shared by both the
+// client (app/page.tsx) and here — Oil Painting and Renaissance must stay
+// completely untouched by this feature.
+const PET_NAME_OVERLAY_STYLES: StyleKey[] = ["watercolor", "lineart"];
 
 // Known bot / scripting client User-Agent signatures. Won't stop a motivated
 // attacker (they can spoof the header) but filters out the 90% of drive-by
@@ -79,6 +85,8 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get("image") as File | null;
     const style = formData.get("style") as string | null;
+    const petNameRaw = formData.get("petName");
+    const petName = typeof petNameRaw === "string" ? petNameRaw.trim().slice(0, 20) : "";
 
     if (!file) {
       return NextResponse.json({ error: "No image provided" }, { status: 400 });
@@ -105,7 +113,16 @@ export async function POST(req: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const fullResBuffer = await generatePortrait(buffer, style as StyleKey);
+    let fullResBuffer = await generatePortrait(buffer, style as StyleKey);
+
+    // Pet name overlay — watercolor/line-art only, and only when the
+    // customer typed one. Composited onto the full-res image BEFORE it's
+    // stored, so the version we later deliver on payment already has it.
+    // Never sent to Gemini as part of the prompt — this is pure
+    // post-processing, same technique as the PREVIEW watermark below.
+    if (petName && PET_NAME_OVERLAY_STYLES.includes(style as StyleKey)) {
+      fullResBuffer = await compositePetName(fullResBuffer, petName);
+    }
 
     // Store full-res in Vercel Blob with NO public access
     // Only accessible via server-side signed URL after payment
@@ -120,7 +137,9 @@ export async function POST(req: NextRequest) {
     // We map imageId -> blob.url via the blob pathname
     // The imageId alone cannot be used to construct the download URL
 
-    // Apply watermark for preview
+    // Apply watermark for preview. fullResBuffer already carries the pet
+    // name overlay (above) when applicable, so the free preview the
+    // customer sees before paying matches the delivered file exactly.
     const watermarkedBuffer = await applyWatermark(fullResBuffer);
     const watermarkedBase64 = `data:image/png;base64,${watermarkedBuffer.toString("base64")}`;
 

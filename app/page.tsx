@@ -29,6 +29,12 @@ type Step = "upload" | "style" | "generate" | "preview";
 const STEPS: Step[] = ["style", "upload", "generate", "preview"];
 const STEP_LABELS = ["Style", "Upload", "Generate", "Preview"];
 
+// Styles that support the pet-name overlay (Sharp-composited, not Gemini
+// prompted — see lib/pet-name-overlay.ts). Oil Painting and Renaissance are
+// intentionally excluded; this list is the single gate for that.
+const PET_NAME_OVERLAY_STYLES: StyleKey[] = ["watercolor", "lineart"];
+const PET_NAME_MAX_LENGTH = 20;
+
 function formatCountdown(secs: number): string {
   const m = Math.floor(secs / 60).toString().padStart(2, "0");
   const s = (secs % 60).toString().padStart(2, "0");
@@ -39,6 +45,12 @@ export default function Home() {
   const [step, setStep] = useState<Step>("style");
   const [file, setFile] = useState<File | null>(null);
   const [style, setStyle] = useState<StyleKey | null>(null);
+  // Pet name overlay — only meaningful for watercolor/line-art (see
+  // PET_NAME_OVERLAY_STYLES below). Collected on the upload step, BEFORE
+  // the generate step's auto-fire effect kicks off, so the user always has
+  // a moment to type it. Purely a post-processing input — never sent to
+  // Gemini as part of the generation prompt.
+  const [petName, setPetName] = useState("");
   const [loading, setLoading] = useState(false);
   const [watermarkedImage, setWatermarkedImage] = useState<string | null>(null);
   const [imageId, setImageId] = useState<string | null>(null);
@@ -153,6 +165,7 @@ export default function Home() {
     setStep("style");
     setFile(null);
     setStyle(null);
+    setPetName("");
     setWatermarkedImage(null);
     setImageId(null);
     setError(null);
@@ -218,6 +231,11 @@ export default function Home() {
         const formData = new FormData();
         formData.append("image", file);
         formData.append("style", useStyle);
+        // Pet name is only ever meaningful for the overlay-eligible styles —
+        // gated again server-side, but no point sending it otherwise.
+        if (petName.trim() && PET_NAME_OVERLAY_STYLES.includes(useStyle)) {
+          formData.append("petName", petName.trim().slice(0, PET_NAME_MAX_LENGTH));
+        }
         const data = await fetchJson<{ watermarkedImage: string; imageId: string }>(
           "/api/generate",
           { method: "POST", body: formData }
@@ -237,7 +255,7 @@ export default function Home() {
         setLoading(false);
       }
     },
-    [file, style]
+    [file, style, petName]
   );
 
   // Re-render the current pet photo in a different style without leaving
@@ -585,6 +603,26 @@ export default function Home() {
                 </svg>
                 Back
               </button>
+              {style && PET_NAME_OVERLAY_STYLES.includes(style) && (
+                <div className="mb-6 max-w-sm mx-auto sm:mx-0">
+                  <label
+                    htmlFor="pet-name"
+                    className="block font-display text-sm font-semibold text-brand-green mb-1.5"
+                  >
+                    Your pet&apos;s name (optional)
+                  </label>
+                  <input
+                    id="pet-name"
+                    type="text"
+                    value={petName}
+                    onChange={(e) => setPetName(e.target.value.slice(0, PET_NAME_MAX_LENGTH))}
+                    maxLength={PET_NAME_MAX_LENGTH}
+                    placeholder="e.g. Bella"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/30 focus:border-brand-green transition-colors"
+                  />
+                  <p className="mt-1.5 text-xs text-gray-400">We&apos;ll add this to your portrait</p>
+                </div>
+              )}
               <UploadStep onFileSelected={handleFileSelected} />
             </div>
           )}
