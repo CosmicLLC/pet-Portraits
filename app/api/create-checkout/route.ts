@@ -237,6 +237,11 @@ export async function POST(req: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      // Explicit instead of relying on the Dashboard's automatic payment
+      // methods — that setting can end up with zero USD-compatible methods
+      // activated, which fails every session with "No valid payment method
+      // types for this Checkout Session."
+      payment_method_types: ["card"],
       line_items: lineItemsMulti,
       discounts: discounts.length > 0 ? discounts : undefined,
       metadata: {

@@ -136,6 +136,7 @@ export async function POST(req: NextRequest) {
     // The canvas upsell ships physical — collect US shipping address.
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      payment_method_types: ["card"],
       line_items: [{ price: canvasPriceId, quantity: 1 }],
       discounts: [{ coupon: couponId }],
       ...(customerEmail ? { customer_email: customerEmail } : {}),
