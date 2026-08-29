@@ -1,16 +1,32 @@
 import sharp from "sharp";
+import fs from "fs";
+import path from "path";
 
 // Composites the pet's name onto the bottom third of a generated portrait —
 // watercolor and line-art styles only (see PET_NAME_OVERLAY_STYLES in
 // app/page.tsx and the style check in app/api/generate/route.ts). Unlike
 // lib/watermark.ts's custom block-letter glyphs (built because "PREVIEW" is
 // one fixed word), a pet's name is arbitrary text, so this uses a real SVG
-// <text> element and lets librsvg/fontconfig shape it — same
-// render-SVG-then-Sharp-composite pattern as the watermark, just with text
-// instead of pixel rects. If a font ever fails to rasterize in the
-// serverless runtime, text silently draws with fontconfig's default
-// fallback rather than throwing — verified visually against the bundled
-// Sharp binary before shipping.
+// <text> element — same render-SVG-then-Sharp-composite pattern as the
+// watermark, just with text instead of pixel rects.
+//
+// IMPORTANT: the font is embedded directly in the SVG as a base64 @font-face
+// data URI, NOT referenced by font-family name alone. A first pass of this
+// file relied on librsvg finding a system font ("Georgia, serif") — that
+// rendered perfectly in local dev (which has system fonts) but came back as
+// empty tofu boxes in prod on Vercel's serverless runtime, which has no
+// fonts installed at all. Embedding the font bytes inline removes the
+// dependency on the runtime having ANY font available.
+const FONT_PATH = path.join(process.cwd(), "lib/fonts/PetNameOverlay-Bold.ttf");
+const FONT_FAMILY = "PetNameOverlay";
+let cachedFontBase64: string | null = null;
+
+function getFontBase64(): string {
+  if (!cachedFontBase64) {
+    cachedFontBase64 = fs.readFileSync(FONT_PATH).toString("base64");
+  }
+  return cachedFontBase64;
+}
 
 // Escape the 5 XML-significant characters. Pet names are free text (any
 // customer's chosen name), so this is load-bearing against SVG injection —
@@ -24,9 +40,9 @@ function escapeXml(input: string): string {
     .replace(/'/g, "&apos;");
 }
 
-// Rough average glyph-width factor for a serif display face at a given
-// font size — used only to decide whether the name needs to shrink to
-// fit, not for exact layout (SVG text-anchor="middle" handles the rest).
+// Rough average glyph-width factor for this serif face at a given font
+// size — used only to decide whether the name needs to shrink to fit, not
+// for exact layout (SVG text-anchor="middle" handles the rest).
 const AVG_CHAR_WIDTH_RATIO = 0.56;
 
 export async function compositePetName(
@@ -63,10 +79,14 @@ export async function compositePetName(
   // the ascenders/descenders of the chosen font.
   const textY = bandY + bandHeight * 0.68;
   const escaped = escapeXml(trimmed);
+  const fontBase64 = getFontBase64();
 
   const svgOverlay = Buffer.from(
     `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">` +
       `<defs>` +
+      `<style>` +
+      `@font-face { font-family: '${FONT_FAMILY}'; src: url(data:font/ttf;base64,${fontBase64}) format('truetype'); }` +
+      `</style>` +
       `<linearGradient id="scrim" x1="0" y1="0" x2="0" y2="1">` +
       `<stop offset="0%" stop-color="#000000" stop-opacity="0"/>` +
       `<stop offset="55%" stop-color="#000000" stop-opacity="0.45"/>` +
@@ -75,8 +95,8 @@ export async function compositePetName(
       `</defs>` +
       `<rect x="0" y="${bandY}" width="${width}" height="${bandHeight}" fill="url(#scrim)"/>` +
       `<text x="${textX}" y="${textY}" text-anchor="middle" ` +
-      `font-family="Georgia, 'Times New Roman', serif" ` +
-      `font-size="${fontSize}" font-weight="600" fill="#FAF7F2" ` +
+      `font-family="${FONT_FAMILY}" ` +
+      `font-size="${fontSize}" fill="#FAF7F2" ` +
       `style="letter-spacing:0.02em">${escaped}</text>` +
       `</svg>`
   );
