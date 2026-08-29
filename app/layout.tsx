@@ -7,7 +7,6 @@ import ScrollRevealInit from "@/components/ScrollRevealInit";
 import Analytics, { AnalyticsNoScript } from "@/components/Analytics";
 import RefCapture from "@/components/RefCapture";
 import CampaignBanner from "@/components/CampaignBanner";
-import EmailPopup from "@/components/EmailPopup";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -155,7 +154,6 @@ export default function RootLayout({
         <ScrollRevealInit />
         <Analytics />
         <RefCapture />
-        <EmailPopup />
       </body>
     </html>
   );
