@@ -301,6 +301,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
 
+    // Idempotency — checked BEFORE any side effect below (referral credit,
+    // buyer credit decrement, order creation, emails, Prodigi). Stripe
+    // webhooks are at-least-once delivery, so a retried event must be a
+    // complete no-op once we've already processed its session once.
+    // Previously this check sat after the credit-decrement block, so a
+    // retried event would decrement a buyer's store credit a second time
+    // for a discount they only redeemed once.
+    const existingOrder = await prisma.order.findUnique({
+      where: { stripeSessionId: session.id },
+    }).catch(() => null);
+    if (existingOrder) {
+      console.log(`Skipping duplicate webhook for session ${session.id}`);
+      return NextResponse.json({ received: true, deduplicated: true });
+    }
+
     // ── Referral attribution ───────────────────────────────────────────
     // If this session came from a ?ref=CODE cookie, credit the referrer
     // $10 and record a Referral row. We do this BEFORE order creation so
@@ -366,16 +381,6 @@ export async function POST(req: NextRequest) {
           console.error("Credit decrement failed:", err);
         }
       }
-    }
-
-    // Idempotency — if we've already processed this Stripe session, return 200 without
-    // re-sending emails or re-generating the wallpaper. Stripe retries are common.
-    const existing = await prisma.order.findUnique({
-      where: { stripeSessionId: session.id },
-    }).catch(() => null);
-    if (existing) {
-      console.log(`Skipping duplicate webhook for session ${session.id}`);
-      return NextResponse.json({ received: true, deduplicated: true });
     }
 
     try {
