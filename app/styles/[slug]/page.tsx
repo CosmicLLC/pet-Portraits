@@ -5,6 +5,7 @@ import type { Metadata } from "next"
 import { STYLE_SEO, styleBySlug, STYLE_SLUGS, BREEDS } from "@/lib/seo-data"
 import LandingHeader from "@/components/LandingHeader"
 import LandingHero from "@/components/LandingHero"
+import StyleHeroShowcase from "@/components/StyleHeroShowcase"
 import LandingFooterCTA from "@/components/LandingFooterCTA"
 import { reviewsByStyle, reviewJsonLd } from "@/lib/reviews"
 import { STYLE_CONTENT } from "@/lib/style-page-content"
@@ -20,6 +21,33 @@ const STYLE_SLUG_TO_REVIEW_KEY: Record<string, "watercolor" | "oil" | "renaissan
 
 interface Props {
   params: { slug: string }
+}
+
+// A/B test: Watercolor and Line Art render <StyleHeroShowcase> instead of
+// the shared <LandingHero>. Oil Painting and Renaissance are untouched —
+// this map is the single gate.
+//
+// KNOWN GAP: no real customer before/after photo PAIR exists for either
+// style (checked public/examples/ and lib/reviews.ts — reviews carry no
+// photo URLs, and the only "after" assets on file are the generic style
+// example images already used sitewide, with no matching raw "before"
+// photo behind them). afterPortraitUrl reuses that existing vetted example
+// image below; beforePhotoUrl here is a clearly-marked placeholder path
+// that does NOT exist on disk. Replace both with a real customer's photo +
+// finished portrait (and set a real petName) before this goes live beyond
+// an A/B test — see the console warning this triggers on every render.
+const STYLE_HERO_SHOWCASE_CONFIG: Record<
+  string,
+  { beforePhotoUrl: string; styleFeatureLine: string }
+> = {
+  "watercolor-pet-portrait": {
+    beforePhotoUrl: "/examples/PLACEHOLDER-watercolor-before-needed.jpg",
+    styleFeatureLine: "Soft, hand-painted feel",
+  },
+  "line-art-pet-portrait": {
+    beforePhotoUrl: "/examples/PLACEHOLDER-lineart-before-needed.jpg",
+    styleFeatureLine: "Clean, minimalist linework",
+  },
 }
 
 // Pre-render all 4 style landing pages at build time.
@@ -112,6 +140,15 @@ export default function StyleLandingPage({ params }: Props) {
       }
     : null
 
+  const heroShowcase = STYLE_HERO_SHOWCASE_CONFIG[style.slug]
+  if (heroShowcase) {
+    console.warn(
+      `[StyleHeroShowcase] "${style.slug}" is rendering with a PLACEHOLDER before-photo ` +
+        `(${heroShowcase.beforePhotoUrl}) — this file does not exist on disk. Supply a real ` +
+        `customer before/after pair (and pet name, if known) before this A/B test goes fully live.`
+    )
+  }
+
   return (
     <main className="min-h-screen bg-cream">
       <script
@@ -134,13 +171,23 @@ export default function StyleLandingPage({ params }: Props) {
 
       <LandingHeader />
 
-      <LandingHero
-        eyebrow={`Custom ${style.shortName} Pet Portraits`}
-        headline={`${style.fullName} from Your Photo`}
-        subhead={`${style.description} Delivered instantly by email — printable at home or shipped as a framed print.`}
-        previewImage={style.image}
-        previewAlt={`${style.fullName} example — custom ${style.shortName.toLowerCase()} dog portrait from photo`}
-      />
+      {heroShowcase ? (
+        <StyleHeroShowcase
+          styleName={style.shortName}
+          beforePhotoUrl={heroShowcase.beforePhotoUrl}
+          afterPortraitUrl={style.image}
+          styleFeatureLine={heroShowcase.styleFeatureLine}
+          styleKey={style.key}
+        />
+      ) : (
+        <LandingHero
+          eyebrow={`Custom ${style.shortName} Pet Portraits`}
+          headline={`${style.fullName} from Your Photo`}
+          subhead={`${style.description} Delivered instantly by email — printable at home or shipped as a framed print.`}
+          previewImage={style.image}
+          previewAlt={`${style.fullName} example — custom ${style.shortName.toLowerCase()} dog portrait from photo`}
+        />
+      )}
 
       {/* Expanded SEO copy — 1,200+ words covering visual language, breed
           pairings, home decor, process. Renders only when STYLE_CONTENT
