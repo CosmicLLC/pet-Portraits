@@ -173,3 +173,55 @@ export function productPriceCents(type: string): number {
   const n = parseFloat(price.replace(/[^0-9.]/g, ""));
   return Number.isFinite(n) ? Math.round(n * 100) : 0;
 }
+
+// ─── Print asset target dimensions ──────────────────────────────────────
+// Physical size in inches for every SKU whose true print dimensions are
+// documented (in its own PRODUCTS[key].label above) — used by
+// lib/upscale.ts to crop the Gemini output to the SKU's exact aspect
+// ratio and resize to an exact 300dpi pixel target before it reaches
+// Prodigi. Deliberately NOT a duplicate/separate source of truth: every
+// entry here matches the inches already printed in that product's label.
+//
+// Intentionally excludes acrylic/metal/cards/phone_case/prism/mug/pillow/
+// gallery_set — this repo has no documented target print aspect ratio for
+// those (mug/pillow/phone_case aren't even flat rectangular prints in the
+// same sense, and the rest have never had their real Prodigi SKU dimensions
+// recorded anywhere in code). getPrintTargetPixels() returns null for them,
+// and the print pipeline logs a one-time warning rather than guessing.
+// Keyed by string, not ProductType — "canvas_upsell" is a valid physical
+// product type (see PHYSICAL_PRODUCT_TYPES above) but isn't itself an entry
+// in the PRODUCTS catalog (it prices via its own Stripe price ID instead).
+const PRINT_SPECS: Record<string, { widthIn: number; heightIn: number } | undefined> = {
+  canvas: { widthIn: 8, heightIn: 10 }, // "Framed Print 8×10"
+  bundle: { widthIn: 8, heightIn: 10 }, // ships the 8×10 framed print
+  canvas_upsell: { widthIn: 8, heightIn: 10 }, // discounted 8×10 framed print
+  framed_12x16: { widthIn: 12, heightIn: 16 },
+  framed_18x24: { widthIn: 18, heightIn: 24 },
+  poster_8x10: { widthIn: 8, heightIn: 10 },
+  poster_12x16: { widthIn: 12, heightIn: 16 },
+  poster_18x24: { widthIn: 18, heightIn: 24 },
+  display: { widthIn: 11, heightIn: 14 },
+  mounted: { widthIn: 11, heightIn: 14 },
+};
+
+export const PRINT_TARGET_DPI = 300;
+
+export interface PrintTargetPixels {
+  width: number;
+  height: number;
+  widthIn: number;
+  heightIn: number;
+  ratio: number;
+}
+
+export function getPrintTargetPixels(type: string): PrintTargetPixels | null {
+  const spec = PRINT_SPECS[type];
+  if (!spec) return null;
+  return {
+    width: Math.round(spec.widthIn * PRINT_TARGET_DPI),
+    height: Math.round(spec.heightIn * PRINT_TARGET_DPI),
+    widthIn: spec.widthIn,
+    heightIn: spec.heightIn,
+    ratio: spec.widthIn / spec.heightIn,
+  };
+}

@@ -206,11 +206,13 @@ async function handleCartCheckout(
         const portraitProxyUrl = printAssetUrl(`portraits/${f.imageId}`, baseUrl);
         let printImageUrl = portraitProxyUrl;
         if (isUpscalerConfigured()) {
-          try {
-            printImageUrl = await upscaleForPrint(portraitProxyUrl, f.imageId, baseUrl);
-          } catch (upErr) {
-            console.error("Cart upscale failed, using original:", upErr);
-          }
+          // See the main (non-cart) fulfillment block for why this is not
+          // wrapped in its own try/catch — a throw here is a genuine
+          // ratio/DPI quality-assertion failure (AI-upscale-specific
+          // failures are already handled inside upscaleForPrint), and it
+          // must propagate to the outer catch below so this item's
+          // Prodigi order is never created with a bad asset.
+          printImageUrl = await upscaleForPrint(portraitProxyUrl, f.imageId, baseUrl, f.productType);
         }
         const prodigi = await createProdigiOrder({
           merchantReference: `${order.id}-${idx}`,
@@ -647,16 +649,16 @@ export async function POST(req: NextRequest) {
             const portraitProxyUrl = printAssetUrl(`portraits/${imageId}`, baseUrl);
             let printImageUrl = portraitProxyUrl;
             if (isUpscalerConfigured()) {
-              try {
-                printImageUrl = await upscaleForPrint(portraitProxyUrl, imageId, baseUrl);
-                console.log(`Upscaled print asset for order ${order.id}`);
-              } catch (upErr) {
-                console.error("Upscale failed, falling back to original:", upErr);
-                await logEvent("warning", "webhook", "Upscale failed, using original resolution", {
-                  orderId: order.id,
-                  error: upErr instanceof Error ? upErr.message : String(upErr),
-                });
-              }
+              // NOT wrapped in its own try/catch: upscaleForPrint() already
+              // swallows AI-upscale-specific failures internally (degrading
+              // to a Sharp-only crop+resize) — anything that still throws
+              // out of it is a genuine ratio/DPI quality-assertion failure,
+              // which must NOT be caught-and-ignored here. Letting it
+              // propagate to the outer catch below means that failure
+              // marks the order prodigiStatus "Failed" and logs it instead
+              // of silently submitting a bad print asset to Prodigi.
+              printImageUrl = await upscaleForPrint(portraitProxyUrl, imageId, baseUrl, productType);
+              console.log(`Upscaled print asset for order ${order.id}`);
             }
 
             const prodigiAddress: ProdigiAddress = {
