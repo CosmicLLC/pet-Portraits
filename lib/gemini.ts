@@ -47,7 +47,7 @@ function getWallpaperAI(): GoogleGenAI {
 // that hadn't shown the issue, so the anti-signature rule in particular is
 // applied everywhere as prevention, not just where it's already been seen.
 const NO_BORDER_NO_SIGNATURE =
-  "STRICT REQUIREMENT: absolutely no border, frame, mat, vignette, drop shadow, or any kind of edge decoration anywhere in the image — the artwork must bleed edge-to-edge with nothing framing it. STRICT REQUIREMENT: absolutely no artist signature, monogram, initials, date, or any scrawled/painted mark anywhere in the image, including the corners — the canvas must be completely free of any such marking.";
+  "STRICT REQUIREMENT: absolutely no border, frame, mat, vignette, drop shadow, or any kind of edge decoration anywhere in the image — the artwork must bleed edge-to-edge with nothing framing it. Do NOT place the artwork as a smaller rectangle inset within a larger blank canvas — do NOT leave a plain white, cream, gray, or blank margin/padding strip along any edge, even a thin one. The painted subject and its background must extend to fill all four physical edges of the image with zero margin on any side — check every edge individually (top, bottom, left, right) before finishing. STRICT REQUIREMENT: absolutely no artist signature, monogram, initials, date, or any scrawled/painted mark anywhere in the image, including the corners — the canvas must be completely free of any such marking.";
 
 // A second, distinct failure mode found in live samples 2026-09-02: Gemini
 // sometimes doesn't add a border to the painting — it renders the ENTIRE
