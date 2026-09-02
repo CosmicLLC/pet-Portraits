@@ -217,8 +217,25 @@ export async function upscaleForPrint(
   // 300dpi, so finish with an ordinary Sharp resize. No further cropping
   // here — ratio is already exact from cropToRatio() above, so a plain
   // "fill" resize can't distort it.
+  //
+  // withMetadata({ density }) is NOT cosmetic — without it, a plain
+  // Sharp-written PNG carries NO embedded DPI (verified: defaults to a
+  // bare 72). A live order (GLOBAL-CFP-18X24, 2026-09-01) showed Prodigi's
+  // dashboard reporting "0dpi" for a delivered 5400x7200 asset — exactly
+  // matching pixel dimensions Prodigi itself recommends — and the
+  // physical print came back cropped on BOTH top and bottom, not just one
+  // edge like our ratio-correction crop above produces. That symptom is
+  // consistent with a downstream system assuming a much lower DPI (and
+  // therefore a much larger physical size) than we intend when density
+  // metadata is missing, then center-cropping to fit the real frame.
+  // Explicitly embedding the density this asset was actually built at
+  // removes that ambiguity entirely.
   if (spec) {
-    finalBuffer = await sharp(finalBuffer).resize(spec.width, spec.height, { fit: "fill" }).png().toBuffer();
+    finalBuffer = await sharp(finalBuffer)
+      .resize(spec.width, spec.height, { fit: "fill" })
+      .withMetadata({ density: PRINT_TARGET_DPI })
+      .png()
+      .toBuffer();
     await assertPrintQuality(finalBuffer, spec, imageId, productType);
   }
 
@@ -247,12 +264,22 @@ async function assertPrintQuality(
   const ratio = width / height;
   const ratioDeviation = Math.abs(ratio - spec.ratio) / spec.ratio;
   const dpi = width / spec.widthIn;
+  // Embedded density, not just pixel-count-implied DPI — this is what
+  // caught the real bug (a plain Sharp PNG carries no density unless
+  // withMetadata({ density }) is set explicitly, which some downstream
+  // system read as a much lower DPI and cropped the asset to compensate).
+  // Checked independently of the pixel-math `dpi` above so a future
+  // regression that silently drops the withMetadata() call is caught
+  // even though width/height (and therefore the math-derived dpi) would
+  // still look fine.
+  const embeddedDensity = meta.density || 0;
 
-  if (ratioDeviation > MAX_RATIO_DEVIATION || dpi < MIN_DPI) {
+  if (ratioDeviation > MAX_RATIO_DEVIATION || dpi < MIN_DPI || embeddedDensity < MIN_DPI) {
     const msg =
       `Print asset failed pre-submit quality check for ${productType} (imageId ${imageId}): ` +
       `${width}x${height}, ratio ${ratio.toFixed(4)} (target ${spec.ratio.toFixed(4)}, ` +
-      `deviation ${(ratioDeviation * 100).toFixed(2)}%), ${dpi.toFixed(0)}dpi (min ${MIN_DPI}, target ${PRINT_TARGET_DPI})`;
+      `deviation ${(ratioDeviation * 100).toFixed(2)}%), ${dpi.toFixed(0)}dpi implied / ` +
+      `${embeddedDensity}dpi embedded (min ${MIN_DPI}, target ${PRINT_TARGET_DPI})`;
     await logEvent("error", "webhook", msg, {
       imageId,
       productType,
@@ -262,6 +289,7 @@ async function assertPrintQuality(
       targetRatio: spec.ratio,
       ratioDeviation,
       dpi,
+      embeddedDensity,
     });
     throw new Error(msg);
   }
